@@ -1,9 +1,9 @@
 ## Introduction
 
 Hypertag is a modern language for front-end development that allows
-writing (X)HTML pages and other types of documents in a way similar to writing a Python script,
-where indentation marks nested HTML elements and thus removes the need for explicit
-closing tags. 
+writing (X)HTML pages and other types of documents in a way similar to writing Python scripts,
+where _indentation_ encodes relationships between nested elements 
+and thus removes the need for explicit opening and closing tags.
 
 Hypertag enables advanced control of document rendering process through
 native **control blocks** (if-elif-else, for, while, try) and provides **modularity** 
@@ -30,33 +30,56 @@ If you try Hypertag, you will never go back to an old-school templating language
 
 ## Cheat Sheet
 
-| Symbol | Description |
-| ------ | --------------- | 
-| %tag ...  | hypertag definition block |
-| %tag      | reference to a tag in an expression |
-| @body     | body attribute in attributes list of a hypertag definition |
-| @body[1:] | DOM embedding block  |
-| $x=       | assignment block |
-| $x        | expression embedding in a text block or string |
-| {x}       | expression embedding in a text block or string |
-| x!        | obligatory qualifier for an expression |
-| x?        | optional qualifier for an expression |
-| ? ...     | "try" block |
-| < ...     | "dedent" marker for a block |
-| &#124; text   | normal text block (may contain expressions, will be HTML-escaped) |
-| / text        | markup text block (may contain expressions, will NOT be HTML-escaped) |
-| ! text        | verbatim text block (expressions will NOT be parsed, text will NOT be HTML-escaped) |
-| -- comment    | block or inline comment |
-| # comment     | block or inline comment |
-| .CLASS    | shortcut attribute in a tagged block, same as: class="CLASS" |
-| #ID       | shortcut attribute in a tagged block, same as: id="ID" |
-| r'text'   | r-string (raw string), no embedded expressions |
-| r"text"   | r-string (raw string), no embedded expressions |
+### Text blocks
+
+| Symbol        | Description     |
+| ------------- | --------------- | 
+| &#124; text   | plain-text block; may contain embedded expressions; output is HTML-escaped |
+| / markup      | markup block; may contain embedded expressions; output is *not* HTML-escaped |
+| ! verbatim    | verbatim block; expressions are *not* parsed; output is *not* HTML-escaped |
+| -- comment <br> # comment | line of comment; is excluded from output; may occur at the end of a block's headline (_inline comment_) or on a separate line (_block comment_) |
+| < BLOCK       | _dedent marker_; causes the output of a BLOCK to be dedented by one level during rendering; can be applied to blocks of all types (text, control etc.) |
+
+### Expressions
+
+| Symbol            | Description |
+| :------:          | --------------- | 
+| $ x = a-b         | assignment block |
+| $x <br> $x.v[1]   | embedding of a factor expression (a variable with 0+ tail operators) in a text block or string |
+| {x+y}             | embedding of an arbitrary expression in a text block or string |
+| x! <br> {x*y}!    | "obligatory" qualifier (!) for an atomic or embedded expression; raises as exception if the expression is false |
+| x? <br> {x*y}?    | "optional" qualifier (?) for an atomic or embedded expression; replaces exceptions and false values with empty string |
 | 'text'    | f-string (formatted string), may contain embedded expressions: $... and {...} |
 | "text"    | f-string (formatted string), may contain embedded expressions: $... and {...} |
-| $$        | escape string to render $ in a normal/markup text block and inside formatted strings |
-| {{        | escape string to render { in a normal/markup text block and inside formatted strings |
-| }}        | escape string to render } in a normal/markup text block and inside formatted strings |
+| r'text'   | r-string (raw string), no embedded expressions |
+| r"text"   | r-string (raw string), no embedded expressions |
+| $$        | escape string; renders $ in a normal/markup text block and inside formatted strings |
+| {{        | escape string; renders { in a normal/markup text block and inside formatted strings |
+| }}        | escape string; renders } in a normal/markup text block and inside formatted strings |
+
+### Tagged blocks
+
+| Symbol        | Description     |
+| ------------- | --------------- | 
+| % tag ...     | hypertag definition block |
+| %tag          | reference to a tag in an expression (_not implemented yet_) |
+| @body         | body attribute in attributes list of a hypertag definition |
+| @body[1:]     | DOM embedding block  |
+| .CLASS    | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag occurrence |
+| #ID       | (shortcut) equiv. to *id="ID"* on attributes list of a tag occurrence |
+| pass    | special tag that generates no output; does *not* accept attributes nor a body |
+| . <br> . &#124; text | _null tag_ - a special tag that outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
+
+### Control blocks
+
+| Symbol    | Syntax     | Description     |
+| :-------: | --------------- | --------------- | 
+| import    | from-import |
+| for       | for-in |
+| while     | while EXPR |
+| if        |  if-elif-else |
+| try       | try-else | may have a body (inline, outline), but cannot be followed by tags on the same line |
+| ?         |       | *optional block*; like a "try" without an "else" branch; can be applied to a tagged block (on the same line) |
 
 
 ## Terminology
@@ -76,9 +99,9 @@ If you try Hypertag, you will never go back to an old-school templating language
 
 #### Text blocks
 
-Normal, markup, verbatim:
+Plain-text, markup, verbatim:
 
-    | normal block with {'em'+'bedded'} $expressions
+    | plain-text (normal) block with {'em'+'bedded'} $expressions
     / markup <b>block</b> with no HTML escaping
     ! verbatim $block$, expressions left unparsed
 
@@ -136,8 +159,10 @@ Hypertag supports also _augmented assignments_ as known in Python:
 
 #### Tagged blocks
 
-- tags chain (:)
-- body: inline / outline / headline
+- tags chain (:) -- multiple tags can be put one after another on the same line; 
+  each tag can have its own attributes; special tags (_pass_, _null_ tag) cannot be used 
+  in this way
+- body layout: inline / outline / headline
 - there is still a way to explicitly write raw (X)HTML tags
   through the use of /-blocks which allow writing unescaped markup
 
