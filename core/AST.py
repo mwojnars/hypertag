@@ -1378,6 +1378,8 @@ class NODES(object):
         Values of subexpressions are converted to strings and concatenated WITHOUT space.
         This is an extension of Python syntax for concatenation of literal strings, like in:
                'Python' " is "  'cool'
+        and is primarily intended for easy concatenation of variables to strings in HTML attr values construction:
+               p style={"font-size:" size}
         """
         def evaluate(self, state, error = "expression to be string-concatenated evaluates to None"):
             return ''.join(STR(expr.evaluate(state), expr, error) for expr in self.children)
@@ -1961,7 +1963,7 @@ if __name__ == '__main__':
     
     text = """
         %T a b c:
-            | {a b c}
+            | {a,b,c}
         T "yes" (-2) True
     """
     

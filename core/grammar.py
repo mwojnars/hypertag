@@ -128,9 +128,6 @@ gap              =  ~"[ \t]"                                    # 1-space leadin
 
 ###  EMBEDDINGS
 
-# below, results of multiple space-separated expressions are ''-concatenated,
-# while results of ','-separated expressions (a tuple) are  ' '-concatenated
-
 embedding        =  embedding_braces / embedding_eval
 embedding_braces =  '{' ws expr_augment ws '}' qualifier?
 embedding_eval   =  mark_eval !mark_eval expr_var
