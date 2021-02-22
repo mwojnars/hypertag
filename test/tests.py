@@ -1016,8 +1016,18 @@ def test_024_empty_control():
         else :
     """
     assert render(src).strip() == ""
-    
-    
+
+def test_025_attributes():
+    src = """
+        %T a b c:
+            | {a b c}
+        T "yes" (-2) True
+    """
+    out = """
+        yes-2True
+    """
+    assert render(src).strip() == out.strip()
+
 
 #####################################################################################################################################################
 

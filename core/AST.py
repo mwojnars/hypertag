@@ -1140,6 +1140,7 @@ class NODES(object):
     class xexpr(expression_root): pass
     class xexpr_var(expression_root): pass
     class xexpr_factor(expression_root): pass
+    class xexpr_strict(expression_root): pass
     class xexpr_augment(expression_root): pass
     
     class variable(expression):
@@ -1293,6 +1294,7 @@ class NODES(object):
             return val
     
     class xfactor_var(xfactor): pass
+    class xfactor_strict(xfactor): pass
     
     
     ###  EXPRESSIONS - OPERATORS (BINARY / TERNARY)  ###
@@ -1675,13 +1677,13 @@ class HypertagAST(BaseTree):
                 "item_import rename try_long try_short special_tag head_verbat head_normal head_markup " \
                 "tail_for tail_if tail_verbat tail_normal tail_markup core_verbat core_normal core_markup " \
                 "attrs_def attrs_val attr_val value_of_attr args arg " \
-                "embedding embedding_braces embedding_eval embedding_or_factor target " \
+                "embedding embedding_braces embedding_eval target " \
                 "expr_root subexpr slice subscript trailer atom literal dict_pair " \
                 "string string_quot1 string_quot2"
     
     # nodes that will be replaced with their child if there is exactly 1 child AFTER rewriting of all children;
     # they must have a corresponding x... node class, because pruning is done after rewriting, not before
-    _compact_ = "factor_var factor pow_expr term arith_expr shift_expr and_expr xor_expr or_expr concat_expr " \
+    _compact_ = "factor_strict factor_var factor pow_expr term arith_expr shift_expr and_expr xor_expr or_expr concat_expr " \
                 "comparison not_test and_test or_test ifelse_test expr_tuple " \
                 "block_struct"
 
@@ -1957,15 +1959,10 @@ if __name__ == '__main__':
     """
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
-    # text = """
-    #     if 5
-    #     for i in [0,1]:
-    #         | x
-    #     try
-    #         | x
-    # """     # empty control blocks
     text = """
-        try
+        %T a b c:
+            | {a b c}
+        T "yes" (-2) True
     """
     
     tree = HypertagAST(text, HypertagHTML(**ctx), stopAfter = "rewrite", verbose = True)

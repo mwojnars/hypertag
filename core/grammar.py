@@ -3,6 +3,7 @@
 """
 
 
+########################################################################################################################################################
 grammar = r"""
 
 ###  Before the grammar is applied, indentation in the input text must be converted into
@@ -134,7 +135,7 @@ embedding        =  embedding_braces / embedding_eval
 embedding_braces =  '{' ws expr_augment ws '}' qualifier?
 embedding_eval   =  mark_eval !mark_eval expr_var
 
-embedding_or_factor = embedding / expr_factor
+#embedding_or_factor = embedding / expr_factor
 
 
 ###  ATTRIBUTES of tags
@@ -147,8 +148,7 @@ attr_short       =  ('.' / '#') (attr_short_lit / embedding)        # shorthands
 attr_short_lit   =  ~"[a-z0-9_-]+"i                                 # shorthand literal value MAY contain "-", unlike python identifiers!
 attr_named       =  name_xml ws '=' ws value_of_attr                # name="value" OR name=value OR name=$(...)
 attr_unnamed     =  value_of_attr ''
-value_of_attr    =  embedding_or_factor ''
-#value_of_attr   =  embedding / literal
+value_of_attr    =  embedding / expr_strict     #embedding_or_factor ''
 
 ###  ARGUMENTS of functions
 
@@ -166,8 +166,9 @@ kwarg            =  name_id ws '=' ws expr
 # other than blindly propagating method calls down to the leaf node.
 
 expr         =  expr_root ''                # basic (standard) form of an expression
-expr_var     =  factor_var ''               # reduced form of an expression: a variable, with optional trailer; used for inline $... embedding (embedding_eval) only
+expr_var     =  factor_var ''               # reduced form of an expression: a variable, with optional trailer; used for inline $... embedding (embedding_eval) and attributes lists
 expr_factor  =  factor ''                   # reduced form of an expression: any atom, with optional trailer; used for non-embedded attribute values
+expr_strict  =  factor_strict ''            # reduced form of an expression: any atom with a trailer, but no spaces inside (before the trailer)
 expr_augment =  expr_root / expr_tuple      # augmented form of an expression: includes unbounded tuples (no parentheses); used in augmented assignments
 
 expr_tuple   =  expr ws ',' (ws expr ws ',')* (ws expr)?      # unbounded tuple, without parentheses ( ); used in selected grammar structures only
@@ -181,7 +182,8 @@ dict         =  '{' ws (dict_pair comma)* (dict_pair ws)? '}'
 dict_pair    =  expr ws ':' ws expr
 
 atom         =  literal / var_use / subexpr / tuple / list / dict / set
-factor_var   =  var_use trailer* qualifier?                   # reduced form of `factor` for use in expr_var
+factor_var   =  var_use trailer* qualifier?                   # reduced form of `factor`: a variable with optional trailer, no spaces allowed
+factor_strict=  atom trailer* qualifier?                      # reduced form of `factor`: no spaces allowed before the trailer
 factor       =  atom (ws trailer)* qualifier?                 # operators: () [] .
 pow_expr     =  factor (ws op_power ws factor)*
 term         =  pow_expr (ws op_multiplic ws pow_expr)*       # operators: * / // percent
@@ -286,7 +288,6 @@ ws          =  ~"[ \t]*"                     # optional whitespace, no newlines
 ###  SYMBOLS that mark TYPES of blocks or text spans
 
 """
-########################################################################################################################################################
 ###
 ###  Regex patterns for character sets allowed in XML identifiers, to be put inside [...] in a regex.
 ###  XML identifiers differ substantially from typical name patterns in other computer languages. Main differences:
