@@ -32,54 +32,61 @@ If you try Hypertag, you will never go back to an old-school templating language
 
 ### Text blocks
 
-| Symbol        | Description     |
+| &nbsp;<br> Symbol <br><img width=400/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
-| &#124; text   | plain-text block; may contain embedded expressions; output is HTML-escaped |
-| / markup      | markup block; may contain embedded expressions; output is *not* HTML-escaped |
-| ! verbatim    | verbatim block; expressions are *not* parsed; output is *not* HTML-escaped |
-| -- comment <br> # comment | line of comment; is excluded from output; may occur at the end of a block's headline (_inline comment_) or on a separate line (_block comment_) |
-| < BLOCK       | _dedent marker_; causes the output of a BLOCK to be dedented by one level during rendering; can be applied to blocks of all types (text, control etc.) |
+| &#124; _text_   | plain-text block; may contain embedded expressions; output is HTML-escaped |
+| / markup        | markup block; may contain embedded expressions; output is *not* HTML-escaped |
+| ! _verbatim_    | verbatim block; expressions are *not* parsed; output is *not* HTML-escaped |
+| -- _comment_ <br> # _comment_ | line of comment; is excluded from output; may occur at the end of a block's headline (_inline comment_) or on a separate line (_block comment_) |
+| < BLOCK       | _dedent marker_ (<) causes the output of a BLOCK to be dedented by one level during rendering; applies to blocks of all types (text, control etc.) |
 
 ### Expressions
 
-| Symbol            | Description |
+| &nbsp;<br> Symbol <br><img width=300/> | &nbsp;<br> Description <br>&nbsp; |
 | :------:          | --------------- | 
-| $ x = a-b         | assignment block |
+| $x = a-b          | assignment block; space after $ is allowed |
 | $x <br> $x.v[1]   | embedding of a factor expression (a variable with 0+ tail operators) in a text block or string |
 | {x+y}             | embedding of an arbitrary expression in a text block or string |
 | x! <br> {x*y}!    | "obligatory" qualifier (!) for an atomic or embedded expression; raises as exception if the expression is false |
-| x? <br> {x*y}?    | "optional" qualifier (?) for an atomic or embedded expression; replaces exceptions and false values with empty string |
+| x? <br> {x*y}?    | "optional" qualifier (?) for an atomic or embedded expression; replaces exceptions and false values with empty strings |
 | 'text'    | f-string (formatted string), may contain embedded expressions: $... and {...} |
 | "text"    | f-string (formatted string), may contain embedded expressions: $... and {...} |
 | r'text'   | r-string (raw string), no embedded expressions |
 | r"text"   | r-string (raw string), no embedded expressions |
-| $$        | escape string; renders $ in a normal/markup text block and inside formatted strings |
-| {{        | escape string; renders { in a normal/markup text block and inside formatted strings |
-| }}        | escape string; renders } in a normal/markup text block and inside formatted strings |
+| $$        | escape string; renders $ in a plaintext/markup block and inside formatted strings |
+| {{        | escape string; renders { in a plaintext/markup block and inside formatted strings |
+| }}        | escape string; renders } in a plaintext/markup block and inside formatted strings |
+| %TAG      | reference to a tag in an expression (_not implemented yet_) |
 
-### Tagged blocks
+### Tags
 
-| Symbol        | Description     |
+| &nbsp;<br> Symbol <br><img width=900/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
-| % tag ...     | hypertag definition block |
-| %tag          | reference to a tag in an expression (_not implemented yet_) |
-| @body         | body attribute in attributes list of a hypertag definition |
-| @body[1:]     | DOM embedding block  |
-| .CLASS    | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag occurrence |
-| #ID       | (shortcut) equiv. to *id="ID"* on attributes list of a tag occurrence |
-| pass    | special tag that generates no output; does *not* accept attributes nor a body |
-| . <br> . &#124; text | _null tag_ - a special tag that outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
+| %TAG x y=0 ...    | hypertag definition; may have 0+ _formal attributes_ (space-separated), possibly with defaults; may be followed by a body (inline or outline); space after % is allowed |
+| %TAG @body ...    | special _body attribute_ of a hypertag definition; arbitrary name; must be the 1st attribute on the list; if missing, the hypertag is _void_ (doesn't accept an actual body in places of occurrence) |
+| @body <br> @body[2:] | _embedding block_ (@): inserts DOM nodes represented by an expression (typically a body attribute inside hypertag definition) |
+| TAG x=1.0 y={v+1} | named (keyword) attributes of a tag occurrence; space-separated, no parentheses |
+| TAG "yes" 3 True  | unnamed attributes of a tag occurrence; values are matched to formal attributes in a way similar to how Python matches function arguments (by order) |
+| TAG .CLASS        | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag |
+| TAG #ID           | (shortcut) equiv. to *id="ID"* on attributes list of a tag |
+| pass              | special _pass tag_, generates no output; does *not* accept attributes nor a body |
+| . <br> . &#124; _text_ | special _null tag_ (.): outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
 
 ### Control blocks
 
+| &nbsp;<br> Syntax <br><img width=1000/> | &nbsp;<br> Description <br>&nbsp; |
+| ------------- | --------------- | 
+| import $X <br> from ~ import $X <br> from PATH import $X, %TAG <br> | importing a variable ($NAME) or a tag (%NAME) from another module (PATH) or from a dynamic context of rendering ("~" default) |
+| if-elif-else |
+
+
 | Symbol    | Syntax     | Description     |
 | :-------: | --------------- | --------------- | 
-| import    | from-import |
-| for       | for-in |
-| while     | while EXPR |
-| if        |  if-elif-else |
+| if        | if-elif-else |
 | try       | try-else | may have a body (inline, outline), but cannot be followed by tags on the same line |
 | ?         |       | *optional block*; like a "try" without an "else" branch; can be applied to a tagged block (on the same line) |
+| for       | for-in |
+| while     | while EXPR |
 
 
 ## Terminology
