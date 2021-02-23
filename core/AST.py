@@ -722,6 +722,7 @@ class NODES(object):
         SystemExit, KeyboardInterrupt, GeneratorExit.
         Note that the meaning of the "else" clause is OPPOSITE to what it is in Python: here, "else" branch
         is executed if all preceeding try/else branches failed with exceptions.
+        If all branches fail, including the last one, empty output is rendered (exception from the last branch is NOT re-raised).
         """
         def _select_branch(self, state):
             for i, branch in enumerate(self.children):
@@ -1962,9 +1963,8 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-        %T a b c:
-            | {a,b,c}
-        T "yes" (-2) True
+        $x = 5
+        p $x
     """
     
     tree = HypertagAST(text, HypertagHTML(**ctx), stopAfter = "rewrite", verbose = True)

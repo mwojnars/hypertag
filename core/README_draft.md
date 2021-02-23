@@ -1,30 +1,63 @@
 ## Introduction
 
 Hypertag is a modern language for front-end development that allows
-writing (X)HTML pages and other types of documents in a way similar to writing Python scripts,
+writing (X)HTML pages and documents in a way similar to writing Python scripts,
 where _indentation_ encodes relationships between nested elements 
-and thus removes the need for explicit opening and closing tags.
+and thus removes the need for explicit closing tags.
+Hypertag provides advanced control of document rendering with
+native control blocks; high level of modularity with Python-like imports;
+and unprecedented support for code re-use thanks to native custom tags (_hypertags_).
 
+<!---
 Hypertag enables advanced control of document rendering process through
-native **control blocks** (if-elif-else, for, while, try) and provides **modularity** 
-through custom tags and import blocks. 
+native **control blocks** (if-elif-else, for, while, try);
+and let the programmer define **custom tags** (_hypertags_), either directly
+in the document using Hypertag syntax (_native tags_), 
+or as Python functions (_external tags_).
+and provides high level of **modularity** through custom tags and import blocks. 
+--->
 
 Why to use Hypertag:
-- less typing; cleaner code 
-- no need to remember about (reduntant) closing tags; no more unmatched open-closing tags
-- unprecedented support for **modularity** and **code re-use**
-
+- **concise syntax**: inspired by Python, the indentation-based syntax is a lot cleaner, 
+  more readable and maintainable than raw HTML; it requires less typing, is less redundant,
+  and lets you concentrate on coding rather than chasing unmatched opening-closing tags;
+  <!--
+  makes the problem of unmatched opening-closing tags non-existent
+  forget about unmatched opening-closing tags;
+  -->
+- **code re-use** is the corner stone of programming: 
+  without reusable functions and classes, implementing advanced software
+  would be impossible; HTML has been missing this important element, 
+  but this is fixed now with Hypertag, in which programmers can
+  create re-usable components in a form of **custom tags** (_hypertags_), 
+  defined either as Python functions (_external tags_) 
+  or directly in a document using Hypertag syntax (_native tags_);
+  hypertags can be parameterized and may represent complex pieces 
+  of combined: content, style and layout - for re-use across multiple documents;
+- **control blocks** (for, while, if-elif-else, try-else) enable fine-grained control
+  over document rendering process; Hypertag's control structures constitute
+  a core part of the language syntax, unlike in templating languages, 
+  where control structures are artificially overlaid on top of another language (HTML);
+- **modularity** in Hypertag is modeled after Python's: 
+  every script may import (hyper)tags and variables from other scripts,
+  as well as from Python modules and from _dynamic context_ of script rendering;
+  scripts and modules can be structured into packages;
+  with this mechanism, building libraries of re-usable components is easy and fun.
+  
 <!--- (TODO)
+- **consistency**: Hypertag combines presentation and logic in one language; 
+  you no longer have to mix presentation code (HTML) with foreign syntax of a 
+  templating language, or PHP etc.
+
 - Object-Oriented Programming (**OOP**) inside markup,
   through native language structures (???)
-  
-- high performace in web applications achieved through caching of parsed AST,
+- **high performace** in web applications achieved through caching of parsed AST,
   combined with their **compactification**: constant parts of the AST are
   pre-rendered and merged into single nodes, to avoid repeated rendering
   with every web page request.
 --->
 
-If you try Hypertag, you will never go back to an old-school templating language.
+If you try Hypertag, you will never miss old-school HTML templating.
 
 ## Quick Start
 
@@ -37,8 +70,9 @@ If you try Hypertag, you will never go back to an old-school templating language
 | &#124; _text_   | plain-text block; may contain embedded expressions; output is HTML-escaped |
 | / markup        | markup block; may contain embedded expressions; output is *not* HTML-escaped |
 | ! _verbatim_    | verbatim block; expressions are *not* parsed; output is *not* HTML-escaped |
+| &#124; _multi-line_<br>&nbsp;&nbsp;_text....._ | text blocks may span *multiple lines*, also when preceded by a tag; subsequent lines must be indented |
 | -- _comment_ <br> # _comment_ | line of comment; is excluded from output; may occur at the end of a block's headline (_inline comment_) or on a separate line (_block comment_) |
-| < BLOCK       | _dedent marker_ (<) causes the output of a BLOCK to be dedented by one level during rendering; applies to blocks of all types (text, control etc.) |
+| < BLOCK       | _dedent marker_ (<) put on the 1st line of a BLOCK causes its output to be dedented by one level during rendering; applies to blocks of all types (text, control etc.) |
 
 ### Expressions
 
@@ -60,36 +94,72 @@ If you try Hypertag, you will never go back to an old-school templating language
 
 ### Tags
 
-| &nbsp;<br> Symbol <br><img width=900/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Symbol <br><img width=1100/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
-| %TAG x y=0 ...    | hypertag definition; may have 0+ _formal attributes_ (space-separated), possibly with defaults; may be followed by a body (inline or outline); space after % is allowed |
-| %TAG @body ...    | special _body attribute_ of a hypertag definition; arbitrary name; must be the 1st attribute on the list; if missing, the hypertag is _void_ (doesn't accept an actual body in places of occurrence) |
+| h1 &#124; _text_ <br> div <br>&nbsp;&nbsp;&nbsp;&nbsp; p &#124; _text_  | _tagged block_: starts with a tag name (_header_), which can be followed by contents (_body_) on the same line (_inline body_) and/or on indented lines beneath (_outline body_) |
+| box: &#124; _Title_<br>&nbsp;&nbsp;&nbsp; li &#124; _item1_<br>&nbsp;&nbsp;&nbsp; li &#124; _item2_ | mixing inline and outline contents is possible if the colon (:) and a text-block marker (&#124;/!) are both present |
+| h1 : b : a href='' : <br>&nbsp;&nbsp;&nbsp;&nbsp; &#124; _text_  | multiple tags can be chained together using colon (:); trailing colon is optional |
+| box "top" x=1.5 <br>a href=$url <br>a href={url} | unnamed and named (keyword) attributes can be passed to a tag as a space-separated list, no parentheses; values can have a form of expressions (embedded $, {}, or atoms) |
+| %TAG x y=0 ...    | hypertag definition; may have _formal attributes_ (space-separated), possibly with defaults; may be followed by a body (inline or outline); space after % is allowed |
+| %TAG @body ...    | the "at" sign (@) marks a special _body attribute_, which can have an arbitrary name; must be the 1st attribute on the list; if missing, the hypertag is _void_ (doesn't accept actual body in places of occurrence) |
 | @body <br> @body[2:] | _embedding block_ (@): inserts DOM nodes represented by an expression (typically a body attribute inside hypertag definition) |
+| div .CLASS        | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag |
+| div #ID           | (shortcut) equiv. to *id="ID"* on attributes list of a tag |
+| pass              | special _pass tag_ generates no output, does *not* accept attributes nor a body |
+| . <br> . &#124; _text_ | special _null tag_ (.) outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
+<!---
 | TAG x=1.0 y={v+1} | named (keyword) attributes of a tag occurrence; space-separated, no parentheses |
 | TAG "yes" 3 True  | unnamed attributes of a tag occurrence; values are matched to formal attributes in a way similar to how Python matches function arguments (by order) |
-| TAG .CLASS        | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag |
-| TAG #ID           | (shortcut) equiv. to *id="ID"* on attributes list of a tag |
-| pass              | special _pass tag_, generates no output; does *not* accept attributes nor a body |
-| . <br> . &#124; _text_ | special _null tag_ (.): outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
+--->
 
 ### Control blocks
 
 | &nbsp;<br> Syntax <br><img width=1000/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
-| import $X <br> from ~ import $X <br> from PATH import $X, %TAG <br> | importing a variable ($NAME) or a tag (%NAME) from another module (PATH) or from a dynamic context of rendering ("~" default) |
-| if-elif-else |
+| import $x <br> from ~ import $x as y <br> from PATH import $x, %TAG <br> | importing a variable ($NAME) or a tag (%NAME) from another module (PATH) or from the dynamic context of rendering ("~" default) |
+| if COND &#124; _text_ <br> if COND:<br>&nbsp;&nbsp;&nbsp;&nbsp;BLOCKS...<br> elif: ... <br>else: ... | _if-elif-else_ construct behaves similarly as in Python; trailing colons (:) are optional |
+| try-else | may have a body (inline, outline), but cannot be followed by tags on the same line |
 
 
 | Symbol    | Syntax     | Description     |
 | :-------: | --------------- | --------------- | 
-| if        | if-elif-else |
-| try       | try-else | may have a body (inline, outline), but cannot be followed by tags on the same line |
 | ?         |       | *optional block*; like a "try" without an "else" branch; can be applied to a tagged block (on the same line) |
 | for       | for-in |
 | while     | while EXPR |
 
+Trailing colon (:) in a headline of a control block (for/while) or a clause (if/elif/else/try)
+is _optional_ and can be omitted in most cases - with an exception for a mixed
+text+structural body (text title in a headline + structural sub-blocks beneath),
+which requires that a text marker in a headline is preceeded by a colon.
+
+    box: | This box has a title and a list of sub-blocks at the same time
+        li : b | item 1
+        li : b | item 2
 
 ## Terminology
+
+**Headline**. The first line of a tagged or control block. 
+Contains a tag, or multiple tags, or a keyword.
+
+**Header**. The initial part of a headline, up to the last marker (see below).
+
+**Marker**. A special symbol (one of &#124;/!@:) that marks the beginning of a body 
+of a tagged or control block. Typically, there is exactly one marker in a headline.
+There can be none, though (when a body starts in a new line); or more than one
+().
+
+If the entire body of a block fits in the headline, it is called an **inline body**.
+If the body starts on a new line after the headline, it is called an **outline body**.
+ - is called a **header**.
+
+**headline** = **header** + **marker** of body type + **title** (inline body)
+
+**inline body** - consists of a title only
+**multiline body** - 
+**outline body** - consists of sub-blocks, no title
+
+Trailing colon (:) after a header indicates that subsequent lines will contain blocks
+rather than multi-line text - even if there is a text-block marker .
 
 - block
 - body
