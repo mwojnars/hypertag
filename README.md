@@ -65,7 +65,7 @@ The `script` in the code above will be translated to
   of combined: content, style and layout - for reuse across documents.
 - **Fine-grained control** over rendering process is possible with
   a range of native _control blocks_ (for, while, if-elif-else, try-else) 
-  constituting a core part of the language syntax, unlike in templating languages, 
+  constituting a core part of Hypertag syntax, unlike in templating languages, 
   where control structures are artificially overlaid on another language (HTML).
 - **Modularity** in Hypertag is modeled after Python's: 
   every script may import tags and variables from other scripts,
@@ -82,18 +82,18 @@ The `script` in the code above will be translated to
 
 ### Text blocks
 
-| &nbsp;<br> Symbol <br><img width=200/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Syntax <br><img width=200/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
 | &#124; _text_   | plain-text block; may contain embedded expressions; output is HTML-escaped |
 | / markup        | markup block; may contain embedded expressions; output is *not* HTML-escaped |
 | ! _verbatim_    | verbatim block; expressions are *not* parsed; output is *not* HTML-escaped |
 | &#124; _multi-line_<br>&nbsp;&nbsp;_text....._ | text blocks may span *multiple lines*, also when preceded by a tag; subsequent lines must be indented |
 | -- _comment_ <br> # _comment_ | line of comment; is excluded from output; may occur at the end of a block's headline (_inline comment_) or on a separate line (_block comment_) |
-| < BLOCK       | _dedent marker_ (<): when put on the 1st line of a BLOCK, it causes the output to be dedented by one level during rendering; applies to blocks of all types (text, control etc.) |
+| < BLOCK       | _dedent marker_ (<): when put on the 1st line of a BLOCK, causes the output to be dedented by one level during rendering; applies to blocks of all types (text, control etc.) |
 
 ### Expressions
 
-| &nbsp;<br> Symbol <br><img width=150/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Syntax <br><img width=150/> | &nbsp;<br> Description <br>&nbsp; |
 | :------:          | --------------- | 
 | $x = a-b          | assignment block; space after $ is allowed |
 | $x <br> $x.v[1]   | embedding of a factor expression (a variable with 0+ tail operators) in a text block or string |
@@ -113,7 +113,7 @@ The `script` in the code above will be translated to
 
 ### Tags
 
-| &nbsp;<br> Symbol <br><img width=600/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Syntax <br><img width=600/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
 | div <br>&nbsp;&nbsp;&nbsp;&nbsp; p &#124; _text_  | _tagged block_ starts with a tag name (_header_) that can be followed by contents (_body_) on the same line (_inline body_) and/or on subsequent lines (_outline body_) |
 | p &#124; _this is_<br>&nbsp;&nbsp;&nbsp;&nbsp; _a multiline_<br>&nbsp;&nbsp;&nbsp;&nbsp; _paragraph_ | a tagged block with exclusively text contents may span multiple lines |
