@@ -11,7 +11,7 @@ script = \
             / Example document with a <u>list of items</u>
         ul
             li | item <1>
-            li | item #{1+1}
+            li | item no. {1+1}
         p : a href='http://hypertag.io' | See the Hypertag site for more!
 """
 

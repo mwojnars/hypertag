@@ -26,7 +26,7 @@ script = \
             / Example document with a <u>list of items</u>
         ul
             li | item <1>
-            li | item #{1+1}
+            li | item no. {1+1}
         p : a href='http://hypertag.io' | See the Hypertag site for more!
 """
 
@@ -38,16 +38,19 @@ The above code outputs
 (see a [preview](http://htmlpreview.github.io/?https://github.com/mwojnars/hypertag/blob/main/test/sample_usage.html)):
 
 ```html
-<html><body>
-    <h1 style="color: #00f">
-        Example document with a <u>list of items</u>
-    </h1>
-    <ul>
-        <li>item &lt;1&gt;</li>
-        <li>item #2</li>
-    </ul>
-    <p><a href="http://hypertag.io">See the Hypertag site for more!</a></p>
-</body></html>
+
+<html>
+<body>
+<h1 style="color: #0000ff">
+    Example document with a <u>list of items</u>
+</h1>
+<ul>
+    <li>item &lt;1&gt;</li>
+    <li>item no. 2</li>
+</ul>
+<p><a href="http://hypertag.io">See the Hypertag site for more!</a></p>
+</body>
+</html>
 ```
 
 
