@@ -5,9 +5,9 @@ from hypertag import HyperHTML
 
 script = \
 """
-    import $title_color
+    import $blue
     html: body:
-        h1 style="color: $title_color"
+        h1 style="color: $blue"
             / Example document with a <u>list of items</u>
         ul
             li | item <1>
@@ -15,5 +15,5 @@ script = \
         p : a href='http://hypertag.io' | See the Hypertag site for more!
 """
 
-html = HyperHTML().render(script, title_color = '#00f')
+html = HyperHTML().render(script, blue = '#00f')
 print(html)
