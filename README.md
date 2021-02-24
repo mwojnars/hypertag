@@ -124,8 +124,8 @@ The `script` in the code above will be translated to
 | @body <br> @body[2:] | _embedding block_ (@): inserts DOM nodes represented by an expression (typically a body attribute inside hypertag definition) |
 | div .CLASS        | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag |
 | div #ID           | (shortcut) equiv. to *id="ID"* on attributes list of a tag |
-| pass              | special _pass tag_ generates no output, does *not* accept attributes nor a body |
-| . <br> . &#124; _text_ | special _null tag_ (.) outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
+| pass              | the special _pass tag_ generates no output, does *not* accept attributes nor a body |
+| . <br> . &#124; _text_ | the special _null tag_ (.) outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
 <!---
 | TAG x=1.0 y={v+1} | named (keyword) attributes of a tag occurrence; space-separated, no parentheses |
 | TAG "yes" 3 True  | unnamed attributes of a tag occurrence; values are matched to formal attributes in a way similar to how Python matches function arguments (by order) |
@@ -134,6 +134,6 @@ The `script` in the code above will be translated to
 
 ## Acknowledgements
 
-Hypertag was inspired by a number of indentation-based templating languages, including:
+Hypertag was inspired by indentation-based templating languages, including:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
