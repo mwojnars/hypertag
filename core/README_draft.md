@@ -1,14 +1,18 @@
 ## Introduction
 
 Hypertag is a modern language for front-end development that allows
-writing (X)HTML pages and documents in a way similar to writing Python scripts,
-where _indentation_ encodes relationships between nested elements 
+writing (X)HTML documents in a way similar to writing Python scripts,
+where _indentation_ encodes relations between nested elements 
 and thus removes the need for explicit closing tags.
-Hypertag provides advanced control of document rendering with
-native control blocks; high level of modularity with Python-like imports;
-and unprecedented support for code re-use thanks to native custom tags (_hypertags_).
+Hypertag provides advanced control of page rendering with
+native control blocks, high level of modularity with Python-like imports,
+and unprecedented support for code reuse thanks to native custom tags (_hypertags_).
 
 <!---
+If you want to build commercial websites with Hypertag
+I'd be glad to supervise or consult on your projects.
+Please drop me an e-mail or contact via LinkedIn to hire me.
+
 Hypertag enables advanced control of document rendering process through
 native **control blocks** (if-elif-else, for, while, try);
 and let the programmer define **custom tags** (_hypertags_), either directly
@@ -25,39 +29,36 @@ Why to use Hypertag:
   makes the problem of unmatched opening-closing tags non-existent
   forget about unmatched opening-closing tags;
   -->
-- **code re-use** is the corner stone of programming: 
-  without reusable functions and classes, implementing advanced software
-  would be impossible; HTML has been missing this important element, 
-  but this is fixed now with Hypertag, in which programmers can
-  create re-usable components in a form of **custom tags** (_hypertags_), 
+- **code reuse** through functions/classes is the corner stone of programming,
+  yet it is missing from HTML; this is fixed now with Hypertag:
+  programmers can create reusable components in a form of **custom tags** (_hypertags_), 
   defined either as Python functions (_external tags_) 
   or directly in a document using Hypertag syntax (_native tags_);
   hypertags can be parameterized and may represent complex pieces 
-  of combined: content, style and layout - for re-use across multiple documents;
-- **control blocks** (for, while, if-elif-else, try-else) enable fine-grained control
-  over document rendering process; Hypertag's control structures constitute
-  a core part of the language syntax, unlike in templating languages, 
-  where control structures are artificially overlaid on top of another language (HTML);
+  of combined: content, style and layout - for reuse across documents;
+- **fine-grained control** over rendering process is possible with
+  a range of native _control blocks_ (for, while, if-elif-else, try-else) 
+  constituting a core part of the language syntax, unlike in templating languages, 
+  where control structures are artificially overlaid on another language (HTML);
 - **modularity** in Hypertag is modeled after Python's: 
-  every script may import (hyper)tags and variables from other scripts,
-  as well as from Python modules and from _dynamic context_ of script rendering;
-  scripts and modules can be structured into packages;
-  with this mechanism, building libraries of re-usable components is easy and fun.
+  every script may import tags and variables from other scripts,
+  from Python modules, and from the dynamic _context_ of script rendering;
+  scripts and modules are arranged into packages;
+  with these mechanisms in place, building libraries of reusable components is easy and fun.
   
-<!--- (TODO)
-- **consistency**: Hypertag combines presentation and logic in one language; 
+<!---
+- **consistency** (monolithic architecture): Hypertag combines presentation and logic in one language; 
   you no longer have to mix presentation code (HTML) with foreign syntax of a 
   templating language, or PHP etc.
-
 - Object-Oriented Programming (**OOP**) inside markup,
   through native language structures (???)
 - **high performace** in web applications achieved through caching of parsed AST,
   combined with their **compactification**: constant parts of the AST are
   pre-rendered and merged into single nodes, to avoid repeated rendering
   with every web page request.
---->
 
 If you try Hypertag, you will never miss old-school HTML templating.
+--->
 
 ## Quick Start
 
@@ -65,7 +66,7 @@ If you try Hypertag, you will never miss old-school HTML templating.
 
 ### Text blocks
 
-| &nbsp;<br> Symbol <br><img width=400/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Symbol <br><img width=200/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
 | &#124; _text_   | plain-text block; may contain embedded expressions; output is HTML-escaped |
 | / markup        | markup block; may contain embedded expressions; output is *not* HTML-escaped |
@@ -76,7 +77,7 @@ If you try Hypertag, you will never miss old-school HTML templating.
 
 ### Expressions
 
-| &nbsp;<br> Symbol <br><img width=300/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Symbol <br><img width=150/> | &nbsp;<br> Description <br>&nbsp; |
 | :------:          | --------------- | 
 | $x = a-b          | assignment block; space after $ is allowed |
 | $x <br> $x.v[1]   | embedding of a factor expression (a variable with 0+ tail operators) in a text block or string |
@@ -85,23 +86,25 @@ If you try Hypertag, you will never miss old-school HTML templating.
 | x? <br> {x*y}?    | "optional" qualifier (?) for an atomic or embedded expression; replaces exceptions and false values with empty strings |
 | 'text'    | f-string (formatted string), may contain embedded expressions: $... and {...} |
 | "text"    | f-string (formatted string), may contain embedded expressions: $... and {...} |
-| r'text'   | r-string (raw string), no embedded expressions |
-| r"text"   | r-string (raw string), no embedded expressions |
+| r'text'   | r-string (raw string), expressions are left unparsed |
+| r"text"   | r-string (raw string), expressions are left unparsed |
 | $$        | escape string; renders $ in a plaintext/markup block and inside formatted strings |
 | {{        | escape string; renders { in a plaintext/markup block and inside formatted strings |
 | }}        | escape string; renders } in a plaintext/markup block and inside formatted strings |
+<!---
 | %TAG      | reference to a tag in an expression (_not implemented yet_) |
+--->
 
 ### Tags
 
-| &nbsp;<br> Symbol <br><img width=1100/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Symbol <br><img width=500/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
-| h1 &#124; _text_ <br> div <br>&nbsp;&nbsp;&nbsp;&nbsp; p &#124; _text_  | _tagged block_: starts with a tag name (_header_), which can be followed by contents (_body_) on the same line (_inline body_) and/or on indented lines beneath (_outline body_) |
-| box: &#124; _Title_<br>&nbsp;&nbsp;&nbsp; li &#124; _item1_<br>&nbsp;&nbsp;&nbsp; li &#124; _item2_ | mixing inline and outline contents is possible if the colon (:) and a text-block marker (&#124;/!) are both present |
+| div <br>&nbsp;&nbsp;&nbsp;&nbsp; p &#124; _text_  | _tagged block_ starts with a tag name (_header_) that can be followed by contents (_body_) on the same line (_inline body_) and/or on subsequent lines (_outline body_) |
+| p &#124; _line 1_<br>&nbsp;&nbsp;&nbsp;&nbsp; _line 2_<br>&nbsp;&nbsp;&nbsp;&nbsp; _line 3_ | a tagged block with exclusively text contents may span multiple lines |
+| box: &#124; _Title_<br>&nbsp;&nbsp;&nbsp; li &#124; _item1_<br>&nbsp;&nbsp;&nbsp; li &#124; _item2_ | mixing inline and outline contents is possible when the colon (:) and a text-block marker (&#124;/!) are both present |
 | h1 : b : a href='' : <br>&nbsp;&nbsp;&nbsp;&nbsp; &#124; _text_  | multiple tags can be chained together using colon (:); trailing colon is optional |
-| box "top" x=1.5 <br>a href=$url <br>a href={url} | unnamed and named (keyword) attributes can be passed to a tag as a space-separated list, no parentheses; values can have a form of expressions (embedded $, {}, or atoms) |
-| %TAG x y=0 ...    | hypertag definition; may have _formal attributes_ (space-separated), possibly with defaults; may be followed by a body (inline or outline); space after % is allowed |
-| %TAG @body ...    | the "at" sign (@) marks a special _body attribute_, which can have an arbitrary name; must be the 1st attribute on the list; if missing, the hypertag is _void_ (doesn't accept actual body in places of occurrence) |
+| box "top" x=1.5 <br>a href=$url <br>a href={url} | unnamed and named (keyword) attributes can be passed to a tag in a space-separated list, no parentheses; values can have a form of expressions (embedded $, {}, or atoms) |
+| %SUM x y=0 &#124; _sum is_ {x+y}<br>%TAB @cells n:<br>&nbsp;&nbsp;&nbsp;&nbsp; &#124; _Table no. $n_<br>&nbsp;&nbsp;&nbsp;&nbsp; @cells | _hypertag definition_ block (%) may declare attributes, possibly with defaults, and may have a body; the "at" sign (@) marks a special attribute that will hold actual body of hypertag's occurrence: without this attribute the hypertag is _void_ (must have empty contents in places of occurrence) |
 | @body <br> @body[2:] | _embedding block_ (@): inserts DOM nodes represented by an expression (typically a body attribute inside hypertag definition) |
 | div .CLASS        | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag |
 | div #ID           | (shortcut) equiv. to *id="ID"* on attributes list of a tag |
@@ -114,9 +117,9 @@ If you try Hypertag, you will never miss old-school HTML templating.
 
 ### Control blocks
 
-| &nbsp;<br> Syntax <br><img width=1000/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Syntax <br><img width=600/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
-| import $x <br> from ~ import $x as y <br> from PATH import $x, %TAG <br> | importing a variable ($NAME) or a tag (%NAME) from another module (PATH) or from the dynamic context of rendering ("~" default) |
+| import $x <br> from ~ import $x as y <br> from hypertag.html import %a, %img <br> from PATH import $x, %TAG <br> | _import block_ reads a variable ($NAME) or a tag (%NAME) from another Hypertag or Python module (PATH) or from the dynamic context of rendering ("~" default) and adds it to the namespace of the current script |
 | if COND &#124; _text_ <br> if COND:<br>&nbsp;&nbsp;&nbsp;&nbsp;BLOCKS...<br> elif: ... <br>else: ... | _if-elif-else_ construct behaves similarly as in Python; trailing colons (:) are optional |
 | try-else | may have a body (inline, outline), but cannot be followed by tags on the same line |
 
@@ -132,7 +135,7 @@ is _optional_ and can be omitted in most cases - with an exception for a mixed
 text+structural body (text title in a headline + structural sub-blocks beneath),
 which requires that a text marker in a headline is preceeded by a colon.
 
-    box: | This box has a title and a list of sub-blocks at the same time
+    box: | This box has both an inline "title" and a list of sub-blocks
         li : b | item 1
         li : b | item 2
 
@@ -144,8 +147,9 @@ Contains a tag, or multiple tags, or a keyword.
 **Header**. The initial part of a headline, up to the last marker (see below).
 
 **Marker**. A special symbol (one of &#124;/!@:) that marks the beginning of a body 
-of a tagged or control block. Typically, there is exactly one marker in a headline.
-There can be none, though (when a body starts in a new line); or more than one
+of a tagged or control block. Typically, there is exactly one marker in a headline,
+though it can be omitted altogether (when a body starts in a new line).
+There is also a special case when the colon (:) can be followed 
 ().
 
 If the entire body of a block fits in the headline, it is called an **inline body**.
@@ -257,16 +261,16 @@ and applications, as a library of predefined **widgets**.
 This realization of the DRY principle is an important aspect of the Hypertag language,
 one that has been missing in standard front-end languages (HTML, XML).
 
-A hypertag definition block starts with "%" followed by a name of a new tag,
-its attributes (optional) and formal body (optional). 
-Default values in a form of literals or expressions can be provided for (selected) attributes.
+A hypertag definition block starts with "%" followed by spaces (optional),
+then a name of new tag (obligatory), its attributes (optional) and formal body (optional). 
+Default values in a form of literals or expressions can be provided for attributes.
 If the first attribute on the list is prefixed with a special symbol "@",
 this attribute will be assigned the actual body of the block of occurrence
-(where the new tag is used); the "body" attribute can have any valid name, 
+(where the new tag is used); the "body" attribute can have an arbitrary name, 
 but it cannot have a default value. If a body attribute is missing, the hypertag
-is "void", which means its occurrences must always have empty body.
+is "void", which means its occurrences must always have empty contents.
 
-An example hypertag definition may look like this:
+An example hypertag definition looks like this:
 
     % fancy_text @body size='10px':
         | *****
@@ -643,7 +647,7 @@ with strings (tag names) as keys and Tag objects as values - the content of this
 dictionary can be imported as tags (%NAME) into a Hypertag script.
 
 
-## Script execution
+## Runtime
 
 Execution of a Hypertag script constists of 3 phases:
 
@@ -657,6 +661,15 @@ steps at once. In some cases, the client may wish to obtain the structured repre
 of the resulting document - the DOM (Document Object Model) - for example, to manipulate
 the DOM tree before it gets rendered. In such case, the client should call 
 `Hypertag.translate()` and then `render()` on the resulting DOM tree.
+
+`hypertag.html` module defines Hypertag's built-in tags for HTML. 
+For every HTML tag, there are two corresponding Hypertag tags in hypertag.html,
+one written in lowercase, and another one in uppercase.
+For example, for HTML tag <div>, there are `%div` and `%DIV` hypertags defined.
+The behavior of lowercase and uppercase variant is the same.
+Programmers can choose what variant they prefer in a script.
+
+`HyperHTML` is a predefined runtime that imports all built-in HTML tags upon startup.
 
 
 **Environment** ... **context** consisting of any python objects can be provided ...

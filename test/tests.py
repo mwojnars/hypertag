@@ -9,7 +9,7 @@ $
 # import unittest
 import os, re, pytest
 
-from hypertag.core.run_html import HypertagHTML
+from hypertag import HypertagHTML
 
 
 #####################################################################################################################################################
