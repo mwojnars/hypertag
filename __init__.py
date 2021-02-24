@@ -1,1 +1,1 @@
-from hypertag.core.run_html import HypertagHTML
+from hypertag.core.run_html import HyperHTML

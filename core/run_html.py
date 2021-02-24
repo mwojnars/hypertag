@@ -10,7 +10,7 @@ import hypertag.html
 #####
 
 
-class HypertagHTML(Runtime):
+class HyperHTML(Runtime):
     
     language = 'HTML'
     escape   = staticmethod(html_escape)

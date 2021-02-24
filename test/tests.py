@@ -9,7 +9,7 @@ $
 # import unittest
 import os, re, pytest
 
-from hypertag import HypertagHTML
+from hypertag import HyperHTML
 
 
 #####################################################################################################################################################
@@ -18,7 +18,7 @@ from hypertag import HypertagHTML
 #####
 
 def render(script, **ctx):
-    return HypertagHTML(**ctx).render(script)
+    return HyperHTML(**ctx).render(script)
 
 def merge_spaces(s, pat = re.compile(r'\s+')):
     """Merge multiple spaces, replace newlines and tabs with spaces, strip leading/trailing space."""

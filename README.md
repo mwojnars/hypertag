@@ -15,25 +15,36 @@ The documentation is under development.
 
 Install: _git clone_
 
-Run:
+Run in Python 3:
 
     from hypertag import HyperHTML
-
+    
     script = \
     """
         import $title_color
         html: body:
-            h1 style="font-color: $title_color"
+            h1 style="color: $title_color"
                 / Example document with a <b>list of items</b>
             ul
                 li | item <1>
-                li | item <2>
+                li | item #{1+1}
     """
-
-    html = HyperHTML().render(script, title_color = '#ff0000')
+    
+    html = HyperHTML().render(script, title_color = '#00f')
     print(html)
 
-The above will output:
+The above code will output:
+
+    <html><body>
+        <h1 style="color: #00f">
+            Example document with a <b>list of items</b>
+        </h1>
+        <ul>
+            <li>item &lt;1&gt;</li>
+            <li>item #2</li>
+        </ul>
+    </body></html>
+
 
 
 ## Examples

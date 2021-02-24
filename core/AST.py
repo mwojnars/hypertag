@@ -1836,7 +1836,7 @@ class HypertagAST(BaseTree):
 
 if __name__ == '__main__':
     
-    from hypertag.core.run_html import HypertagHTML
+    from hypertag.core.run_html import HyperHTML
     DEBUG = True
 
     text = """
@@ -1967,7 +1967,7 @@ if __name__ == '__main__':
         p $x
     """
     
-    tree = HypertagAST(text, HypertagHTML(**ctx), stopAfter = "rewrite", verbose = True)
+    tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
     
     # print()
     # print("===== AST =====")
