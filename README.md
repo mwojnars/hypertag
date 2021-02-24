@@ -7,7 +7,7 @@ and thus removes the need for explicit closing tags.
 Hypertag provides: advanced control of page rendering with
 native control blocks, high level of modularity with Python-like imports,
 unprecedented support for code reuse thanks to native custom tags (_hypertags_),
-and much more...
+and [much more](#why-to-use-hypertag). Authored by Marcin Wojnarski ([LinkedIn](http://www.linkedin.com/in/marcinwojnarski)).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
@@ -72,7 +72,9 @@ The `script` in the code above will be translated to
   from Python modules, and from the dynamic _context_ of script rendering;
   scripts and modules are arranged into packages;
   with these mechanisms in place, building libraries of reusable components is easy and fun.
-
+- **Applicability** to different target languages: 
+  Hypertag is *not* limited to (X)HTML; rather, by defining new tags,
+  it can be adapted to produce (potentially) any other document description language.
 
 ## Examples
 
