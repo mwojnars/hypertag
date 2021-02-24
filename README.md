@@ -15,7 +15,7 @@ and much more...
 
 Install: _git clone_
 
-Run in Python 3:
+Run in Python 3 (example):
 ```python3
 from hypertag import HyperHTML
 
@@ -35,7 +35,7 @@ html = HyperHTML().render(script, blue = '#00f')
 print(html)
 ```
 
-The `script` in the code above is translated to
+The `script` in the code above will be translated to
 (see a [preview](http://htmlpreview.github.io/?https://github.com/mwojnars/hypertag/blob/main/test/sample_usage.html)):
 
 ```html
