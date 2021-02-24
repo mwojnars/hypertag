@@ -39,19 +39,16 @@ The `script` in the code above will be translated to
 (see a [preview](http://htmlpreview.github.io/?https://github.com/mwojnars/hypertag/blob/main/test/sample_usage.html)):
 
 ```html
-
-<html>
-<body>
-<h1 style="color: #0000ff">
-    Example document with a <u>list of items</u>
-</h1>
-<ul>
-    <li>item &lt;1&gt;</li>
-    <li>item no. 2</li>
-</ul>
-<p><a href="http://hypertag.io">See the Hypertag site for more!</a></p>
-</body>
-</html>
+<html><body>
+    <h1 style="color: #00f">
+        Example document with a <u>list of items</u>
+    </h1>
+    <ul>
+        <li>item &lt;1&gt;</li>
+        <li>item no. 2</li>
+    </ul>
+    <p><a href="http://hypertag.io">See the Hypertag site for more!</a></p>
+</body></html>
 ```
 
 ### Why to use Hypertag
