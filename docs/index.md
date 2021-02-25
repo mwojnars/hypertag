@@ -1,4 +1,44 @@
-_This will be documentation for Hypertag ....._
+<style type="text/css" rel="stylesheet">
+    header h1 { text-transform: uppercase; }
+
+    section {
+      /* width: 590px; */
+      width: 990px;
+    }
+
+    .wrapper {
+      /* width: 650px; */
+      width: 1050px;
+    }
+
+    nav {
+      /* margin-left: -580px; */
+      margin-left: -780px;
+    }
+
+    #banner {
+      /* margin-right: -382px; */
+      margin-right: -582px;
+    }
+
+    #banner .fork {
+      /* margin-left: -325px; */
+      margin-left: -525px;
+    }
+
+    footer {
+      /* margin-left: -530px; */
+      margin-left: -730px;
+    }
+
+    #dummybodyid > header {
+      padding-left: 0px;
+      padding-right: 0px;
+    }
+</style>
+
+
+_This will be documentation for Hypertag ..._
 
 
 ## Welcome to GitHub Pages
