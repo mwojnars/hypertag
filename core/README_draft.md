@@ -451,12 +451,29 @@ to tag names inside expressions. THERE WILL BE A WAY through %TAG operator))
 
 #### Null tag (.)
 
-In blocks that allow tags, you can put a dot "." instead of a tag name.
+Normally, a Hypertag script reads top-to-bottom through a vertical sequence of blocks;
+however, it can also exhibit left-to-right arrangement of tags vs. textual contents. 
+In blocks that could have a tag, but don't need one in a particular place,
+you can put a dot "." instead of a tag name to provide valid indentation and still 
+ensure consistent vertical alignment of *tags* on the left and *text* on the right,
+like here:
+
+    div:
+        p
+            i   | this line is in italics and so it requires a tag
+            .   | this line needs no tags, hence the null tag is used as a placeholder 
+            
 The dot represents a _null tag_ that creates a node in the DOM (like any regular tag) 
 but during rendering it passes the body unchanged to the output.
-In other words, a _null tag_ is a tag that performs no processing of its body,
-something like an identity function.
+In other words, a _null tag_ serves as a placeholder that performs no processing 
+of its body, similar to an identity function.
 
+The null tag can also be used as a root node for a group of sub-blocks, 
+to provide visual grouping in the source code and/or allow finer control
+over node filtering and selection if the blocks were to be passed to a hypertag (as _@body_)
+and processed with DOM selectors.
+
+<!---
 Typically, a null tag is used in either of two cases:
 
 1. to vertically align text contents of mixed: tagged and untagged blocks;
@@ -464,13 +481,14 @@ Typically, a null tag is used in either of two cases:
    even despite some blocks need more horizontal space for their (regular) tags;
 1. to visually group in the script related blocks; note that sub-indentation of the
    dotted block will be preserved in the output.
+--->
 
-Both cases are illustrated in the example below:
+Both use cases are illustrated in the example below:
 
-    h1                        | TITLE
+    h1                | TITLE
     .
-        a href="http://..."   | click HERE!
-        .                     | and see our new marvelous web page
+        a href=$url   | click HERE!
+        .             | to visit our website
 
 
 #### Pass tag
@@ -576,17 +594,28 @@ of the resulting document - the DOM (Document Object Model) - for example, to ma
 the DOM tree before it gets rendered. In such case, the client should call 
 `Hypertag.translate()` and then `render()` on the resulting DOM tree.
 
-`hypertag.html` module defines Hypertag's built-in tags for HTML. 
-For every HTML tag, there are two corresponding Hypertag tags in hypertag.html,
-one written in lowercase, and another one in uppercase.
-For example, for HTML tag <div>, there are `%div` and `%DIV` hypertags defined.
-The behavior of lowercase and uppercase variant is the same.
-Programmers can choose what variant they prefer in a script.
+Runtime specifies the target language a Hypertag script is being rendered to.
+Runtime decides what built-in symbols (tags and/or variables dependent on the
+target language, see `Runtime.DEFAULT`) 
+are automatically imported at the beginning of rendering.
+Moreover, Runtime specifies an escape function (`Runtime.escape`) that is applied
+to the output of plain-text blocks in order to convert it to the target language.
 
-`HyperHTML` is a predefined runtime that imports all built-in HTML tags upon startup.
+`HyperHTML` is a built-in runtime that renders Hypertag scripts to HTML 
+as a target language. HyperHTML implements HTML-specific tags and an escape function.
+For every HTML tag, HyperHTML provides two alternative Hypertag tags:
+written in lowercase or uppercase.
+For example, for the HTML tag <div>, there are `%div` and `%DIV` hypertags available.
+The behavior of lowercase and uppercase variants is the same.
+It is up to a programmer to decide what variant to use.
+
+Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
+to a script. They can also be imported manually from the `hypertag.html` module, e.g.:
+
+    from hypertag.html import %div, %DIV
 
 
-**Environment** ... **context** consisting of any python objects can be provided ...
+**Environment** ... **dynamic context** of rendering consisting of any python objects can be provided ...
 
 ## SDK ??
 
@@ -602,3 +631,34 @@ on [StackOverflow](https://stackoverflow.com/questions/ask)
 and tag them with, guess... the "**hypertag**" tag.
 
 Other questions can be posted in the _Discussions_ section on Hypertag's page in GitHub.
+
+
+<!---
+
+/* style.css | http://hypertag.io/assets/css/style.css?v=f1e5c5ec36271e9c7e17d86bc8072ca67b4c9dd1 */
+
+section {
+  /* width: 590px; */
+  width: 890px;
+}
+
+.wrapper {
+  /* width: 650px; */
+  width: 950px;
+}
+
+nav {
+  /* margin-left: -580px; */
+  margin-left: -730px;
+}
+
+#banner {
+  /* margin-right: -382px; */
+  margin-right: -532px;
+}
+
+#banner .fork {
+  /* margin-left: -325px; */
+  margin-left: -475px;
+}
+--->

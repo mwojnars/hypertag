@@ -6,7 +6,7 @@ where _indentation_ determines relations between nested elements
 and thus removes the need for explicit closing tags.
 Hypertag provides: advanced control of page rendering with
 native control blocks, high level of modularity with Python-like imports,
-unprecedented support for code reuse thanks to native custom tags (_hypertags_),
+unprecedented support for code reuse with native custom tags (_hypertags_),
 and [much more](#why-to-use-hypertag). Authored by Marcin Wojnarski ([LinkedIn](http://www.linkedin.com/in/marcinwojnarski)).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
@@ -115,7 +115,7 @@ The `script` in the code above will be translated to
 
 ### Tags
 
-| &nbsp;<br> Syntax <br><img width=600/> | &nbsp;<br> Description <br>&nbsp; |
+| &nbsp;<br> Syntax <br><img width=700/> | &nbsp;<br> Description <br>&nbsp; |
 | ------------- | --------------- | 
 | div <br>&nbsp;&nbsp;&nbsp;&nbsp; p &#124; _text_  | _tagged block_ starts with a tag name (_header_) that can be followed by contents (_body_) on the same line (_inline body_) and/or on subsequent lines (_outline body_) |
 | p &#124; _this is_<br>&nbsp;&nbsp;&nbsp;&nbsp; _a multiline_<br>&nbsp;&nbsp;&nbsp;&nbsp; _paragraph_ | a tagged block with exclusively text contents may span multiple lines |
