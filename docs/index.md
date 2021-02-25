@@ -1,3 +1,33 @@
+<style type="text/css" rel="stylesheet">
+    header h1 { text-transform: uppercase; }
+
+    section {
+      /* width: 590px; */
+      width: 990px;
+    }
+
+    .wrapper {
+      /* width: 650px; */
+      width: 1050px;
+    }
+
+    nav {
+      /* margin-left: -580px; */
+      margin-left: -780px;
+    }
+
+    #banner {
+      /* margin-right: -382px; */
+      margin-right: -582px;
+    }
+
+    #banner .fork {
+      /* margin-left: -325px; */
+      margin-left: -525px;
+    }
+</style>
+
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/mwojnars/hypertag/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
