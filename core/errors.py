@@ -1,4 +1,4 @@
-from nifty.parsing.parsing import ParserError
+from hypertag.nifty.parsing import ParserError
 
 ########################################################################################################################################################
 

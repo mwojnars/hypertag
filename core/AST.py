@@ -10,8 +10,8 @@ from six import reraise, text_type
 from parsimonious.grammar import Grammar as Parsimonious
 from parsimonious.exceptions import IncompleteParseError
 
-from nifty.util import ObjDict
-from nifty.parsing.parsing import ParsimoniousTree as BaseTree
+from hypertag.nifty.util import ObjDict
+from hypertag.nifty.parsing import ParsimoniousTree as BaseTree
 
 from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, MissingValueEx, NameErrorEx, \
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
