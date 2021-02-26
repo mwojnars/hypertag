@@ -140,7 +140,7 @@ A block that starts with $ marks an assignment to a local variable:
     $ dash = x * '-'
     $ title = dash + ' TITLE ' + dash
 
-Hypertag supports also _augmented assignments_ as known in Python:
+Hypertag supports also _augmented assignments_ as known from Python:
 
     $ a, (b, c) = [1, (2, 3)]
 
@@ -218,13 +218,16 @@ definition blocks (_nested definitions_), but not in control blocks.
 Basic form:
 
     try ...
-    or ...
+    else ...
     else ...
 
-If used with a single tagged block, try block can be written in a shorter form:
+If there are no "else" branches, a try block can be written in a shorter form using `?`:
 
     ?tag ...
     ? tag ...
+    ?
+        block1
+        block2
 
 This works with a default tag specification, as well:
 
@@ -255,7 +258,7 @@ When a script is imported to another script, the context stays the same for both
 
 from PATH import NAME -- import from a module denoted by PATH, which can be any string
   consisting of [...] characters that can be correctly interpreted by the currently used
-  Environment subclass
+  runtime
 
 3. Import from a Hypertag script:
 
@@ -264,7 +267,6 @@ from PATH import NAME -- import from a module denoted by PATH, which can be any 
 4. Import from a combined Python-Hypertag module:
 
 ...
-
 
 
 ### Comments
@@ -312,9 +314,10 @@ Comments can NOT be mixed with textual contents of text blocks.
 
 #### Literals
 
-Integers, real numbers, strings, boolean literals (True, False), None.
+Literal expressions include: integers, real numbers, strings, 
+boolean values (True, False), and None.
 
-    True, False, None
+    | {True} {False} {None} {5} {-5.5} {'text'} {"text"}
 
 #### Strings
 
@@ -605,9 +608,9 @@ to the output of plain-text blocks in order to convert it to the target language
 as a target language. HyperHTML implements HTML-specific tags and an escape function.
 For every HTML tag, HyperHTML provides two alternative Hypertag tags:
 written in lowercase or uppercase.
-For example, for the HTML tag <div>, there are `%div` and `%DIV` hypertags available.
-The behavior of lowercase and uppercase variants is the same.
-It is up to a programmer to decide what variant to use.
+For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags available.
+The behavior of lowercase and uppercase variants is the same and
+it is up to the programmer to decide what variant to use.
 
 Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
 to a script. They can also be imported manually from the `hypertag.html` module, e.g.:
@@ -615,14 +618,14 @@ to a script. They can also be imported manually from the `hypertag.html` module,
     from hypertag.html import %div, %DIV
 
 
-**Environment** ... **dynamic context** of rendering consisting of any python objects can be provided ...
+**Runtime** ... **dynamic context** of rendering consisting of any python objects can be provided ...
 
 ## SDK ??
 
 - class Tag, ExternalTag, MarkupTag -- for implementing custom tags
 - class HNode
 - class Sequence
-- class Environment
+- class Runtime
 
 ## Questions & Answers
 
@@ -632,33 +635,3 @@ and tag them with, guess... the "**hypertag**" tag.
 
 Other questions can be posted in the _Discussions_ section on Hypertag's page in GitHub.
 
-
-<!---
-
-/* style.css | http://hypertag.io/assets/css/style.css?v=f1e5c5ec36271e9c7e17d86bc8072ca67b4c9dd1 */
-
-section {
-  /* width: 590px; */
-  width: 890px;
-}
-
-.wrapper {
-  /* width: 650px; */
-  width: 950px;
-}
-
-nav {
-  /* margin-left: -580px; */
-  margin-left: -730px;
-}
-
-#banner {
-  /* margin-right: -382px; */
-  margin-right: -532px;
-}
-
-#banner .fork {
-  /* margin-left: -325px; */
-  margin-left: -475px;
-}
---->

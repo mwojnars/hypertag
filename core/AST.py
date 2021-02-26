@@ -10,8 +10,7 @@ from six import reraise, text_type
 from parsimonious.grammar import Grammar as Parsimonious
 from parsimonious.exceptions import IncompleteParseError
 
-from nifty.util import asnumber, escape as slash_escape, ObjDict
-from nifty.text import html_escape
+from nifty.util import ObjDict
 from nifty.parsing.parsing import ParsimoniousTree as BaseTree
 
 from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, MissingValueEx, NameErrorEx, \
@@ -1599,63 +1598,63 @@ class NODES(object):
         whitechar = '\t'
 
 
-    ###  SYNTHETIC nodes  ###
-    
-    class merged(static):
-        """
-        An artificial node created during compactification by merging several sibling nodes that are all pure (or static, in particular).
-        Values of the original nodes (strings to be concatenated) are retrieved from their render().
-        """
-        value = None        # pre-rendered output of the compactified nodes
-        ex = None           # if MissingValueEx exception was caught during rendering, it's stored here as an (exception, traceback) pair
-        
-        def __init__(self, node, state):
-            self.tree = node.tree
-            self.fulltext = node.fulltext
-            self.pos = node.pos
-            try:
-                self.value = node.render(state)
-            except MissingValueEx as ex:
-                self.ex = (ex, sys.exc_info()[2])
-                
-        def merge(self, node, state, sep):
-            self.pos = (self.pos[0], node.pos[1])
-            if self.ex: return                          # we already know that an exception will be raised upon self.render(), no need to append new nodes
-            try:
-                nodeValue = node.render(state)
-                self.value += sep + nodeValue
-            except MissingValueEx as ex:
-                self.ex = (ex, sys.exc_info()[2])
-    
-        def render(self, state):
-            if self.ex: reraise(None, self.ex[0], self.ex[1])
-            return self.value
-        
-        def info(self):
-            return "%s at position %s rendering: %s" % (self.infoName(), self.pos, slash_escape(str(self.value)))
-    
-    
-    ###  UTILITY METHODS  ###
-
-    @staticmethod
-    def _compactify_siblings_(nodes, state, sep = u''):
-        "Compactify a list of sibling nodes, by compactifying each one separately when possible and then merging neighboring static nodes."
-        out = []
-        last = None         # the current last <merged> node; can be expanded if the subsequent node is also pure
-        
-        for node in nodes:
-            #print(' ', node, node.check_pure())
-            if node.check_pure():                               # a pure node that can be reduced into a <merged> node?
-                if last: last.merge(node, state, sep)
-                else:
-                    last = NODES.merged(node, state)
-                    out.append(last)
-            else:                                               # non-pure node? let's compactify recursively its subtree and append
-                node.compactify(state)
-                out.append(node)
-                last = None
-        
-        return out
+    # ###  SYNTHETIC nodes  ###
+    #
+    # class merged(static):
+    #     """
+    #     An artificial node created during compactification by merging several sibling nodes that are all pure (or static, in particular).
+    #     Values of the original nodes (strings to be concatenated) are retrieved from their render().
+    #     """
+    #     value = None        # pre-rendered output of the compactified nodes
+    #     ex = None           # if MissingValueEx exception was caught during rendering, it's stored here as an (exception, traceback) pair
+    #
+    #     def __init__(self, node, state):
+    #         self.tree = node.tree
+    #         self.fulltext = node.fulltext
+    #         self.pos = node.pos
+    #         try:
+    #             self.value = node.render(state)
+    #         except MissingValueEx as ex:
+    #             self.ex = (ex, sys.exc_info()[2])
+    #
+    #     def merge(self, node, state, sep):
+    #         self.pos = (self.pos[0], node.pos[1])
+    #         if self.ex: return                          # we already know that an exception will be raised upon self.render(), no need to append new nodes
+    #         try:
+    #             nodeValue = node.render(state)
+    #             self.value += sep + nodeValue
+    #         except MissingValueEx as ex:
+    #             self.ex = (ex, sys.exc_info()[2])
+    #
+    #     def render(self, state):
+    #         if self.ex: reraise(None, self.ex[0], self.ex[1])
+    #         return self.value
+    #
+    #     def info(self):
+    #         from nifty.util import escape as slash_escape
+    #         return "%s at position %s rendering: %s" % (self.infoName(), self.pos, slash_escape(str(self.value)))
+    #
+    # ###  UTILITY METHODS  ###
+    #
+    # @staticmethod
+    # def _compactify_siblings_(nodes, state, sep = u''):
+    #     "Compactify a list of sibling nodes, by compactifying each one separately when possible and then merging neighboring static nodes."
+    #     out = []
+    #     last = None         # the current last <merged> node; can be expanded if the subsequent node is also pure
+    #
+    #     for node in nodes:
+    #         #print(' ', node, node.check_pure())
+    #         if node.check_pure():                               # a pure node that can be reduced into a <merged> node?
+    #             if last: last.merge(node, state, sep)
+    #             else:
+    #                 last = NODES.merged(node, state)
+    #                 out.append(last)
+    #         else:                                               # non-pure node? let's compactify recursively its subtree and append
+    #             node.compactify(state)
+    #             out.append(node)
+    #             last = None
+    #
+    #     return out
     
 
 #####################################################################################################################################################

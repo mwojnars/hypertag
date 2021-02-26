@@ -73,8 +73,8 @@ The `script` in the code above will be translated to
   scripts and modules are arranged into packages;
   with these mechanisms in place, building libraries of reusable components is easy and fun.
 - **Applicability** to different target languages: 
-  Hypertag is *not* limited to (X)HTML; rather, by defining new tags,
-  it can be adapted to produce (potentially) any other document description language.
+  Hypertag is *not* limited to (X)HTML; by defining new tags,
+  it can be adapted so as to produce (potentially) any other document description language.
 
 ## Examples
 

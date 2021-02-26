@@ -3,6 +3,18 @@ from hypertag.core.tag import MarkupTag
 
 ########################################################################################################################################################
 #####
+#####  UTILITIES
+#####
+
+def html_escape(text):
+    """Escape HTML/XML special characters (& < >) in a string that's to be embedded in a text part of an HTML/XML document.
+    For escaping attribute values use html_attr_escape() - attributes need a different set of special characters to be escaped.
+    """
+    return text.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')
+
+
+########################################################################################################################################################
+#####
 #####  BUILTIN (X)HTML tags
 #####
 

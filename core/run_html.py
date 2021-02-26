@@ -1,5 +1,4 @@
-from nifty.text import html_escape
-
+from hypertag.core._html import html_escape
 from hypertag.core.runtime import Runtime, _read_module
 import hypertag.html
 
