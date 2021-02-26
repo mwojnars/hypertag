@@ -90,24 +90,87 @@ rather than multi-line text - even if there is a text-block marker .
 
 ## Syntax
 
-### Basic blocks
+Every Hypertag script consists of a list of **blocks**. During parsing,
+blocks are first **translated** into Hypertag's native Document Object Model (DOM),
+and then the DOM undergoes **rendering** to produce a document string in a target language. 
+Typically, the target language is HTML (see `hypertag.HyperHTML`) or XHTML, 
+although any other language can be supported if an appropriate subclass 
+of `hypertag.core.Runtime` is implemented to provide language-specific configuration: 
+predefined tags, an escape function etc. (see the ..... section for details).
 
-#### Text blocks
+All top-level blocks in a document (or sub-blocks at any given depth)
+must have the _same indentation_. Both a space (` `) and a tab character (`\t`)
+can be used for indenting, although we recommend only using spaces to avoid confusion:
+two indentation strings are considered the same if and only if they are equal
+in Python sense, which means that a space in one line cannot be replaced with a tab
+in another equally-indented line. These are similar rules as in Python.
 
-Plain-text, markup, verbatim:
+### Text blocks
 
-    | plain-text (normal) block with {'em'+'bedded'} $expressions
-    / markup <b>block</b> with no HTML escaping
-    ! verbatim $block$, expressions left unparsed
+The most elementary type of block is a _text block_, which comes in three variants:
 
-Multiline block:
+- **plain-text** block (marked with "|")
+- **markup** block ("/")
+- **verbatim** block ("!")
 
-    |   text block
+Example:
+
+    | plain-text block with {'em'+'bedded'} $expressions
+    / markup <b>block</b> does no HTML escaping
+    ! in a verbatim $block$ {expressions} are left unparsed, no <escaping>
+
+This renders to (after prepending `$expressions='EXPRESSIONS'`):
+
+    plain-text block with embedded EXPRESSIONS &amp; escaping
+    markup <b>block</b> does no escaping and raw tags are passed to output
+    in a verbatim $block$ {expressions} are left unparsed, no <escaping>
+
+Plain-text and markup blocks may contain embedded expressions, like `$x` or `{a+b}`,
+which are evaluated and replaced with their corresponding values during translation.
+Additionally, the output of a plaintext block is converted to the target language 
+(*escaped*) before insertion to the DOM. A runtime-specific *escape function* is used
+for this purpose. For example, `hypertag.HyperHTML` runtime performs HTML-escaping: 
+it replaces characters '<', '>' and '&' with HTML entities (`&amp;` `&gt;` `&lt;`).
+For a different target language, the escape function could perform any other operation
+that is necessary to convert plain text to a valid string in this language. 
+
+Contents of a text block may span multiple lines. The additional lines
+must be indented more than the first line. Sub-indentation is preserved:
+
+    |   a text block
       may span
         multiple
       lines...
 
-##### Embedded expressions
+renders to
+
+      a text block
+    may span
+      multiple
+    lines...
+
+
+### Tagged blocks
+
+Some types of blocks (_structural blocks_) may contain nested blocks inside - a list 
+of such nested blocks is called a **body**.
+
+The most common example of a structural block is a **tagged block**: it starts 
+with a **tag**.
+
+Moreover, the "if" and "try" control blocks may consist of multiple branches (**clauses**),
+and each clause may have its own body.
+
+- tags chain (:) -- multiple tags can be put one after another on the same line; 
+  each tag can have its own attributes; special tags (_pass_, _null_ tag) cannot be used 
+  in this way
+- body layout: inline / outline / headline
+- there is still a way to explicitly write raw (X)HTML tags
+  through the use of /-blocks which allow writing unescaped markup
+
+
+
+### Embedded expressions
 
 Text blocks (normal and markup) may contain embedded expressions.
 An embedding may come in two forms, either using the {...} syntax:
@@ -132,7 +195,7 @@ to test for errors or false results:
     | $x.call()!  -- raises an exception if x.call() is false
 
 
-#### Assignments
+### Assignments
 
 A block that starts with $ marks an assignment to a local variable:
 
@@ -145,24 +208,14 @@ Hypertag supports also _augmented assignments_ as known from Python:
     $ a, (b, c) = [1, (2, 3)]
 
 
-#### DOM embedding
+### DOM embedding
 
     @ body
     @ body[0]
     @ body.METHOD()
 
 
-#### Tagged blocks
-
-- tags chain (:) -- multiple tags can be put one after another on the same line; 
-  each tag can have its own attributes; special tags (_pass_, _null_ tag) cannot be used 
-  in this way
-- body layout: inline / outline / headline
-- there is still a way to explicitly write raw (X)HTML tags
-  through the use of /-blocks which allow writing unescaped markup
-
-
-#### Hypertag definition
+### Hypertag definition
 
 A Hypertag script may contain definitions of custom tags, called **hypertags**,
 which can be viewed as equivalents of Python functions
