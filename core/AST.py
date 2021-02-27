@@ -1962,10 +1962,8 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    |    a text block
-        may span
-         multiple
-       lines...
+    try:
+        | can we access $x outside the paragraph?
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
