@@ -95,7 +95,7 @@ blocks are first **translated** into Hypertag's native Document Object Model (DO
 and then the DOM undergoes **rendering** to produce a document string in a target language. 
 Typically, the target language is HTML (see `hypertag.HyperHTML`) or XHTML, 
 although any other language can be supported if an appropriate subclass 
-of `hypertag.core.Runtime` is implemented to provide language-specific configuration: 
+of `hypertag.core.runtime.Runtime` is implemented to provide language-specific configuration: 
 predefined tags, an escape function etc. (see the ..... section for details).
 
 All top-level blocks in a document (or sub-blocks at any given depth)
@@ -135,7 +135,7 @@ For a different target language, the escape function could perform any other ope
 that is necessary to convert plain text to a valid string in this language. 
 
 Contents of a text block may span multiple lines. The additional lines
-must be indented more than the first line. Sub-indentation is preserved:
+must be indented more than the first line. Sub-indentation is preserved in the output:
 
     |   a text block
       may span
@@ -152,18 +152,77 @@ renders to
 
 ### Tagged blocks
 
-Some types of blocks (_structural blocks_) may contain nested blocks inside - a list 
-of such nested blocks is called a **body**.
+Some types of blocks (_structural blocks_) may contain nested blocks inside. 
+A list of such nested blocks is called a **body** of the block. 
+The initial part of a block that precedes the body is a **header**. 
+For all types of blocks (control blocks included!), body is _not_ mandatory and can be omitted.
+Moreover, the "if" and "try" control blocks (see section .....) 
+may consist of multiple branches (**clauses**), each branch having its own body.
 
-The most common example of a structural block is a **tagged block**: it starts 
-with a **tag**.
+The most common type of structural block is a **tagged block**,
+whose header consists of a name of a tag, optionally followed by a space-separated list
+of attributes:
 
-Moreover, the "if" and "try" control blocks may consist of multiple branches (**clauses**),
-and each clause may have its own body.
+    div class='main-content' width='1000px'
+        | body node 1
+        | body node 2
 
-- tags chain (:) -- multiple tags can be put one after another on the same line; 
+A **tag** is a function-like object belonging to the _tags namespace_ 
+(see section ........) that performs some kind of transformation 
+of the block's body represented by a DOM (see section .......).
+The execution of this transformation is called **tag expansion**:
+a DOM or a string is produced as a result, which is subsequently concatenated
+with the output of adjacent blocks to form final output of script rendering.
+Tag expansion can be moderated by values of attributes.
+
+For example, the built-in tag `div` as provided by HyperHTML runtime 
+wraps up the rendered body of a block with `<div>...</div>`
+prefix and suffix during expansion, and pastes into the opening `<div>` 
+any attributes that have been declared in the block.
+
+Technically speaking, every tag is an instance of `hypertag.core.tag.Tag` that
+accepts - through the method `Tag.expand()` - any number of positional 
+and/or keyword arguments (attributes) plus the special _body_ argument 
+that holds the DOM of a translated body of the tag's occurrence -
+in the example above this would be a DOM holding two plain-text nodes.
+
+<!---
+The tag can perform any kind of processing of input DOM and 
+returns a DOM or a string that will be concatenated with the output of adjacent blocks
+to form the final output of rendering.
+(See section ...... for details about DOM.)
+--->
+
+A tag can be implemented in Python (_external tag_) and imported to a script 
+using _import_ blocks (see section ......), or defined directly in a Hypertag script
+using a _hypertag definition_ block (_native tag_, see section ......).
+In both cases, Hypertag parser represents the tag internally as an instance
+of a `hypertag.core.tag.Tag` subclass (`ExternalTag` or `NativeTag`, respectively).
+
+Every Hypertag runtime may define a list of _built-in tags_ that will be imported
+automatically when script parsing begins.
+For example, `HyperHTML` provides built-in Tags for all valid HTML tags,
+and there are two variants available for each tag: lower-case and upper-case.
+(see section ....... for details).
+
+............
+
+that belongs to the _tags namespace_.
+During translation of a script, Hypertag maintains two separate namespaces:
+
+- **variables namespace**: 
+
+The entire header must fit in the first line of a block.
+For a body, there are several possibilities: it may follow directly after
+the header on the same line (_inline body_), occupy subsequent lines
+(_outline body_), mix both of these approaches (__), or contain a multi-line
+text contents (_multiline body_).
+
+
+**tags chain** (:) -- multiple tags can be put one after another on the same line; 
   each tag can have its own attributes; special tags (_pass_, _null_ tag) cannot be used 
   in this way
+
 - body layout: inline / outline / headline
 - there is still a way to explicitly write raw (X)HTML tags
   through the use of /-blocks which allow writing unescaped markup
@@ -657,13 +716,15 @@ are automatically imported at the beginning of rendering.
 Moreover, Runtime specifies an escape function (`Runtime.escape`) that is applied
 to the output of plain-text blocks in order to convert it to the target language.
 
+### HyperHTML
+
 `HyperHTML` is a built-in runtime that renders Hypertag scripts to HTML 
 as a target language. HyperHTML implements HTML-specific tags and an escape function.
 For every HTML tag, HyperHTML provides two alternative Hypertag tags:
-written in lowercase or uppercase.
+written in lower case and upper case.
 For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags available.
-The behavior of lowercase and uppercase variants is the same and
-it is up to the programmer to decide what variant to use.
+Output of their expansion differs by letter case, otherwise the behavior is the same.
+It is up to the programmer to decide what variant to use.
 
 Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
 to a script. They can also be imported manually from the `hypertag.html` module, e.g.:
@@ -671,7 +732,9 @@ to a script. They can also be imported manually from the `hypertag.html` module,
     from hypertag.html import %div, %DIV
 
 
-**Runtime** ... **dynamic context** of rendering consisting of any python objects can be provided ...
+**Runtime** ... **dynamic context** of rendering consisting of any python objects 
+can be provided ...
+
 
 ## SDK ??
 
