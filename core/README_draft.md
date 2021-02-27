@@ -79,16 +79,13 @@ If the body starts on a new line after the headline, it is called an **outline b
 Trailing colon (:) after a header indicates that subsequent lines will contain blocks
 rather than multi-line text - even if there is a text-block marker .
 
-- block
-- body
-- tag, attributes
-- script >  AST > DOM ... tree, node, body
-- rendering
 
-((?? move Script Execution here))
+## Setup
 
+Install: ........
+Run: .......
 
-## Syntax
+## Blocks
 
 Every Hypertag script consists of a list of **blocks**. During parsing,
 blocks are first **translated** into Hypertag's native Document Object Model (DOM),
@@ -115,15 +112,15 @@ The most elementary type of block is a _text block_, which comes in three varian
 
 Example:
 
-    | plain-text block with {'em'+'bedded'} $expressions
-    / markup <b>block</b> does no HTML escaping
-    ! in a verbatim $block$ {expressions} are left unparsed, no <escaping>
+    | Plain-text block supports {'em'+'bedded'} $expressions & escaping.
+    / Markup block does no escaping, so <b>raw tags</b> are passed to output.
+    ! In a verbatim $block$ {expressions} are left unparsed, no <escaping>.
 
 This renders to (after prepending `$expressions='EXPRESSIONS'`):
 
-    plain-text block with embedded EXPRESSIONS &amp; escaping
-    markup <b>block</b> does no escaping and raw tags are passed to output
-    in a verbatim $block$ {expressions} are left unparsed, no <escaping>
+    Plain-text block supports embedded EXPRESSIONS &amp; escaping.
+    Markup <b>block</b> does no escaping, so <b>raw tags</b> are passed to output.
+    In a verbatim $block$ {expressions} are left unparsed, no <escaping>.
 
 Plain-text and markup blocks may contain embedded expressions, like `$x` or `{a+b}`,
 which are evaluated and replaced with their corresponding values during translation.
@@ -215,57 +212,83 @@ For example, `HyperHTML` provides built-in Tags for all valid HTML tags,
 and there are two variants available for each tag: lower-case and upper-case.
 (see section ....... for details).
 
+In a tagged block, multiple tags can be **chained** together using a colon (:). Example:
 
-**tags chain** (:) -- multiple tags can be put one after another on the same line; 
-  each tag can have its own attributes; special tags (_pass_, _null_ tag) cannot be used 
-  in this way
+    h1 : b : a href='#' :
+        | Header in bold with an anchor
 
+outputs:
 
+    <h1><b><a href="#">
+        Header in bold with an anchor
+    </a></b></h1>
 
-
-### Embedded expressions
-
-Text blocks (normal and markup) may contain embedded expressions.
-An embedding may come in two forms, either using the {...} syntax:
-
-    | value of x = {x}
-
-or using the $... syntax:
-
-    | value of x = $x
-
-The former syntax can handle all types of expressions, while the latter 
-can only be used for variables, possibly extended with tail operators:
-
-    | $x.value
-    | $x[index]
-    | $x(arg1, arg2)
-
-Both forms, {...} and $..., allow the use of a trailing qualifier (? or !)
-to test for errors or false results:
-
-    | {x+y}?  -- is converted to empty string if false, or if exception was raised
-    | $x.call()!  -- raises an exception if x.call() is false
+Each tag in a chain can have its own list of attributes. 
+Special tags (_pass_, _null_ - see section ......) cannot be used in this way.
 
 
-### Assignments
+### Special tags
 
-A block that starts with $ marks an assignment to a local variable:
+#### Null tag (.)
 
-    $ x = 5
-    $ dash = x * '-'
-    $ title = dash + ' TITLE ' + dash
+Normally, a Hypertag script reads top-to-bottom through a vertical sequence of blocks;
+however, it can also exhibit left-to-right arrangement of tags vs. textual contents. 
+In blocks that could have a tag, but don't need one in a particular place,
+you can put a dot "." instead of a tag name to provide valid indentation and still 
+ensure consistent vertical alignment of *tags* on the left and *text* on the right,
+like here:
 
-Hypertag supports also _augmented assignments_ as known from Python:
+    div:
+        p
+            i   | this line is in italics and so it requires a tag
+            .   | this line needs no tags, hence the null tag is used as a placeholder 
+            
+The dot represents a _null tag_ that creates a node in the DOM (like any regular tag) 
+but during rendering it passes the body unchanged to the output.
+In other words, a _null tag_ serves as a placeholder that performs no processing 
+of its body, similar to an identity function.
 
-    $ a, (b, c) = [1, (2, 3)]
+The null tag can also be used as a root node for a group of sub-blocks, 
+to provide visual grouping in the source code and/or allow finer control
+over node filtering and selection if the blocks were to be passed to a hypertag (as _@body_)
+and processed with DOM selectors.
+
+<!---
+Typically, a null tag is used in either of two cases:
+
+1. to vertically align text contents of mixed: tagged and untagged blocks;
+   using a null tag allows all blocks to have the same indentation of text contents,
+   even despite some blocks need more horizontal space for their (regular) tags;
+1. to visually group in the script related blocks; note that sub-indentation of the
+   dotted block will be preserved in the output.
+--->
+
+Both use cases are illustrated in the example below:
+
+    h1                | TITLE
+    .
+        a href=$url   | click HERE!
+        .             | to visit our website
 
 
-### DOM embedding
+#### Pass tag
 
-    @ body
-    @ body[0]
-    @ body.METHOD()
+A block consisting of a single keyword `pass` (the _"pass" tag_), no attributes, no body - 
+constitutes a "pass block" that serves as a placeholder that does simply nothing, 
+not even rendering a newline (unlike the null tag). The pass tag corresponds 
+to Python's "pass" keyword. Typically, a pass block is used inside control blocks 
+(for/if/else) to mark an empty branch, which may appeal to aesthetics or be a way to mark 
+unfinished implementation. Example:
+
+    if condition
+        p | render something
+    else
+        pass
+
+The above code is equivalent to:
+
+    if condition
+        p | render something
 
 
 ### Hypertag definition
@@ -315,6 +338,26 @@ and the actual `@body` is inserted, resulting in the following output:
 
 Hypertag definition blocks can be nested in tagged blocks and in other
 definition blocks (_nested definitions_), but not in control blocks.
+
+
+### DOM embedding
+
+    @ body
+    @ body[0]
+    @ body.METHOD()
+
+
+### Assignments
+
+A block that starts with $ marks an assignment to a local variable:
+
+    $ x = 5
+    $ dash = x * '-'
+    $ title = dash + ' TITLE ' + dash
+
+Hypertag supports also _augmented assignments_ as known from Python:
+
+    $ a, (b, c) = [1, (2, 3)]
 
 
 ### Control blocks
@@ -435,38 +478,194 @@ An inline comment occurs at the end of a line containing a header of any structu
 Comments can NOT be mixed with textual contents of text blocks.
 
 
-### Expressions
+### Indentation
 
-#### Literals
+Normally, _script indentation_ is stored in the DOM and translates to 
+_output indentation_ of the text produced during rendering.
+You can modify this behaviour and remove output indentation in two ways, by using:
+
+- Dedent marker (<): removes output indentation of a single block
+  the marker is used with
+- Dedent tag (builtin): removes output indentation of all nested blocks
+  (but the indentation of the dedent block itself stays untouched)
+
+The _dedent marker_ and _dedent tag_ can be used together. Example:
+
+    div
+        < dedent : a
+            p:    / These <p> blocks will be aligned with their parent (<a>) after rendering.
+                b | Deeper-level nested block are dedented, too!
+            p     / And the parent's indentation is removed, as well
+                    (<a> is aligned with top-level <div>), thanks to 
+                    the use of the <i>dedent marker</i>.
+
+outputs:
+    
+    ..........
+
+
+## Symbols
+
+Valid symbols for tags ....
+Valid symbols for variables ....
+Valid symbols for attributes ....
+
+### Namespaces
+
+During translation of a script to a DOM, Hypertag maintains two separate namespaces:
+
+- **tags namespace**
+- **variables namespace**
+
+Only symbols in the tags namespace can be used as tags in tagged blocks.
+Only symbols in the variables namespace can occur in expressions,
+unless the `%` prefix is added to inform that a given symbol should be taken
+from the tags namespace instead (NOT IMPLEMENTED YET).
+
+The same name can be present in both namespaces at the same time and link to different 
+objects _without_ causing a collission. This is an important feature when 
+generating HTML documents. The HTML defines dozens of tags, whose names are fixed 
+and often very short (i, b, p, code, form, head, body, ...) - 
+without separation of namespaces, they would often collide with names 
+commonly used by programmers for naming variables.
+
+<!---
+Maintaining separate namespaces is justified by the fact that in 
+typical use cases - like HTML generation - there are dozens of predefined tags
+with short names, all of which must be directly accessible. 
+Many of these tags have very common names (i, b, p, code, form, head, body, ...),
+and without separation of name spaces, name collissions between tags and local variables 
+would be very frequent and lead to confusion. 
+--->
+
+For instance, thanks to namescape separation, it is possible to define `$i`
+as a loop variable in a `for` block while refering to `%i` (a tag) inside the block
+at the same time:
+
+    for i in [1,2,3]:
+        i | number $i printed in italics
+
+outputs:
+
+    <i>number 1 printed in italics</i>
+    <i>number 2 printed in italics</i>
+    <i>number 3 printed in italics</i>
+
+To avoid confusion in documentation and clearly indicate what namespace a given symbol
+belongs to, one can precede its name with `%` or `$`, like in `%i` (denotes a tag)
+or `$i` (denotes a variable).
+
+The ways to add symbols to the two namespaces:
+
+- Both namespaces can be initialized with built-in symbols by the runtime.
+- Both namespaces can be extended with new symbols by `import` blocks.
+- A hypertag definition block (`%...`) adds the name of a new tag to the tags namespace
+  in the outer scope, while adding symbols of formal attributes to the variables
+  namespace in the inner scope.
+- Assignments (`$...`) and `for` blocks add symbols to the variables namespace.
+
+### Name scoping
+
+The two main namespaces (tags namespace, variables namespace) are _not_ flat, 
+rather they are arranged in a hierarchy that follows the structure 
+of the document (_hierarchical name scoping_). Every tagged block, 
+as well as a hypertag definition block, creates a new branch in the namespace:
+new symbols are only added to this branch; they are visible to sibling blocks 
+at the same depth and to their sub-blocks, but are _not_ accessible from the outer scope.
+For example:
+
+    p
+        $x = 1
+        -- "x" can be accessed inside the paragraph
+        | $x
+    -- "x" cannot be accessed outside the paragraph
+
+Obviously, symbols defined at a higher level can be overwritten at a lower level
+down the document tree:
+
+    $ x = 1
+    p:
+        $ x = 2
+        | x inside the paragraph equals $x
+    | x outside the paragraph equals $x
+
+outputs:
+
+    <p>
+        x inside the paragraph equals 2
+    </p>
+    x outside the paragraph equals 1
+
+Note that unlike tagged and definition blocks, control blocks do _not_ create new branches
+in namespaces by themselves. Therefore, it is correct to assign a variable inside 
+an if/try/for/while block and access its value in sibling blocks:
+
+    if True:
+        $x = 1
+    else:
+        $x = 2
+    | x=$x is accessible in a sibling of a control block
+
+outputs:
+
+    x=1 is accessible in a sibling of a control block
+
+
+## Expressions
+
+Text blocks (normal and markup) may contain embedded expressions.
+An embedding may come in two forms, either using the {...} syntax:
+
+    | value of x = {x}
+
+or using the $... syntax:
+
+    | value of x = $x
+
+The former syntax can handle all types of expressions, while the latter 
+can only be used for variables, possibly extended with tail operators:
+
+    | $x.value
+    | $x[index]
+    | $x(arg1, arg2)
+
+Both forms, {...} and $..., allow the use of a trailing qualifier (? or !)
+to test for errors or false results:
+
+    | {x+y}?  -- is converted to empty string if false, or if exception was raised
+    | $x.call()!  -- raises an exception if x.call() is false
+
+
+### Literals
 
 Literal expressions include: integers, real numbers, strings, 
 boolean values (True, False), and None.
 
     | {True} {False} {None} {5} {-5.5} {'text'} {"text"}
 
-#### Strings
+### Strings
 
 - raw strings (_r-strings_)
 - formatted strings (_f-strings_)
 
 
 
-#### Collections
+### Collections
 
 Lists, dicts ...
 
-#### Operators
+### Operators
 
 Hypertag implements majority of standard operators available in Python.
 
-Arithmetic and binary operators:
+**Arithmetic and binary operators:**
 
     ** * / // %
     + - unary minus
     << >>
     & ^ |
 
-Logical operators:
+**Logical operators:**
 
     == != >= <= < > in is "not in" "is not"
     not and or
@@ -477,13 +676,16 @@ with the "else" branch being optional, imputed with "else None" if missing:
     X if TEST else Y
     X if TEST
 
-Tail operators:
+**Tail operators:**
 
     .     member access
     []    indexing
     ()    function call
 
-Slice operator when used inside [...]:
+Access to attributes of Python objects and elements of collections.
+Calls to methods and functions.
+
+**Slice operator** when used inside [...]:
 
     start : stop : step
 
@@ -492,7 +694,7 @@ as well as tail operators: **optional value** ("?") and **obligatory value** ("!
 They are described in next sections.
 
 
-#### Concatenation operator
+### Concatenation operator
 
 If multiple expressions are put one after another separated by 1+ whitespace:
 
@@ -515,7 +717,7 @@ before concatenation.
 The programmer must guarantee that the values of all sub-expressions 
 can be converted to `<str>` through the call: `str(value)`
 
-#### Qualifiers: ? and !
+### Qualifiers: ? and !
 
 ? = _optional value_: fall back to an empty string if an error/None/False/0/... was returned
 
@@ -540,185 +742,6 @@ In any case (X? or X!), if X is true, the value of X is returned unchanged.
 Examples:
 
     {(post.authors ', ')? post.title}  -- prints title only if "authors" field is missing in "post"
-    
-### Namespaces
-
-During translation of a script to a DOM, Hypertag maintains two separate namespaces:
-
-- **tags namespace**
-- **variables namespace**
-
-Only symbols in the tags namespace can be used as tags in tagged blocks.
-Only symbols in the variables namespace can occur in expressions,
-unless the `%` prefix is added to inform that a given symbol should be taken
-from the tags namespace instead (NOT IMPLEMENTED YET).
-
-The same name can be present in both namespaces at the same time and link to different 
-objects _without_ causing a collission. This is an important feature when generating HTML,
-given that HTML defines dozens of tags, whose names are fixed and often very short
-(i, b, p, code, form, head, body, ...), so without separation of namespaces,
-they would often collide with names commonly used by programmers for naming variables.
-
-<!---
-Maintaining separate namespaces is justified by the fact that in 
-typical use cases - like HTML generation - there are dozens of predefined tags
-with short names, all of which must be directly accessible. 
-Many of these tags have very common names (i, b, p, code, form, head, body, ...),
-and without separation of name spaces, name collissions between tags and local variables 
-would be very frequent and lead to confusion. 
---->
-
-For instance, thanks to namescape separation, it is possible to define `$i`
-as a loop variable in a `for` block while refering to `%i` (a tag) inside the block
-at the same time:
-
-    for i in [1,2,3]:
-        i | number $i printed in italics
-
-output:
-
-    <i>number 1 printed in italics</i>
-    <i>number 2 printed in italics</i>
-    <i>number 3 printed in italics</i>
-
-To avoid confusion in documentation and clearly indicate what namespace a given symbol
-belongs to, one can precede its name with `%` or `$`, like in `%i` (denotes a tag)
-or `$i` (denotes a variable).
-
-The ways to add symbols to the namespaces:
-
-- Both namespaces can be initialized with built-in symbols by the runtime.
-- Both namespaces can be extended with new symbols by `import` blocks.
-- A hypertag definition block (`%...`) adds the name of a new tag to the tags namespace
-  in the outer scope, while adding symbols of formal attributes to the variables
-  namespace in the inner scope.
-- Assignments (`$...`) and `for` blocks add symbols to the variables namespace.
-
-### Name scoping
-
-The two main namespaces (tags namespace, variables namespace) are _not_ flat, 
-rather they are arranged in hierarchical structures that follow the structure 
-of the document (_hierarchical name scoping_). Every tagged block, 
-as well as a hypertag definition block, creates a new branch of the namespace:
-new symbols are only added to this branch; they are visible to sibling blocks 
-at the same depth and to their sub-blocks, but are _not_ accessible from the outer scope.
-For example:
-
-    p
-        $x = 1
-        | x is defined inside the paragraph: $x
-    try | can we access $x outside the paragraph?
-    else| NO, we cannot access "x" outside the paragraph
-
-outputs:
-
-Obviously, symbols defined at a higher level can be overwritten deeper in the document tree:
-
-    $ x = 1
-    p:
-        $ x = 2
-        | x inside the paragraph equals $x
-    | x outside the paragraph equals $x
-
-output:
-
-    <p>
-        x inside the paragraph equals 2
-    </p>
-    x outside the paragraph equals 1
-
-Note that control blocks do _not_ create a new branch 
-
-The hierarchical scoping does _not_ apply to control blocks, 
-which modify the top-level namespace, 
-so it is fine to assign a variable inside an if/try/for/while block 
-and the value will be visible in subsequent blocks:
-
-### Special tags
-
-#### Null tag (.)
-
-Normally, a Hypertag script reads top-to-bottom through a vertical sequence of blocks;
-however, it can also exhibit left-to-right arrangement of tags vs. textual contents. 
-In blocks that could have a tag, but don't need one in a particular place,
-you can put a dot "." instead of a tag name to provide valid indentation and still 
-ensure consistent vertical alignment of *tags* on the left and *text* on the right,
-like here:
-
-    div:
-        p
-            i   | this line is in italics and so it requires a tag
-            .   | this line needs no tags, hence the null tag is used as a placeholder 
-            
-The dot represents a _null tag_ that creates a node in the DOM (like any regular tag) 
-but during rendering it passes the body unchanged to the output.
-In other words, a _null tag_ serves as a placeholder that performs no processing 
-of its body, similar to an identity function.
-
-The null tag can also be used as a root node for a group of sub-blocks, 
-to provide visual grouping in the source code and/or allow finer control
-over node filtering and selection if the blocks were to be passed to a hypertag (as _@body_)
-and processed with DOM selectors.
-
-<!---
-Typically, a null tag is used in either of two cases:
-
-1. to vertically align text contents of mixed: tagged and untagged blocks;
-   using a null tag allows all blocks to have the same indentation of text contents,
-   even despite some blocks need more horizontal space for their (regular) tags;
-1. to visually group in the script related blocks; note that sub-indentation of the
-   dotted block will be preserved in the output.
---->
-
-Both use cases are illustrated in the example below:
-
-    h1                | TITLE
-    .
-        a href=$url   | click HERE!
-        .             | to visit our website
-
-
-#### Pass tag
-
-A block consisting of a single keyword `pass` (the _"pass" tag_), no attributes, no body - 
-constitutes a "pass block" that serves as a placeholder that does simply nothing, 
-not even rendering a newline (unlike the null tag). The pass tag corresponds 
-to Python's "pass" keyword. Typically, a pass block is used inside control blocks 
-(for/if/else) to mark an empty branch, which may appeal to aesthetics or be a way to mark 
-unfinished implementation. Example:
-
-    if condition
-        p | render something
-    else
-        pass
-
-The above code is equivalent to:
-
-    if condition
-        p | render something
-
-### Indentation
-
-Normally, _script indentation_ is stored in the DOM nodes and translates to 
-_output indentation_ of the text produced during rendering.
-You can modify this behaviour and remove output indentation in two ways, by using:
-
-- Dedent marker (<): removes output indentation of a single block
-  the marker is used with
-- Dedent tag (builtin): removes output indentation of all nested blocks
-  (but the indentation of the dedent block itself stays untouched)
-
-Often, _dedent marker_ and _dedent tag_ are used together.
-
-Example:
-
-    div
-        < dedent : a
-            p:    / These <p> blocks will be aligned with their parent (<a>) after rendering.
-                b | Deeper-level nested block are dedented, too!
-            p     / And the parent's indentation is removed, as well
-                    (<a> is aligned with top-level <div>), thanks to 
-                    the use of the <i>dedent marker</i>.
     
 
 ## DOM
