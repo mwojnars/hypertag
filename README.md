@@ -2,7 +2,7 @@
 
 Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
-where _indentation_ determines relations between nested elements 
+where _indentation_ determines relationships between nested elements 
 and thus removes the need for explicit closing tags.
 Hypertag provides: advanced control of page rendering with
 native control blocks, high level of modularity with Python-like imports,
@@ -73,8 +73,8 @@ The `script` in the code above will be translated to
   scripts and modules are arranged into packages;
   with these mechanisms in place, building libraries of reusable components is easy and fun.
 - **Applicability** to different target languages: 
-  Hypertag is *not* limited to (X)HTML; by defining new tags,
-  it can be adapted so as to produce (potentially) any other document description language.
+  Hypertag is *not* limited to (X)HTML; through defining new tags,
+  it can be adapted to produce (potentially) any other document description language.
 
 
 ## Quick Start
@@ -95,20 +95,20 @@ A typical Hypertag script consists of nested blocks with tags:
 output:
 
 ```html
-    <ul>
-        <li>
-            This is the first item of a "ul" list.
-            Pipe (|) marks a plain-text block. HTML is auto-escaped: &amp; &lt; &gt;
-        </li>
-        <li>
-            This is the second item.
-            Slash (/) marks a <b>markup block</b> (no HTML escaping).
-            Text blocks may consist of multiple lines, like here.
-        </li>
-    </ul>
-    <p>
-        Indentation of blocks gets preserved in the output.
-    </p>
+  <ul>
+      <li>
+          This is the first item of a "ul" list.
+          Pipe (|) marks a plain-text block. HTML is auto-escaped: &amp; &lt; &gt;
+      </li>
+      <li>
+          This is the second item.
+          Slash (/) marks a <b>markup block</b> (no HTML escaping).
+          Text blocks may consist of multiple lines, like here.
+      </li>
+  </ul>
+  <p>
+      Indentation of blocks gets preserved in the output.
+  </p>
 ```
 
 There are three types of text blocks: _plain-text_ (|), _markup_ (/) and _verbatim_ (!).
@@ -120,10 +120,10 @@ They differ in the way how embedded expressions and HTML special symbols are han
 
 output:
 
-```
-    Plain-text block may contain embedded expressions &amp; its output is HTML-escaped.
-    Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
-    In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
+```html
+  Plain-text block may contain embedded expressions &amp; its output is HTML-escaped.
+  Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
+  In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 ```
 
 All the rules of text layout and processing as described in the next examples 
@@ -148,15 +148,15 @@ with <...> tags directly surrounding the body, without newlines.
 output:
 
 ```html
-    <h1>This is inline text, no surrounding newlines are printed in the output.</h1>
-    <p>This paragraph is "inline" and "multiline" at the same time.
-    It continues on subsequent lines
-    without additional "|" markers.</p>
-    <div>
-    This is another example of how a multiline text-only block can be written.
-    The initial "|" marker in the headline informs that all subsequent lines
-    contain plain text only, no more markers are needed.
-    </div>
+  <h1>This is inline text, no surrounding newlines are printed in the output.</h1>
+  <p>This paragraph is "inline" and "multiline" at the same time.
+  It continues on subsequent lines
+  without additional "|" markers.</p>
+  <div>
+  This is another example of how a multiline text-only block can be written.
+  The initial "|" marker in the headline informs that all subsequent lines
+  contain plain text only, no more markers are needed.
+  </div>
 ```
 
 Inline (but not multiline) text can be combined with other sub-blocks if a colon (:)
@@ -169,10 +169,10 @@ is put before the text marker:
 output:
 
 ```html
-    <div>This inline text can be follow by nested blocks thanks to ":" marker
-      <p>
-        <i>Contents...</i>
-      </p></div>
+  <div>This inline text can be follow by nested blocks thanks to ":" marker
+    <p>
+      <i>Contents...</i>
+    </p></div>
 ```
 
 If no inline contents is present, a colon can optionally be put at the end of 
@@ -199,17 +199,17 @@ Tags may have _attributes_ and can be _chained_ together, like here:
 output:
 
 ```html
-    <a id='anchor04' href="http://hypertag.io" style="color:#00f">
-        Attributes are passed to a tag in a space-separated list, no parentheses.
-    </a>
+  <a id='anchor04' href="http://hypertag.io" style="color:#00f">
+      Attributes are passed to a tag in a space-separated list, no parentheses.
+  </a>
 
-    <h1><b><i>
-        Tags can be chained together using a colon ":".
-    </i></b></h1>
+  <h1><b><i>
+      Tags can be chained together using a colon ":".
+  </i></b></h1>
 
-    <h1 class="big-title"><a href="http://hypertag.io"><b>
-        Each tag in a chain can have its own attributes.
-    </b></a></h1>
+  <h1 class="big-title"><a href="http://hypertag.io"><b>
+      Each tag in a chain can have its own attributes.
+  </b></a></h1>
 ```
 
 Shortcut syntax can be used for the two most common HTML attribute names: 
@@ -220,7 +220,7 @@ Shortcut syntax can be used for the two most common HTML attribute names:
 output:
 
 ```html
-    <p id="main-contents" class="wide-paragraph">text...</p>
+  <p id="main-contents" class="wide-paragraph">text...</p>
 ```
 
 A Hypertag script may define _variables_ to be used subsequently in _expressions_
@@ -238,8 +238,8 @@ some tail operators (. [] ()):
 output:
 
 ```html
-    The name repeated 3 times is: AlaAlaAla
-    The second character of the name is: l
+  The name repeated 3 times is: AlaAlaAla
+  The second character of the name is: l
 ```
 
 Each variable points to a Python object and can be used with all the same 
@@ -292,8 +292,8 @@ are _explicitly_ imported with "from ~ import ..." or "import ...":
 This script can be rendered in Python like this:
 
 ```python3
-    html = HyperHTML().render(script, width = 500, height = 1000)
-    print(html)
+  html = HyperHTML().render(script, width = 500, height = 1000)
+  print(html)
 ```
 and the output is:
 
@@ -321,24 +321,24 @@ What a clean piece of code compared to the always-cluttered HTML? In raw HTML,
 and in many templating languages too, you would have much more typing to do:
 
 ```html
-    <table>
-        <tr>
-            <td>Porsche</td>
-            <td>200,000</td>
-        </tr>
-        <tr>
-            <td>Jaguar</td>
-            <td>150,000</td>
-        </tr>
-        <tr>
-            <td>Maserati</td>
-            <td>300,000</td>
-        </tr>
-        <tr>
-            <td>Cybertruck</td>
-            <td>UNKNOWN</td>
-        </tr>
-    </table>
+  <table>
+      <tr>
+          <td>Porsche</td>
+          <td>200,000</td>
+      </tr>
+      <tr>
+          <td>Jaguar</td>
+          <td>150,000</td>
+      </tr>
+      <tr>
+          <td>Maserati</td>
+          <td>300,000</td>
+      </tr>
+      <tr>
+          <td>Cybertruck</td>
+          <td>UNKNOWN</td>
+      </tr>
+  </table>
 ```
 
 No doubt which version is more readable and maintainable?
