@@ -1961,9 +1961,17 @@ if __name__ == '__main__':
     """
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
+    ctx = {'width': 500, 'height': 1000}
     text = """
-    h1 : b : a href='#' :
-        | Header in bold with an anchor
+    % tableRow name price='UNKNOWN'
+        tr
+            td | $name
+            td .style-price | $price
+    table
+        tableRow 'Porsche'  '200,000'
+        tableRow 'Jaguar'   '150,000'
+        tableRow 'Maserati' '300,000'
+        tableRow 'Cybertruck'
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

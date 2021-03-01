@@ -166,7 +166,7 @@ the header on the same line (_inline body_), occupy subsequent lines
 text contents (_multiline body_).
 --->
 
-The most common type of structural block is a **tagged block**,
+The most common type of structural block is a **tagged block**
 whose header consists of a name of a tag, optionally followed by a space-separated list
 of attributes:
 
