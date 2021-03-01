@@ -29,7 +29,7 @@ block_try        =  try_long / try_short
 try_long         =  'try' generic_control? (nl 'else' generic_control?)*
 try_short        =  '?' ws (block_struct / body_control)?       # short version of "try" block:  ?tag ... or ?|...
 
-block_assign     =  mark_eval ws targets ws op_inplace? '=' ws (embedding / expr_augment) (ws inline_comment)?
+block_assign     =  mark_eval ws targets ws op_inplace? '=' ws (embedding / expr_augment) inline_comment?
 op_inplace       =  ~"//|\%%|<<|>>|[-+*/&|^]"
 
 block_while      =  'while' clause_if
@@ -81,8 +81,8 @@ pass_tag         =  'pass'
 generic_control  =  (ws body_text) / body_control               # like body_control, but additionally allows full-text body
 generic_struct   =  (ws body_text) / body_struct                # like body_struct, but additionally allows full-text body
 
-body_control     =  (ws mark_struct (ws inline_comment)? tail_blocks?) / ((ws inline_comment)? tail_blocks)
-body_struct      =  (ws mark_struct)? (ws (headline / inline_comment))? tail_blocks?       # this rule matches empty string '' (!)
+body_control     =  (ws mark_struct inline_comment? tail_blocks?) / (inline_comment? tail_blocks)
+body_struct      =  (ws mark_struct)? ((ws headline) / inline_comment)? tail_blocks?       # this rule matches empty string '' (!)
 
 body_text        =  block_verbat / block_normal / block_markup / block_embed
 headline         =  head_verbat / head_normal / head_markup
@@ -93,9 +93,9 @@ head_markup      =  mark_markup gap? line_markup?
 
 ###  TEXT BLOCKS, TAIL, LINE
 
-block_embed      =  mark_embed ws expr                          # @... embedding of a DOM fragment; not strictly a text block, but is treated as such to allow inline placement after a tag:  TAG @body ... @ body.child[0]
+block_embed      =  mark_embed ws expr inline_comment?          # @... embedding of a DOM fragment; not strictly a text block, but is treated as such to allow inline placement after a tag:  TAG @body ... @ body.child[0]
 block_comment    =  mark_comment line_verbat? tail_verbat?
-inline_comment   =  mark_comment verbatim?                      # inline (end-line) comment; full-line comments are parsed as block_comment
+inline_comment   =  ws mark_comment verbatim?                   # inline (end-line) comment; full-line comments are parsed as block_comment
 
 block_verbat     =  mark_verbat line_verbat? tail_verbat?
 block_normal     =  mark_normal line_normal? tail_normal?
