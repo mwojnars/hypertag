@@ -16,7 +16,7 @@ and thus removes the need for explicit closing tags.
 Hypertag provides: advanced control of page rendering with
 native control blocks, high level of modularity with Python-like imports,
 unprecedented support for code reuse with native custom tags (_hypertags_),
-and [much more](#why-to-use-hypertag). Authored by Marcin Wojnarski ([LinkedIn](http://www.linkedin.com/in/marcinwojnarski)).
+and [much more](#why-to-use-hypertag). Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
@@ -330,20 +330,19 @@ that can be defined directly in a Hypertag script using _hypertag definition_ bl
             td | $name
             td | $price
 
-This code defines a custom tag, `tableRow`, which wraps up plain-text contents of cells
-with appropriate `tr` & `td` tags for a table listing of products.
-As you can see, a hypertag may accept attributes, which can have default values,
-just like arguments of Python functions.
-This hypertag can be used with named (keyword) or unnamed attributes, 
-similar to a Python function:
+Here, `tableRow` is a custom tag that wraps up plain-text contents of table cells
+with appropriate `tr` & `td` tags to produce a listing of products.
+As you can see, a hypertag may accept attributes and they can have default values,
+just like arguments of Python functions. This hypertag can be used with named (keyword) 
+or unnamed attributes, similar to a Python function:
 
     table
-        tableRow 'Porsche'   '200,000'
-        tableRow 'Jaguar'    '150,000'
-        tableRow 'Maserati'  '300,000'
+        tableRow 'Porsche'  '200,000'
+        tableRow 'Jaguar'   '150,000'
+        tableRow 'Maserati' '300,000'
         tableRow 'Cybertruck'
 
-What a clean piece of code compared to the always-cluttered HTML? In raw HTML, 
+What a clean piece of code it is compared to the always-cluttered HTML? In raw HTML, 
 and in many templating languages too, you would need much more typing:
 
 ```html
@@ -371,7 +370,7 @@ No doubt which version is more readable and maintainable?
 
 Imagine that at some point you decided to add a CSS class to all cells in the price column?
 In HTML, you'd have to manually go through all the cells and modify 
-every single occurrence ([code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
+every single occurrence (HTML's notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
 taking care not to modify `<td>` cells of another column accidentally.
 
 Hypertag provides powerful ways to deduplicate code, so it is enough to modify
@@ -383,23 +382,34 @@ the hypertag definition in one place adding `.style-price`, and voilà:
             td .style-price | $price
 
 This definition can be moved out to a separate "utility" script,
-or stay in the same file where it is being used, for easy maintenance - 
-the programmer can choose whatever location is better for a given case.
-In other templating languages, there are rarely so many choices:
-usually the best you can do is separate out duplicated HTML code as a Python function,
-which introduces code fragmentation and spreads the presentation code over 
+or stay in the same file where it is used for easy maintenance - 
+the programmer can choose whatever location is best in a given case.
+In other templating languages, there are not so many choices:
+typically the best you can do is separate out duplicated HTML code into a Python function,
+introducing code fragmentation along the way and spreading the presentation code over 
 different types of files (views vs. models) and languages (HTML vs. Python) - 
 a very unclean and confusing approach.
 
-Needless to say, hypertags can use _other_ hypertags in their definition.
-Even more, hypertag definitions can be nested, so that one hypertag can define
-another hypertag inside - the latter can be used only locally within the scope 
+Needless to say, hypertags can refer to other hypertags.
+Even more, hypertag definitions can be nested, so that one hypertag is defined 
+inside another - the former can only be used locally within the scope 
 of the outer definition.
 
+<!---
+    % products items=[]
+        % row name price
+            tr        
+                td | $name
+                td | $price
+        table        
+            for item in items:
+                row item.name item.price
+--->
+
 One more important element of hypertag syntax is the _body attribute_.
-Imagine that in our example above, we wanted to add another column containing
+Imagine that in the example above, we wanted to add another column containing
 formatted (rich-text) information about a given car model.
-Passing it as a regular attribute is not very convenient, because we'd have to encode
+Passing it as a regular attribute is not convenient, because we'd have to encode
 somehow the entire HTML structure of the description: paragraphs, styles, images.
 Instead, we can add a _body attribute_ (@) named "info" to the hypertag definition:
 
@@ -410,8 +420,9 @@ Instead, we can add a _body attribute_ (@) named "info" to the hypertag definiti
             td
                @ info           # this could be inlined as well:  td @ info
 
-and apply this hypertag to a non-empty _actual body_ which will be passed 
-in the "info" attribute and will get printed in the right place inside the output table:
+and then apply the hypertag to a non-empty _actual body_ which will be passed 
+as a DOM structure through the "info" attribute and will get printed in the right 
+place inside the output table with all its rich contents and formatting preserved:
 
     table
         tableRow 'Porsche' '200,000'
@@ -424,7 +435,7 @@ in the "info" attribute and will get printed in the right place inside the outpu
             img src="maserati.jpg"
             i | no funny quotes for Maserati 🙄 
         tableRow 'Cybertruck'
-            | People who liked Minecraft will like this one, too.
+            | If you liked Minecraft you will like this one, too.
             / (Honestly, I did it for the memes. <i>Elon Musk</i>)
 
 Output:
@@ -458,20 +469,42 @@ Output:
         <td>Cybertruck</td>
         <td>UNKNOWN</td>
         <td>
-           People who liked Minecraft will like this one, too.
+           If you liked Minecraft you will like this one, too.
            (Honestly, I did it for the memes. <i>Elon Musk</i>)
         </td>
     </tr>
 </table>
 ```
 
+As you can see, Hypertag is much more concise than raw HTML, and with the help of custom
+tags it enables cleaner separation between presentation logic (tags) and textual contents.
+
 <!---
 This is something that differentiates hypertags from plain Python functions.
 Sometimes it is useful to put comments that will be excluded from the output.
 You can do this in Hypertag with either `--` or `#` prefix:
 
-Control blocks ...
 --->
+
+### Control blocks
+
+Last but not least, control blocks of multiple types are available in Hypertag
+to help you manipulate input data directly in the document without going back and forth
+between Python and the template code. These include:
+
+- **if-elif-else**
+- **try-else**
+- **for**
+- **while**
+
+The semantics of "if", "for", "while" blocks is analogous to what it is in Python:
+
+    ......
+
+The "try" block behaves differently than the corresponding Python statement.
+
+    ......
+
 
 ## Cheat Sheet
 

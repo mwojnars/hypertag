@@ -1980,7 +1980,7 @@ if __name__ == '__main__':
             img src="maserati.jpg"
             i | no funny quotes for Maserati 🙄
         tableRow 'Cybertruck'
-            | People who liked Minecraft will like this one, too.
+            | If you liked Minecraft you will like this one, too.
             / (Honestly, I did it for the memes. <i>Elon Musk</i>)
     """
     
