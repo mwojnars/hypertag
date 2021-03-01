@@ -1963,10 +1963,25 @@ if __name__ == '__main__':
     
     ctx = {'width': 500, 'height': 1000}
     text = """
-    $ k = 3
-    $ name = "Ala"
-    | The name repeated $k times is: {name * k}
-    | The third character of the name is: "$name[2]"
+    % tableRow @info name price='UNKNOWN'
+        tr
+            td | $name
+            td | $price
+            td
+               @ info           # this could be inlined as well:  td @ info
+    table
+        tableRow 'Porsche' '200,000'
+            / If you insist on <s>air conditioning</s>,
+            / you can always hit the track and roll down the window at <u>160 mph</u>.
+        tableRow 'Jaguar' '150,000'
+            img src="jaguar.jpg"
+            | Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.
+        tableRow 'Maserati' '300,000'
+            img src="maserati.jpg"
+            i | no funny quotes for Maserati 🙄
+        tableRow 'Cybertruck'
+            | People who liked Minecraft will like this one, too.
+            / (Honestly, I did it for the memes. <i>Elon Musk</i>)
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
