@@ -233,13 +233,13 @@ some tail operators (. [] ()):
     $ k = 3
     $ name = "Ala"
     | The name repeated $k times is: {name * k}
-    | The second character of the name is: $name[1]
+    | The third character of the name is: "$name[2]"
 
 output:
 
 ```html
 The name repeated 3 times is: AlaAlaAla
-The second character of the name is: l
+The third character of the name is: "a"
 ```
 
 Each variable points to a Python object and can be used with all the same 
@@ -282,7 +282,7 @@ HyperHTML supports also a special import path "~" (tilde), which denotes
 the _dynamic context_ of script execution: a dictionary of all variables that have
 been passed to the rendering method (`HyperHTML.render()`) as extra keyword arguments.
 These variables are _only_ accessible in the script after they
-are _explicitly_ imported with "from ~ import ..." or "import ...":
+are _explicitly_ imported with "from ~ import ..." or "import ..." blocks:
 
     from ~ import $width
     import $height
@@ -307,8 +307,8 @@ They can be defined directly in a Hypertag script using _hypertag definition_ bl
             td | $name
             td | $price
 
-This code defines a custom tag, `tableRow`, which takes care of 
-wrapping up the contents with appropriate `tr` & `td` tags for a table listing of products.
+This code defines a custom tag, `tableRow`, which wraps up plain-text contents of cells
+with appropriate `tr` & `td` tags for a table listing of products.
 This hypertag can be used in the following way:
 
     table
@@ -318,7 +318,7 @@ This hypertag can be used in the following way:
         tableRow 'Cybertruck'
 
 What a clean piece of code compared to the always-cluttered HTML? In raw HTML, 
-and in many templating languages too, you would have much more typing to do:
+and in many templating languages too, you would need to do much more typing:
 
 ```html
 <table>

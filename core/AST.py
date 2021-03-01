@@ -1963,15 +1963,10 @@ if __name__ == '__main__':
     
     ctx = {'width': 500, 'height': 1000}
     text = """
-    % tableRow name price='UNKNOWN'
-        tr
-            td | $name
-            td .style-price | $price
-    table
-        tableRow 'Porsche'  '200,000'
-        tableRow 'Jaguar'   '150,000'
-        tableRow 'Maserati' '300,000'
-        tableRow 'Cybertruck'
+    $ k = 3
+    $ name = "Ala"
+    | The name repeated $k times is: {name * k}
+    | The third character of the name is: "$name[2]"
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
