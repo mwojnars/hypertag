@@ -174,18 +174,18 @@ tagged an untagged blocks:
 
     div: | This inline text can be follow by nested blocks thanks to ":" marker
       p
-        i | This line is in italics...
-        . | ...and this one is not. 
-        . | The null tag does nothing, only helps with code alignment.
+        i | This line is in italics ...
+        . | ... but this one is not. 
+        . | The null tag does nothing, only helps with code alignment when a tag is missing.
 
 output:
 
 ```html
 <div>This inline text can be follow by nested blocks thanks to ":" marker
   <p>
-    <i>This line is in italics...</i>
-    ...and this one is not.
-    The null tag does nothing, only helps with code alignment.
+    <i>This line is in italics ...</i>
+    ... but this one is not.
+    The null tag does nothing, only helps with code alignment when a tag is missing.
   </p></div>
 ```
 
@@ -271,8 +271,8 @@ standard operators that are available in Python:
     ()                  - function call
 
 All identifiers (of variables and tags) are case-sensitive.
-Namespaces for tags and variables are separated, so you don't have to worry
-about name collission between your variables and predefined tags: "i", "a" etc.
+There are separate namespaces for tags and variables, so you don't need to worry
+about possible name collissions between local variables and predefined tags: "i", "a" etc.
 
 Variables can also be imported from other Hypertag scripts and Python modules
 using an _import_ block. Objects of any type can be imported in this way, 
