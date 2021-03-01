@@ -79,6 +79,8 @@ The `script` in the code above will be translated to
 
 ## Quick Start
 
+### Blocks
+
 A typical Hypertag script consists of nested blocks with tags:
 
     ul
@@ -130,6 +132,8 @@ All the rules of text layout and processing as described in the next examples
 (inline text, multiline text etc.) hold equally for _all types_ of text blocks.
 Spaces after special characters: |/!:$% - are never obligatory, and in some cases
 (inside expressions) they may be forbidden.
+
+### Tags
 
 In a tagged block, text may start on the same line as the tag (_inline_ contents),
 and it may extend to subsequent lines (_multiline_ contents) if no sub-blocks are present.
@@ -223,6 +227,8 @@ output:
 <p id="main-contents" class="wide-paragraph">text...</p>
 ```
 
+### Expressions
+
 A Hypertag script may define _variables_ to be used subsequently in _expressions_
 inside plain-text and markup blocks, or inside attribute lists.
 A variable is created by an _assignment block_ ($). 
@@ -299,6 +305,9 @@ and the output is:
 
     Dimensions imported from the context: 500 x 1000
 
+
+### Custom tags
+
 One of the key features of Hypertag is the support for custom tags (_hypertags_).
 They can be defined directly in a Hypertag script using _hypertag definition_ blocks (%):
 
@@ -318,7 +327,7 @@ This hypertag can be used in the following way:
         tableRow 'Cybertruck'
 
 What a clean piece of code compared to the always-cluttered HTML? In raw HTML, 
-and in many templating languages too, you would need to do much more typing:
+and in many templating languages too, you would need much more typing:
 
 ```html
 <table>
@@ -348,7 +357,7 @@ In HTML, you'd have to manually go through all the cells and make modifications 
 every single occurrence (HTML enforces [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
 taking care not to modify `<td>` cells of another column accidentally.
 
-In Hypertag, which provides powerful ways to deduplicate presentation code,
+In Hypertag, which provides powerful ways to deduplicate the code,
 it is enough to modify the hypertag definition in one place, and voilà:
 
     % tableRow name price='UNKNOWN'
