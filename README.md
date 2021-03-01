@@ -44,7 +44,7 @@ html = HyperHTML().render(script, blue = '#00f')
 print(html)
 ```
 
-The `script` in the code above will be translated to
+The `script` in the code above is translated to
 (see a [preview](http://htmlpreview.github.io/?https://github.com/mwojnars/hypertag/blob/main/test/sample_usage.html)):
 
 ```html
@@ -145,35 +145,31 @@ Spaces after special characters: |/!:$% - are never obligatory, and in some case
 ### Tags
 
 In a tagged block, text may start on the same line as the tag (_inline_ contents),
-and it may extend to subsequent lines (_multiline_ contents) if no sub-blocks are present.
-Inline text gets rendered to a more consise form in the output HTML:
-with <...> tags directly surrounding the body, without newlines.
+and it may extend to subsequent lines (_multiline_ contents) unless sub-blocks are present.
+Inline text gets rendered to a consise form: with no surrounding newlines 
+between the body and the HTML tags.
 
-    h1 | This is inline text, no surrounding newlines are printed in the output.
-    p  | This paragraph is "inline" and "multiline" at the same time.
-         It continues on subsequent lines 
-         without additional "|" markers.
+    h1 | This is inline text, no surrounding newlines are printed.
+    p  | This paragraph is "inline" and "multiline" at the same time,
+         it continues on subsequent lines without additional "|" markers.
     div |
-      This is another example of how a multiline text-only block can be written.
-      The initial "|" marker in the headline informs that all subsequent lines
-      contain plain text only, no more markers are needed.
+      Another example of how a multiline text-only block can be written
+      using an initial "|" marker in the headline and no other markers thereafter.
 
 output:
 
 ```html
-<h1>This is inline text, no surrounding newlines are printed in the output.</h1>
-<p>This paragraph is "inline" and "multiline" at the same time.
-It continues on subsequent lines
-without additional "|" markers.</p>
+<h1>This is inline text, no surrounding newlines are printed.</h1>
+<p>This paragraph is "inline" and "multiline" at the same time,
+it continues on subsequent lines without additional "|" markers.</p>
 <div>
-This is another example of how a multiline text-only block can be written.
-The initial "|" marker in the headline informs that all subsequent lines
-contain plain text only, no more markers are needed.
+Another example of how a multiline text-only block can be written
+using an initial "|" marker in the headline and no other markers thereafter.
 </div>
 ```
 
 Inline (but not multiline) text can be combined with other sub-blocks if a colon (:)
-is put before the text marker. A special _null_ tag (.) can be used to better align
+is placed before the text marker. A special _null_ tag (.) can be used to better align
 tagged an untagged blocks:
 
     div: | This inline text can be follow by nested blocks thanks to ":" marker
@@ -194,7 +190,9 @@ output:
 ```
 
 If no inline contents is present, a colon can optionally be put at the end of 
-the block's headline. The two forms, with and without a trailing colon, are equivalent,
+the block's headline. The two forms, with and without a trailing colon, are equivalent.
+
+<!---
 and so are the "div" blocks below:
 
     div:
@@ -202,30 +200,26 @@ and so are the "div" blocks below:
     
     div
       p | Some contents...
+--->
 
 Tags may have _attributes_ and can be _chained_ together, like here:
 
     a href="http://hypertag.io" style="color:#00f"
         | Attributes are passed to a tag in a space-separated list, no parentheses.
     
-    h1: b: i  
-        | Tags can be chained together using a colon ":".
-
     h1 class='big-title' : a href='http://hypertag.io' : b
+        | Tags can be chained together using a colon ":".
         | Each tag in a chain can have its own attributes.
 
 output:
 
 ```html
-<a id='anchor04' href="http://hypertag.io" style="color:#00f">
+<a href="http://hypertag.io" style="color:#00f">
     Attributes are passed to a tag in a space-separated list, no parentheses.
 </a>
 
-<h1><b><i>
-    Tags can be chained together using a colon ":".
-</i></b></h1>
-
 <h1 class="big-title"><a href="http://hypertag.io"><b>
+    Tags can be chained together using a colon ":".
     Each tag in a chain can have its own attributes.
 </b></a></h1>
 ```
@@ -370,7 +364,7 @@ No doubt which version is more readable and maintainable?
 
 Imagine that at some point you decided to add a CSS class to all cells in the price column?
 In HTML, you'd have to manually go through all the cells and modify 
-every single occurrence (HTML's notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
+every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
 taking care not to modify `<td>` cells of another column accidentally.
 
 Hypertag provides powerful ways to deduplicate code, so it is enough to modify

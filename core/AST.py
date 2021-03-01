@@ -1963,25 +1963,12 @@ if __name__ == '__main__':
     
     ctx = {'width': 500, 'height': 1000}
     text = """
-    % tableRow @info name price='UNKNOWN'
-        tr
-            td | $name
-            td | $price
-            td
-               @ info           # this could be inlined as well:  td @ info
-    table
-        tableRow 'Porsche' '200,000'
-            / If you insist on <s>air conditioning</s>,
-            / you can always hit the track and roll down the window at <u>160 mph</u>.
-        tableRow 'Jaguar' '150,000'
-            img src="jaguar.jpg"
-            | Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.
-        tableRow 'Maserati' '300,000'
-            img src="maserati.jpg"
-            i | no funny quotes for Maserati 🙄
-        tableRow 'Cybertruck'
-            | If you liked Minecraft you will like this one, too.
-            / (Honestly, I did it for the memes. <i>Elon Musk</i>)
+    a href="http://hypertag.io" style="color:#00f"
+        | Attributes are passed to a tag in a space-separated list, no parentheses.
+    
+    h1 class='big-title' : a href='http://hypertag.io' : b
+        | Tags can be chained together using a colon ":".
+        | Each tag in a chain can have its own attributes.
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
