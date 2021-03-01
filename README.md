@@ -421,8 +421,8 @@ place inside the output table with all its rich contents and formatting preserve
     table
         tableRow 'Porsche' '200,000'
             img src="porsche.jpg"
-            / If you insist on <s>air conditioning</s>,
-            / you can always hit the track and roll down the window at <u>160 mph</u>.
+            / If you insist on <s>air conditioning</s>, 🤔
+            / you can always hit the track and roll down the window at <u>160 mph</u>. 😎 
         tableRow 'Jaguar' '150,000'
             img src="jaguar.jpg"
             b | Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.
@@ -438,8 +438,8 @@ Output:
         <td>200,000</td>
         <td>
            <img src="porsche.jpg" />
-           If you insist on <s>air conditioning</s>,
-           you can always hit the track and roll down the window at <u>160 mph</u>.
+           If you insist on <s>air conditioning</s>, 🤔
+           you can always hit the track and roll down the window at <u>160 mph</u>. 😎
         </td>
     </tr>
     <tr>
