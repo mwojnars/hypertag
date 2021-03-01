@@ -336,8 +336,8 @@ or unnamed attributes, similar to a Python function:
         tableRow 'Maserati' '300,000'
         tableRow 'Cybertruck'
 
-What a clean piece of code it is compared to the always-cluttered HTML? In raw HTML, 
-and in many templating languages too, you would need much more typing:
+What a clean piece of code it is compared to the always-cluttered HTML? 
+In raw HTML, and in many templating languages too, you would need much more typing:
 
 ```html
 <table>
@@ -363,12 +363,12 @@ and in many templating languages too, you would need much more typing:
 No doubt which version is more readable and maintainable?
 
 Imagine that at some point you decided to add a CSS class to all cells in the price column?
-In HTML, you'd have to manually go through all the cells and modify 
+In HTML, you'd have to walk through all the cells and manually modify 
 every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
 taking care not to modify `<td>` cells of another column accidentally.
 
-Hypertag provides powerful ways to deduplicate code, so it is enough to modify
-the hypertag definition in one place adding `.style-price`, and voilà:
+Hypertag provides powerful ways to deduplicate code, so here, it is enough to modify
+the hypertag definition adding `.style-price` in one place, and voilà:
 
     % tableRow name price='UNKNOWN'
         tr        
@@ -376,11 +376,11 @@ the hypertag definition in one place adding `.style-price`, and voilà:
             td .style-price | $price
 
 This definition can be moved out to a separate "utility" script,
-or stay in the same file where it is used for easy maintenance - 
+or stay in the same file where it is used, for easy maintenance - 
 the programmer can choose whatever location is best in a given case.
-In other templating languages, there are not so many choices:
-typically the best you can do is separate out duplicated HTML code into a Python function,
-introducing code fragmentation along the way and spreading the presentation code over 
+In traditional templating languages, there are not so many choices:
+often the best you can do is separate out duplicated HTML code into a Python function,
+introducing code fragmentation along the way and spreading presentation code over 
 different types of files (views vs. models) and languages (HTML vs. Python) - 
 a very unclean and confusing approach.
 
@@ -415,19 +415,17 @@ Instead, we can add a _body attribute_ (@) named "info" to the hypertag definiti
                @ info           # this could be inlined as well:  td @ info
 
 and then apply the hypertag to a non-empty _actual body_ which will be passed 
-as a DOM structure through the "info" attribute and will get printed in the right 
+as a DOM tree via the "info" attribute and will get printed in the right 
 place inside the output table with all its rich contents and formatting preserved:
 
     table
         tableRow 'Porsche' '200,000'
+            img src="porsche.jpg"
             / If you insist on <s>air conditioning</s>,
             / you can always hit the track and roll down the window at <u>160 mph</u>.
         tableRow 'Jaguar' '150,000'
             img src="jaguar.jpg"
-            | Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.
-        tableRow 'Maserati' '300,000'
-            img src="maserati.jpg"
-            i | no funny quotes for Maserati 🙄 
+            b | Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.
         tableRow 'Cybertruck'
             | If you liked Minecraft you will like this one, too.
             / (Honestly, I did it for the memes. <i>Elon Musk</i>)
@@ -439,6 +437,7 @@ Output:
         <td>Porsche</td>
         <td>200,000</td>
         <td>
+           <img src="porsche.jpg" />
            If you insist on <s>air conditioning</s>,
            you can always hit the track and roll down the window at <u>160 mph</u>.
         </td>
@@ -448,15 +447,7 @@ Output:
         <td>150,000</td>
         <td>
            <img src="jaguar.jpg" />
-           Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.
-        </td>
-    </tr>
-    <tr>
-        <td>Maserati</td>
-        <td>300,000</td>
-        <td>
-           <img src="maserati.jpg" />
-           <i>no funny quotes for Maserati 🙄</i>
+           <b>Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.</b>
         </td>
     </tr>
     <tr>
