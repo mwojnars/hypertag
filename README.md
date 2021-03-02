@@ -44,7 +44,7 @@ html = HyperHTML().render(script, blue = '#00f')
 print(html)
 ```
 
-The `script` in the code above is translated to
+The `script` in the code above is rendered to
 (see a [preview](http://htmlpreview.github.io/?https://github.com/mwojnars/hypertag/blob/main/test/sample_usage.html)):
 
 ```html
@@ -65,13 +65,13 @@ The `script` in the code above is translated to
 - **Concise syntax**: inspired by Python, the indentation-based syntax is a lot cleaner, 
   more readable and maintainable than raw HTML; it requires less typing, is less redundant,
   and lets you concentrate on coding rather than chasing unmatched opening-closing tags.
-- **Code reuse** through functions/classes is the corner stone of programming,
+- **Code reuse** by means of functions/classes is the corner stone of programming,
   yet it is missing from HTML; this is fixed now with Hypertag:
   programmers can create reusable components in a form of **custom tags** (_hypertags_), 
   defined either as Python functions (_external tags_) 
   or directly in a document using Hypertag syntax (_native tags_);
   hypertags can be parameterized and may represent complex pieces 
-  of combined: content, style and layout - for reuse across documents.
+  of combined: content, style and layout - for a reuse across documents.
 - **Fine-grained control** over rendering process is possible with
   a range of native _control blocks_ (for, while, if-elif-else, try-else) 
   constituting a core part of Hypertag syntax, unlike in templating languages, 
@@ -144,17 +144,18 @@ Spaces after special characters: |/!:$% - are never obligatory, and in some case
 
 ### Tags
 
-In a tagged block, text may start on the same line as the tag (_inline_ contents),
-and it may extend to subsequent lines (_multiline_ contents) unless sub-blocks are present.
-Inline text gets rendered to a consise form: with no surrounding newlines 
-between the body and the HTML tags.
+In a tagged block, the text may start on the same line (_headline_) as the tag (_inline_ content)
+and may extend to subsequent lines (_multiline_ content) unless sub-blocks are present.
+Any content that starts below the headline is called _outline_ content (short for "out of the line").
+Inline text is rendered to a more consise form than outline text: 
+with no surrounding newlines between the body and the HTML tags.
 
     h1 | This is inline text, no surrounding newlines are printed.
     p  | This paragraph is "inline" and "multiline" at the same time,
          it continues on subsequent lines without additional "|" markers.
     div |
       Another example of how a multiline text-only block can be written
-      using an initial "|" marker in the headline and no other markers thereafter.
+      using an initial "|" marker in the headline and no more markers thereafter.
 
 output:
 
@@ -256,6 +257,9 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
+To put a literal `{`, `}`, or `$` character inside a text block you should use 
+an escape string: `{{`, `}}`, or `$$`.
+
 Each variable points to a Python object and can be used with all the same 
 standard operators that are available in Python:
 
@@ -269,6 +273,23 @@ standard operators that are available in Python:
     .                   - member access
     []                  - indexing
     ()                  - function call
+
+Hypertag allows also for creation of standard Python collections: 
+_lists_, _tuples_, _sets_ and _dictionaries_. When creating sets and dicts,
+keep a space between the braces of a collection and of the surrounding embedding,
+otherwise the `{{` and `}}` sequences may be interpreted as escape strings.
+
+    | this is a list:   { [1,2,3] }
+    | this is a tuple:  { (1,2,3) }
+    | this is a set:    { {1,2,1,2} }
+    | this is a dict:   { {'a': 1, 'b': 2} }
+
+Output:
+
+    this is a list:   [1, 2, 3]
+    this is a tuple:  (1, 2, 3)
+    this is a set:    {1, 2}
+    this is a dict:   {'a': 1, 'b': 2}
 
 All identifiers (of variables and tags) are case-sensitive.
 There are separate namespaces for tags and variables, so you don't need to worry
@@ -464,6 +485,15 @@ Output:
 As you can see, Hypertag is much more concise than raw HTML, and with the help of custom
 tags it enables cleaner separation between presentation logic (tags) and textual contents.
 
+Like variables, custom tags can also be imported from other Hypertag scripts and from 
+Python modules. The syntax is a bit different, though. Because of separation of 
+namespaces (variables vs. tags), every import block must clearly indicate whether
+a symbol to be imported is a variable or a tag. This is done be prepending 
+the imported name with `$` (a variable) or `%` (a tag).
+
+    from my.utils import $variable
+    from my.utils import %tag
+
 <!---
 This is something that differentiates hypertags from plain Python functions.
 Sometimes it is useful to put comments that will be excluded from the output.
@@ -474,21 +504,163 @@ You can do this in Hypertag with either `--` or `#` prefix:
 ### Control blocks
 
 Last but not least, control blocks of multiple types are available in Hypertag
-to help you manipulate input data directly in the document without going back and forth
-between Python and the template code. These include:
+to help you manipulate input data directly inside the document without going back and forth
+between Python and templating code:
 
 - **if-elif-else**
 - **try-else**
 - **for**
 - **while**
 
-The semantics of "if", "for", "while" blocks is analogous to what it is in Python:
+The semantics of "if", "for", "while" blocks is analogous to what it is in Python.
+Both inline and outline body is supported, although the former comes with restrictions:
+the preceeding expression (a condition in "if/while", a collection in "for")
+may need to be transformed to an atom by enclosing it in (...) or {...} 
+to avoid parsing errors. Trailing colons in clause headlines are optional.
 
-    ......
+    $size = 5
+    if size > 10      
+        | large size
+    elif size > 3:
+        | medium size
+    else
+        | small size
 
-The "try" block behaves differently than the corresponding Python statement.
+Output:
 
-    ......
+    medium size
+
+Same as above but with inline body, notice the parentheses around expressions:
+
+    $size = 5
+    if (size > 10)    | large size
+    elif (size > 3)   | medium size
+    else              | small size
+
+Loops:
+
+    for i in [1,2,3]:
+        li | item no. $i
+
+    $s = 'abc'
+    while len(s) > 0               -- Python built-ins ("len") can be used
+        | letter "$s[0]"
+        $s = s[1:]                 -- assignments can occur inside loops
+
+Output:
+
+```html
+<li>item no. 1</li>
+<li>item no. 2</li>
+<li>item no. 3</li>
+
+letter "a"
+letter "b"
+letter "c"
+```
+
+The "try" block differs from the corresponding Python statement.
+It consists of a single "try" clause plus any number (possibly none) of "else" clauses.
+The first clause that does _not_ raise an exception is returned as the output
+of the entire block. All exceptions that inherit from Python's Exception are caught.
+Empty string is rendered if all clauses fail.
+
+Exceptions are caught during translation of the block only, so if there are any 
+syntactical or name resolution errors (e.g., an undefined variable in a clause),
+these errors are still being raised. Also, note that, here, the semantics of "else" 
+is _opposite_ to what it is in Python, where the "else" clause of a "try-else" statement
+only gets executed if _no_ exceptions occured.
+
+Example:
+
+    $cars = {'ford': 60000, 'audi': 80000}
+    try
+        | Price of Opel is $cars['opel']
+    else
+        | Price of Opel is not available
+
+Output:
+
+    Price of Opel is not available
+
+Similar code as above but with inline body:
+
+    $cars = {'ford': 60000, 'audi': 80000}
+    
+    try  | Price of Opel is $cars['opel']
+    else | Price of Opel is not available, but how about Seat: $cars['seat']
+    else | Neither Opel nor Seat is available.
+           Let's stick with a Ford: $cars['ford']
+
+Output:
+
+    Neither Opel nor Seat is available.
+    Let's stick with a Ford: 60000
+
+
+There is a shortcut version "?" of the "try" syntax. It can be used when there are
+no "else" clauses, like here:
+
+    ? | Price of Opel is $cars['opel']
+
+Importantly, the shortcut "?" _can_ be used as a prefix (on the same line) 
+with a tagged block, which is not possible with the basic syntax. 
+The code below renders empty string instead of raising an exception:
+
+    ? b : a href=$cars['ford'].url | the "a" tag fails because cars['ford'] has no "url"
+
+The "try" block is particularly useful when combined with expression
+_qualifiers_: "optional" (`?`) and "obligatory" (`!`), placed at the end
+of (sub)expressions to mark that a given piece of calculation:
+
+- can be ignored (replaced with `''`) if it fails with an exception (`?`),
+- or must be non-empty (not false), otherwise an exception is raised (`!`).
+
+Together, these language constructs provide fine-grained control over data post-processing,
+sanitization and display.
+They can be used to test against availability of particular elements of input data
+(keys in dictionaries, attributes of objects) and to easily create alternative paths 
+of calculation that will handle multiple edge cases at once.
+
+    try | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
+
+In the code above, the price of Opel is not present in the dictionary, but thanks 
+to the "optional" qualifier `?`, a KeyError is caught early and a fallback is used 
+to approximate the price from another entry. The output:
+
+    Price of Opel is 64000.0
+
+The "obligatory" qualifier `!` can be used to check that a variable has a non-default 
+(non-empty) value, and adapt the displayed message accordingly without using
+complicated if-else tests:
+
+    %display name='' price=0
+        try  | Product "$name!" costs {price}!.
+        else | Product "$name!" is available, but the price is not set yet.
+        else | There is a product priced at {price!}.
+        else | Sorry, we're closed.
+
+    display 'Pen' 100
+    display 'Pencil'
+    display price=25
+
+Output:
+
+    Product "Pen" costs 100.
+    Product "Pencil" is available, but the price is not set yet.
+    There is a product priced at 25.
+
+Qualifiers can be used after atomic expressions or embeddings, no space allowed.
+
+
+### Built-ins
+
+(TODO)
+
+- Built-in tags (HTML)
+- Built-in tags (common)
+- Built-in variables & functions
+- Python built-ins
 
 
 ## Cheat Sheet
@@ -547,6 +719,6 @@ The "try" block behaves differently than the corresponding Python statement.
 
 ## Acknowledgements
 
-Hypertag was inspired by indentation-based templating languages, including:
+Hypertag was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).

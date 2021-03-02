@@ -1963,23 +1963,14 @@ if __name__ == '__main__':
     
     ctx = {'width': 500, 'height': 1000}
     text = """
-    % tableRow @info name price='UNKNOWN'
-        tr
-            td | $name
-            td | $price
-            td
-               @ info           # this could be inlined as well:  td @ info
-    table
-        tableRow 'Porsche' '200,000'
-            img src="porsche.jpg"
-            / If you insist on <s>air conditioning</s>,
-            / you can always hit the track and roll down the window at <u>160 mph</u>.
-        tableRow 'Jaguar' '150,000'
-            img src="jaguar.jpg"
-            b | Money may not buy happiness, but I'd rather cry in a Jaguar than on a bus.
-        tableRow 'Cybertruck'
-            | If you liked Minecraft you will like this one, too.
-            / (Honestly, I did it for the memes. <i>Elon Musk</i>)
+    %display name='' price=0
+        try  | Product "$name!" costs {price}!.
+        else | Product "$name!" is available, but the price is not set yet.
+        else | There is a product priced at {price!}.
+
+    display 'Pen' 100
+    display 'Pencil'
+    display price=25
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
