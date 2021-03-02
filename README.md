@@ -599,13 +599,13 @@ Similar code as above, but with inline body:
     else | Neither Opel nor Seat is available.
            Let's stick with a Ford: $cars['ford'].
 
-Output:
+output:
 
     Neither Opel nor Seat is available.
     Let's stick with a Ford: 60000.
 
-There is a shortcut version "?" of the "try" syntax. It can be used when there are
-no "else" clauses, like here:
+There is a shortcut version "?" of the "try" syntax. 
+It can only be used without "else" clauses:
 
     ? | Price of Opel is $cars['opel'].
 
@@ -613,32 +613,32 @@ Importantly, the shortcut "?" _can_ be used as a prefix (on the same line)
 with a tagged block, which is not possible with the basic syntax. 
 The code below renders empty string instead of raising an exception:
 
-    ? b : a href=$cars['ford'].url | the "a" tag fails because cars['ford'] has no "url"
+    ? b : a href=$cars.url | the "a" tag fails because "cars" has no "url"
 
 The "try" block is particularly useful when combined with expression
 _qualifiers_: "optional" (`?`) and "obligatory" (`!`), placed at the end
-of (sub)expressions to mark that a given piece of calculation:
+of (sub)expressions to mark that a given piece of calculation either:
 
-- can be ignored (replaced with `''`) if it fails with an exception (`?`),
-- or must be non-empty (not false), otherwise an exception is raised (`!`).
+- can be ignored (replaced with `''`) if it fails with an exception (`?`); or
+- must be non-empty (not false), otherwise an exception is raised (`!`).
 
 Together, these language constructs provide fine-grained control over data post-processing,
 sanitization and display.
-They can be used to test against availability of particular elements of input data
+They can be used to verify the availability of particular elements of input data
 (keys in dictionaries, attributes of objects) and to easily create alternative paths 
-of calculation that will handle multiple edge cases at once.
+of calculation that will handle multiple edge cases, all at once.
 
     try | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
 
-In the code above, the price of Opel is not present in the dictionary, but thanks 
-to the "optional" qualifier `?`, a KeyError is caught early and a fallback is used 
+In the above code, the price of Opel is not present in the dictionary, but thanks 
+to the "optional" qualifier `?`, a KeyError is caught early, and a fallback is used 
 to approximate the price from another entry. The output:
 
     Price of Opel is 64000.0
 
-The "obligatory" qualifier `!` can be used to check that a variable has a non-default 
-(non-empty) value, and adapt the displayed message accordingly without using
-complicated if-else tests:
+The "obligatory" qualifier `!` can be used to verify that a variable has a non-default 
+(non-empty) value, and adapt the displayed message accordingly, with no need for 
+much more verbose if-else tests:
 
     %display name='' price=0
         try  | Product "$name!" costs {price}!.
@@ -650,13 +650,13 @@ complicated if-else tests:
     display 'Pencil'
     display price=25
 
-Output:
+output:
 
     Product "Pen" costs 100.
     Product "Pencil" is available, but the price is not set yet.
     There is a product priced at 25.
 
-Qualifiers can be used after atomic expressions or embeddings, no space allowed.
+Qualifiers can be used after atomic expressions or embeddings, no space is allowed.
 
 
 ### Built-ins

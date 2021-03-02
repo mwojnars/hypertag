@@ -1964,7 +1964,10 @@ if __name__ == '__main__':
     ctx = {'width': 500, 'height': 1000}
     text = """
     $cars = {'ford': 60000, 'audi': 80000}
-    ? | Price of Opel is $cars['ford'].
+    try
+        | Price of Opel is $cars['opel'].
+    else
+        | Price of Opel is unknown.
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
