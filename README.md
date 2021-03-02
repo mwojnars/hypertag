@@ -208,7 +208,8 @@ and so are the "div" blocks below:
       p | Some contents...
 --->
 
-Tags may have _attributes_ and can be _chained_ together, like the h1:b:a tags below:
+Tags may have _attributes_ and can be _chained_ together with a colon `:`,
+like the h1+b+a tags below:
 
     h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
         | Tags can be chained together using a colon ":".
@@ -305,10 +306,10 @@ including functions and classes:
     | fun(x) is equal $my_function(x)
     $ obj = MyClass(z)
 
-The HyperHTML runtime understands the same _package.module_ syntax of import paths
+The HyperHTML standard runtime understands the same _package.module_ syntax of import paths
 as Python. This syntax can be applied to Python and Hypertag files alike:
 the latter must have the ".hy" extension in order to be recognized.
-The interpretation of import paths is runtime-specific, and so some other (custom)
+The interpretation of import paths is runtime-specific, so some other (custom)
 runtime classes could parse these paths differently, for instance, to enable the import 
 of scripts from a DB instead of files, or from remote locations etc.
 
@@ -323,7 +324,7 @@ have been _explicitly_ imported with "from ~ import ..." or "import ..." blocks:
     
     | Page dimensions imported from the context: $width x $height
 
-This script can be rendered in Python like this:
+This script can be rendered in the following way:
 
 ```python3
 html = HyperHTML().render(script, width = 500, height = 1000)
@@ -356,7 +357,8 @@ similar to Python functions. A hypertag can be used with named (keyword) or unna
         tableRow name='Cybertruck'
 
 What a clean piece of code it is compared to the always-cluttered HTML? 
-In raw HTML, and in many templating languages too, you would need much more typing:
+In raw HTML, and in many templating languages too, you would need much more typing
+to produce the same table:
 
 ```html
 <table>
@@ -385,8 +387,7 @@ Imagine that at some point you decided to add a CSS class to all cells in the pr
 In HTML, you'd have to walk through all the cells and manually modify 
 every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
 taking care not to modify `<td>` cells of another column accidentally.
-
-Hypertag provides powerful ways to deduplicate code, so here, it is enough to modify
+In Hypertag, which provides powerful ways to deduplicate code, it is enough to modify
 the hypertag definition adding `.style-price` in one place, and voilà:
 
     % tableRow name price='UNKNOWN'
@@ -395,7 +396,7 @@ the hypertag definition adding `.style-price` in one place, and voilà:
             td .style-price | $price
 
 This definition can be moved out to a separate "utility" script,
-or stay in the same file where it is used, for easy maintenance - 
+or stay in the same file where it is being used, for easy maintenance - 
 the programmer can choose whatever location is best in a given case.
 In traditional templating languages, there are not so many choices:
 often the best you can do is separate out duplicated HTML code into a Python function,
@@ -404,9 +405,8 @@ different types of files (views vs. models) and languages (HTML vs. Python) -
 a very unclean and confusing approach.
 
 Needless to say, hypertags can refer to other hypertags.
-Even more, hypertag definitions can be nested, so that one hypertag is defined 
-inside another - the former can only be used locally within the scope 
-of the outer definition.
+Even more, hypertag definitions can be nested: a hypertag can be defined inside another one,
+such that it can only be used locally within the scope of the outer definition.
 
 <!---
     % products items=[]
@@ -419,21 +419,21 @@ of the outer definition.
                 row item.name item.price
 --->
 
-One more important element of hypertag syntax is the _body attribute_.
+One more crucial element of the hypertag syntax is the _body attribute_.
 Imagine that in the example above, we wanted to add another column containing
-formatted (rich-text) information about a given car model.
-Passing it as a regular attribute is not convenient, because we'd have to encode
-somehow the entire HTML structure of the description: paragraphs, styles, images.
-Instead, we can add a _body attribute_ (@) named "info" to the hypertag definition:
+formatted (rich-text) information about a car model: funny quotes, pictures etc.
+Passing it as a regular attribute is inconvenient, as we'd have to somehow encode
+the entire HTML structure of the description: paragraphs, styles, images.
+Instead, we can add a _body attribute_ (@) to the hypertag definition:
 
     % tableRow @info name price='UNKNOWN'
         tr
             td | $name
             td | $price
             td
-               @ info           # this could be inlined as well:  td @ info
+               @ info           # this could be inlined instead:  td @ info
 
-and then apply the hypertag to a non-empty _actual body_ which will be passed 
+and then apply this hypertag to a non-empty _actual body_ which will be passed 
 as a DOM tree via the "info" attribute and will get printed in the right 
 place inside the output table with all its rich contents and formatting preserved:
 
@@ -480,13 +480,21 @@ Output:
 </table>
 ```
 
+Note that there can only be one _body_ attribute in a hypertag; it must be the first one
+on the list, if present; it is _not_ obligatory (if missing, the tag is _void_ and its 
+occurrences must have empty body); and it can have arbitrary name: we suggest _@body_ 
+if there is no other meaningful alternative... 
+Yes, any associations with Python's "self" are intended and well justified.
+
+<!---
 As you can see, Hypertag is much more concise than raw HTML, and with the help of custom
 tags it enables cleaner separation between presentation logic (tags) and textual contents.
+--->
 
 Like variables, custom tags can also be imported from other Hypertag scripts and from 
 Python modules. The syntax is a bit different, though. Because of separation of 
 namespaces (variables vs. tags), every import block must clearly indicate whether
-a symbol to be imported is a variable or a tag. This is done be prepending 
+a particular symbol is a variable or a tag. This is done be prepending 
 the imported name with `$` (a variable) or `%` (a tag).
 
     from my.utils import $variable
