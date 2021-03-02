@@ -1963,14 +1963,10 @@ if __name__ == '__main__':
     
     ctx = {'width': 500, 'height': 1000}
     text = """
-    %display name='' price=0
-        try  | Product "$name!" costs {price}!.
-        else | Product "$name!" is available, but the price is not set yet.
-        else | There is a product priced at {price!}.
-
-    display 'Pen' 100
-    display 'Pencil'
-    display price=25
+    h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
+        | Tags can be chained together using a colon ":".
+        | Each tag in a chain can have its own attributes.
+        | Attributes are passed in a space-separated list, no parentheses.
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

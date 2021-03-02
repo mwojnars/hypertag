@@ -12,9 +12,9 @@
 Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
-and thus removes the need for explicit closing tags.
-Hypertag provides: advanced control of page rendering with
-native control blocks, high level of modularity with Python-like imports,
+and hence removes the need for explicit closing tags.
+Hypertag provides advanced control of page rendering with native control blocks, 
+high level of modularity with Python-like imports,
 unprecedented support for code reuse with native custom tags (_hypertags_),
 and [much more](#why-to-use-hypertag). Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
@@ -44,7 +44,7 @@ html = HyperHTML().render(script, blue = '#00f')
 print(html)
 ```
 
-The `script` in the code above is rendered to
+The `script` in the code above is rendered to `html` as shown below
 (see a [preview](http://htmlpreview.github.io/?https://github.com/mwojnars/hypertag/blob/main/test/sample_usage.html)):
 
 ```html
@@ -82,7 +82,7 @@ The `script` in the code above is rendered to
   scripts and modules are arranged into packages;
   with these mechanisms in place, building libraries of reusable components is easy and fun.
 - **Applicability** to different target languages: 
-  Hypertag is *not* limited to (X)HTML; through defining new tags,
+  Hypertag is *not* limited to (X)HTML; by defining new tags,
   it can be adapted to produce (potentially) any other document description language.
 
 
@@ -122,8 +122,8 @@ output:
 </p>
 ```
 
-There are three types of text blocks: _plain-text_ (|), _markup_ (/) and _verbatim_ (!).
-They differ in the way how embedded expressions and HTML special symbols are handled.
+There are three types of _text_ blocks: _plain-text_ (|), _markup_ (/), _verbatim_ (!).
+They differ in the way how embedded expressions and raw HTML are handled.
 
     | Plain-text block may contain {'em'+'bedded'} expressions & its output is HTML-escaped.
     / Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
@@ -140,22 +140,27 @@ In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 All the rules of text layout and processing as described in the next examples 
 (inline text, multiline text etc.) hold equally for _all types_ of text blocks.
 Spaces after special characters: |/!:$% - are never obligatory, and in some cases
-(inside expressions) they may be forbidden.
+(inside expressions) they may be disallowed.
 
 ### Tags
 
 In a tagged block, the text may start on the same line (_headline_) as the tag (_inline_ content)
 and may extend to subsequent lines (_multiline_ content) unless sub-blocks are present.
 Any content that starts below the headline is called _outline_ content (short for "out of the line").
-Inline text is rendered to a more consise form than outline text: 
-with no surrounding newlines between the body and the HTML tags.
+Inline text is rendered to a more compact form than outline text
+(no extra newlines between the body and the HTML tags).
 
     h1 | This is inline text, no surrounding newlines are printed.
     p  | This paragraph is "inline" and "multiline" at the same time,
          it continues on subsequent lines without additional "|" markers.
     div |
+      Another way to write a multiline text-only block: with initial "|" marker
+      in the headline followed by lines of text and no more markers.
+
+<!---
       Another example of how a multiline text-only block can be written
       using an initial "|" marker in the headline and no more markers thereafter.
+--->
 
 output:
 
@@ -164,8 +169,8 @@ output:
 <p>This paragraph is "inline" and "multiline" at the same time,
 it continues on subsequent lines without additional "|" markers.</p>
 <div>
-Another example of how a multiline text-only block can be written
-using an initial "|" marker in the headline and no other markers thereafter.
+Another way to write a multiline text-only block: with initial "|" marker
+in the headline followed by lines of text and no more markers.
 </div>
 ```
 
@@ -176,8 +181,8 @@ tagged an untagged blocks:
     div: | This inline text can be follow by nested blocks thanks to ":" marker
       p
         i | This line is in italics ...
-        . | ... but this one is not. 
-        . | The null tag does nothing, only helps with code alignment when a tag is missing.
+        . | ... and this one is not. Both are vertically aligned in the script.
+        . | The null tag does nothing, but helps with code alignment when a tag is missing.
 
 output:
 
@@ -185,12 +190,12 @@ output:
 <div>This inline text can be follow by nested blocks thanks to ":" marker
   <p>
     <i>This line is in italics ...</i>
-    ... but this one is not.
-    The null tag does nothing, only helps with code alignment when a tag is missing.
+    ... and this one is not. Both are vertically aligned in the script.
+    The null tag does nothing, but helps with code alignment when a tag is missing.
   </p></div>
 ```
 
-If no inline contents is present, a colon can optionally be put at the end of 
+If no inline content is present, a colon can optionally be put at the end of 
 the block's headline. The two forms, with and without a trailing colon, are equivalent.
 
 <!---
@@ -203,37 +208,32 @@ and so are the "div" blocks below:
       p | Some contents...
 --->
 
-Tags may have _attributes_ and can be _chained_ together, like here:
+Tags may have _attributes_ and can be _chained_ together, like the h1:b:a tags below:
 
-    a href="http://hypertag.io" style="color:#00f"
-        | Attributes are passed to a tag in a space-separated list, no parentheses.
-    
-    h1 class='big-title' : a href='http://hypertag.io' : b
+    h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
         | Tags can be chained together using a colon ":".
         | Each tag in a chain can have its own attributes.
+        | Attributes are passed in a space-separated list, no parentheses.
 
 output:
 
 ```html
-<a href="http://hypertag.io" style="color:#00f">
-    Attributes are passed to a tag in a space-separated list, no parentheses.
-</a>
-
-<h1 class="big-title"><a href="http://hypertag.io"><b>
+<h1 class="big-title"><b><a href="http://hypertag.io" style="color:DarkBlue">
     Tags can be chained together using a colon ":".
     Each tag in a chain can have its own attributes.
-</b></a></h1>
+    Attributes are passed in a space-separated list, no parentheses.
+</a></b></h1>
 ```
 
 Shortcut syntax can be used for the two most common HTML attribute names: 
 .CLASS is equivalent to class=CLASS, and #ID means id=ID, for example:
 
-    p #main-contents .wide-paragraph | text...
+    p #main-content .wide-paragraph | text...
     
 output:
 
 ```html
-<p id="main-contents" class="wide-paragraph">text...</p>
+<p id="main-content" class="wide-paragraph">text...</p>
 ```
 
 ### Expressions
@@ -257,11 +257,11 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
-To put a literal `{`, `}`, or `$` character inside a text block you should use 
+To put a literal `{`, `}`, or `$` inside a text block you should use 
 an escape string: `{{`, `}}`, or `$$`.
 
 Each variable points to a Python object and can be used with all the same 
-standard operators that are available in Python:
+standard operators as in Python:
 
     ** * / // %
     + - unary minus
@@ -276,8 +276,8 @@ standard operators that are available in Python:
 
 Hypertag allows also for creation of standard Python collections: 
 _lists_, _tuples_, _sets_ and _dictionaries_. When creating sets and dicts,
-keep a space between the braces of a collection and of the surrounding embedding,
-otherwise the `{{` and `}}` sequences may be interpreted as escape strings.
+keep a space between the braces of a collection and the surrounding embedding,
+otherwise the double braces `{{` and `}}` may be interpreted as escape strings.
 
     | this is a list:   { [1,2,3] }
     | this is a tuple:  { (1,2,3) }
@@ -302,27 +302,26 @@ including functions and classes:
     from python_module import $x, $y as z, $fun as my_function, $T as MyClass
     from hypertag_script import $name
 
-    | fun() of x is equal: $my_function(x)
+    | fun(x) is equal $my_function(x)
     $ obj = MyClass(z)
 
 The HyperHTML runtime understands the same _package.module_ syntax of import paths
-as Python. This syntax can be applied to Python and Hypertag files alike.
-Hypertag scripts must have the ".hy" extension in order to be recognized.
-Note, however, that interpretation of import paths is runtime-specific and other
-Runtime subclasses can parse these paths differently.
-For example, a custom runtime could provide its own path syntax to enable 
-the import of scripts from a DB instead of files, or from remote locations etc.
+as Python. This syntax can be applied to Python and Hypertag files alike:
+the latter must have the ".hy" extension in order to be recognized.
+The interpretation of import paths is runtime-specific, and so some other (custom)
+runtime classes could parse these paths differently, for instance, to enable the import 
+of scripts from a DB instead of files, or from remote locations etc.
 
 HyperHTML supports also a special import path "~" (tilde), which denotes 
 the _dynamic context_ of script execution: a dictionary of all variables that have
 been passed to the rendering method (`HyperHTML.render()`) as extra keyword arguments.
-These variables are _only_ accessible in the script after they
-are _explicitly_ imported with "from ~ import ..." or "import ..." blocks:
+These variables can only be accessed in the script after they
+have been _explicitly_ imported with "from ~ import ..." or "import ..." blocks:
 
     from ~ import $width
     import $height
     
-    | Dimensions imported from the context: $width x $height
+    | Page dimensions imported from the context: $width x $height
 
 This script can be rendered in Python like this:
 
@@ -332,7 +331,7 @@ print(html)
 ```
 and the output is:
 
-    Dimensions imported from the context: 500 x 1000
+    Page dimensions imported from the context: 500 x 1000
 
 
 ### Custom tags
@@ -347,15 +346,14 @@ that can be defined directly in a Hypertag script using _hypertag definition_ bl
 
 Here, `tableRow` is a custom tag that wraps up plain-text contents of table cells
 with appropriate `tr` & `td` tags to produce a listing of products.
-As you can see, a hypertag may accept attributes and they can have default values,
-just like arguments of Python functions. This hypertag can be used with named (keyword) 
-or unnamed attributes, similar to a Python function:
+As you can see, a hypertag may accept attributes, and they can have default values,
+similar to Python functions. A hypertag can be used with named (keyword) or unnamed attributes:
 
     table
         tableRow 'Porsche'  '200,000'
         tableRow 'Jaguar'   '150,000'
         tableRow 'Maserati' '300,000'
-        tableRow 'Cybertruck'
+        tableRow name='Cybertruck'
 
 What a clean piece of code it is compared to the always-cluttered HTML? 
 In raw HTML, and in many templating languages too, you would need much more typing:
