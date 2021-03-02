@@ -433,8 +433,8 @@ Instead, we can add a _body attribute_ (@) to the hypertag definition:
             td
                @ info           # this could be inlined instead:  td @ info
 
-and then apply this hypertag to a non-empty _actual body_ which will be passed 
-as a DOM tree via the "info" attribute and will get printed in the right 
+and then apply this hypertag to a non-empty _actual body_ which will be passed
+in a structural form via the "info" attribute and will get printed in the right 
 place inside the output table with all its rich contents and formatting preserved:
 
     table
@@ -481,7 +481,7 @@ Output:
 ```
 
 Note that there can only be one _body_ attribute in a hypertag; it must be the first one
-on the list, if present; it is _not_ obligatory (if missing, the tag is _void_ and its 
+on the list; it can be missing (then the tag is _void_ and its 
 occurrences must have empty body); and it can have arbitrary name: we suggest _@body_ 
 if there is no other meaningful alternative... 
 Yes, any associations with Python's "self" are intended and well justified.
@@ -510,8 +510,8 @@ You can do this in Hypertag with either `--` or `#` prefix:
 ### Control blocks
 
 Last but not least, control blocks of multiple types are available in Hypertag
-to help you manipulate input data directly inside the document without going back and forth
-between Python and templating code:
+to help you manipulate the input data directly inside the document 
+without going back and forth between Python and templating code. The blocks available:
 
 - **if-elif-else**
 - **try-else**
@@ -524,6 +524,8 @@ the preceeding expression (a condition in "if/while", a collection in "for")
 may need to be transformed to an atom by enclosing it in (...) or {...} 
 to avoid parsing errors. Trailing colons in clause headlines are optional.
 
+An example with outline body:
+
     $size = 5
     if size > 10      
         | large size
@@ -532,18 +534,18 @@ to avoid parsing errors. Trailing colons in clause headlines are optional.
     else
         | small size
 
-Output:
+output:
 
     medium size
 
-Same as above but with inline body, notice the parentheses around expressions:
+The same code as above, but with inline body, notice the parentheses around expressions:
 
     $size = 5
     if (size > 10)    | large size
     elif (size > 3)   | medium size
     else              | small size
 
-Loops:
+Examples of loops:
 
     for i in [1,2,3]:
         li | item no. $i
@@ -553,7 +555,7 @@ Loops:
         | letter "$s[0]"
         $s = s[1:]                 -- assignments can occur inside loops
 
-Output:
+output:
 
 ```html
 <li>item no. 1</li>
@@ -567,47 +569,45 @@ letter "c"
 
 The "try" block differs from the corresponding Python statement.
 It consists of a single "try" clause plus any number (possibly none) of "else" clauses.
-The first clause that does _not_ raise an exception is returned as the output
-of the entire block. All exceptions that inherit from Python's Exception are caught.
+The first clause that does _not_ raise an exception is returned.
+All exceptions that inherit from Python's Exception are caught.
 Empty string is rendered if all clauses fail.
 
-Exceptions are caught during translation of the block only, so if there are any 
-syntactical or name resolution errors (e.g., an undefined variable in a clause),
-these errors are still being raised. Also, note that, here, the semantics of "else" 
-is _opposite_ to what it is in Python, where the "else" clause of a "try-else" statement
-only gets executed if _no_ exceptions occured.
+Exceptions are checked only after semantic analysis, so if there are any syntactical 
+or name resolution errors (e.g., an undefined variable in a clause), they are still being raised.
+Also, note that the semantics of "else" is _opposite_ to what it is in Python,
+where the "else" clause of a "try-else" statement only gets executed if _no_ exceptions occured.
 
 Example:
 
     $cars = {'ford': 60000, 'audi': 80000}
     try
-        | Price of Opel is $cars['opel']
+        | Price of Opel is $cars['opel'].
     else
-        | Price of Opel is not available
+        | Price of Opel is unknown.
 
-Output:
+output:
 
-    Price of Opel is not available
+    Price of Opel is unknown.
 
-Similar code as above but with inline body:
+Similar code as above, but with inline body:
 
     $cars = {'ford': 60000, 'audi': 80000}
     
-    try  | Price of Opel is $cars['opel']
-    else | Price of Opel is not available, but how about Seat: $cars['seat']
+    try  | Price of Opel is $cars['opel'].
+    else | Price of Opel is not available, but how about Seat: $cars['seat'].
     else | Neither Opel nor Seat is available.
-           Let's stick with a Ford: $cars['ford']
+           Let's stick with a Ford: $cars['ford'].
 
 Output:
 
     Neither Opel nor Seat is available.
-    Let's stick with a Ford: 60000
-
+    Let's stick with a Ford: 60000.
 
 There is a shortcut version "?" of the "try" syntax. It can be used when there are
 no "else" clauses, like here:
 
-    ? | Price of Opel is $cars['opel']
+    ? | Price of Opel is $cars['opel'].
 
 Importantly, the shortcut "?" _can_ be used as a prefix (on the same line) 
 with a tagged block, which is not possible with the basic syntax. 

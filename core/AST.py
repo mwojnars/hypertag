@@ -1963,10 +1963,8 @@ if __name__ == '__main__':
     
     ctx = {'width': 500, 'height': 1000}
     text = """
-    h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
-        | Tags can be chained together using a colon ":".
-        | Each tag in a chain can have its own attributes.
-        | Attributes are passed in a space-separated list, no parentheses.
+    $cars = {'ford': 60000, 'audi': 80000}
+    ? | Price of Opel is $cars['ford'].
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
