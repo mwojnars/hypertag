@@ -257,13 +257,7 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
-To put a literal `{`, `}`, or `$` inside a text block you should use 
-an escape string: `{{`, `}}`, or `$$`. Assignment blocks can handle `augmented assignments`,
-where multiple variables are assigned to at once:
-
-    $ a, (b, c) = 1, (2, 3)
-
-Each variable points to a Python object and can be used with all the same 
+Each Hypertag variable points to a Python object and can be used with all the same 
 standard operators as in Python:
 
     ** * / // %
@@ -295,6 +289,12 @@ Output:
     this is a tuple:  (1, 2, 3)
     this is a set:    {1, 2}
     this is a dict:   {'a': 1, 'b': 2}
+
+To put a literal `{`, `}`, or `$` inside a text block you should use 
+an escape string: `{{`, `}}`, or `$$`. Assignment blocks can handle _augmented assignments_,
+where multiple variables are assigned to, all at once:
+
+    $ a, (b, c) = 1, (2, 3)
 
 All identifiers (of variables and tags) are case-sensitive.
 There are separate namespaces for tags and variables, so you don't need to worry
