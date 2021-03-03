@@ -178,20 +178,20 @@ Inline (but not multiline) text can be combined with other sub-blocks if a colon
 is placed before the text marker. A special _null_ tag (.) can be used to better align
 tagged an untagged blocks:
 
-    div: | This inline text can be follow by nested blocks thanks to ":" marker
+    div: | This inline text can be follow by nested blocks thanks to the ":" marker
       p
         i | This line is in italics ...
         . | ... and this one is not. Both are vertically aligned in the script.
-        . | The null tag does nothing, but helps with code alignment when a tag is missing.
+        . | The null tag helps with code alignment when a tag is missing.
 
 output:
 
 ```html
-<div>This inline text can be follow by nested blocks thanks to ":" marker
+<div>This inline text can be follow by nested blocks thanks to the ":" marker
   <p>
     <i>This line is in italics ...</i>
     ... and this one is not. Both are vertically aligned in the script.
-    The null tag does nothing, but helps with code alignment when a tag is missing.
+    The null tag helps with code alignment when a tag is missing.
   </p></div>
 ```
 
@@ -243,8 +243,7 @@ A Hypertag script may define _variables_ to be used subsequently in _expressions
 inside plain-text and markup blocks, or inside attribute lists.
 A variable is created by an _assignment block_ ($). 
 Expressions are embedded in text blocks using {...}  or $... syntax - the latter can only
-be used for expressions that consist of a variable with (optionally) 
-some tail operators (. [] ()):
+be used for expressions that consist of a variable with (optionally) some tail operators (. [] ()):
 
     $ k = 3
     $ name = "Ala"
@@ -259,7 +258,10 @@ The third character of the name is: "a"
 ```
 
 To put a literal `{`, `}`, or `$` inside a text block you should use 
-an escape string: `{{`, `}}`, or `$$`.
+an escape string: `{{`, `}}`, or `$$`. Assignment blocks can handle `augmented assignments`,
+where multiple variables are assigned to at once:
+
+    $ a, (b, c) = 1, (2, 3)
 
 Each variable points to a Python object and can be used with all the same 
 standard operators as in Python:
@@ -271,14 +273,16 @@ standard operators as in Python:
     == != >= <= < > in is "not in" "is not"
     not and or
     X if TEST else Y    - the "else" clause is optional and defaults to "else None"
+    A:B:C               - array slice operator
     .                   - member access
     []                  - indexing
     ()                  - function call
 
-Hypertag allows also for creation of standard Python collections: 
-_lists_, _tuples_, _sets_ and _dictionaries_. When creating sets and dicts,
-keep a space between the braces of a collection and the surrounding embedding,
-otherwise the double braces `{{` and `}}` may be interpreted as escape strings.
+Hypertag supports also literal `None`, `False`, `True` and allows for creation
+of standard Python collections: _lists_, _tuples_, _sets_, _dictionaries_.
+When creating sets and dicts, keep a space between the braces of a collection and the
+surrounding embedding, otherwise the double braces `{{` and `}}` may be interpreted
+as escape strings.
 
     | this is a list:   { [1,2,3] }
     | this is a tuple:  { (1,2,3) }
@@ -294,7 +298,7 @@ Output:
 
 All identifiers (of variables and tags) are case-sensitive.
 There are separate namespaces for tags and variables, so you don't need to worry
-about possible name collissions between local variables and predefined tags: "i", "a" etc.
+about possible name collissions between local variables and predefined tags: "a", "b", "i" etc.
 
 Variables can also be imported from other Hypertag scripts and Python modules
 using an _import_ block. Objects of any type can be imported in this way, 
@@ -605,7 +609,7 @@ output:
     Let's stick with a Ford: 60000.
 
 There is a shortcut version "?" of the "try" syntax. 
-It can only be used without "else" clauses:
+It can only be used without "else" clauses, to suppress exceptions:
 
     ? | Price of Opel is $cars['opel'].
 
@@ -620,13 +624,13 @@ _qualifiers_: "optional" (`?`) and "obligatory" (`!`), placed at the end
 of (sub)expressions to mark that a given piece of calculation either:
 
 - can be ignored (replaced with `''`) if it fails with an exception (`?`); or
-- must be non-empty (not false), otherwise an exception is raised (`!`).
+- must be non-empty (not false), otherwise an exception will be raised (`!`).
 
-Together, these language constructs provide fine-grained control over data post-processing,
+Together, these language constructs enable fine-grained control over data post-processing,
 sanitization and display.
 They can be used to verify the availability of particular elements of input data
 (keys in dictionaries, attributes of objects) and to easily create alternative paths 
-of calculation that will handle multiple edge cases, all at once.
+of calculation that will handle multiple edge cases at once.
 
     try | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
 
@@ -638,7 +642,7 @@ to approximate the price from another entry. The output:
 
 The "obligatory" qualifier `!` can be used to verify that a variable has a non-default 
 (non-empty) value, and adapt the displayed message accordingly, with no need for 
-much more verbose if-else tests:
+a more verbose if-else test:
 
     %display name='' price=0
         try  | Product "$name!" costs {price}!.
@@ -656,17 +660,80 @@ output:
     Product "Pencil" is available, but the price is not set yet.
     There is a product priced at 25.
 
-Qualifiers can be used after atomic expressions or embeddings, no space is allowed.
+Qualifiers can be used in loop headlines, as well, to test for non-emptiness
+of collections to be iterated over:
+
+    try
+        for p in products!
+            | $p.name costs $p.price
+    else
+        | No products currently available.
+
+When passed `$products=[]`, the above code outputs:
+
+    No products currently available.
+
+Qualifiers can be used after all atomic expressions and embeddings, no space is allowed.
 
 
 ### Built-ins
 
-(TODO)
+When using HyperHTML runtime, all Python built-in symbols (`builtins.*`) are automatically
+imported as variables at the beginning of script rendering, so all commonly used Python
+types and functions: `list`, `set`, `dict`, `int`, `min`, `max`, `enumerate`, `sorted` etc., 
+are available to a script.
 
-- Built-in tags (HTML)
-- Built-in tags (common)
-- Built-in variables & functions
-- Python built-ins
+    | $len('cat'), $list('cat')
+    | $int('123'), $min(4,5,6)
+    for i, c in enumerate(sorted('cat')):
+        | $i, $c  
+
+output:
+
+    3, ['c', 'a', 't']
+    123, 4
+    0, a
+    1, c
+    2, t
+
+Additionally, HyperHTML defines a number of its own built-in tags and variables:
+
+1. HTML-specific tags.
+2. General-purpose tags.
+3. Functions.
+4. Filters
+
+(TODO...)
+
+
+### Extras
+
+There is a number of additional elements of Hypertag that have not been mentioned so far.
+These include:
+
+- The _dedent_ marker (`<`): when put at the beginning of a block's headline,
+  it decreases the output indentation of this block by one level (makes the indentation
+  equal to the parent's). The dedent marker can be used with all types of blocks, 
+  including tagged and control blocks.
+- The `pass` keyword can be used in place of a block, as an "empty block" placeholder.
+  This quasi-block generates no output, similarly to the `pass` keyword in Python. 
+  The use of `pass` is never enforced by the syntax, given that empty body 
+  is always a valid alternative and can be used inside all kinds of parent blocks.
+  In some cases, though, the use of explicit `pass` may be preferred due to aesthetic
+  considerations.
+- In expressions, you can create literal strings with the `'...'` and `"..."` syntax.
+  This syntax actually creates _formatted strings_ (equivalent to Python's f-strings),
+  which may contain _embedded expressions_ of both the `$...` and `{...}` form.
+  If you want to create raw strings instead, so that `$` and `{}` are treated as regular
+  characters, the `r'...'` and `r"..."` syntax can be used.
+- Hypertag provides a special _concatenation operator_ not present in Python.
+  If multiple expressions are put one after another separated by 1+ whitespace
+  (a space is the operator): EXPR1 EXPR2 EXPR3 ...
+  their values are automatically converted to strings with `str(EXPR)` and concatenated.
+  This is an extension of Python syntax for concatenating literal strings, like in:
+  `'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`
+  In Python, this works for literals only. In Hypertag, all types of expressions
+  can be handled in this way.
 
 
 ## Cheat Sheet
@@ -715,7 +782,7 @@ Qualifiers can be used after atomic expressions or embeddings, no space is allow
 | @body <br> @body[2:] | _embedding block_ (@): inserts DOM nodes represented by an expression (typically a body attribute inside hypertag definition) |
 | div .CLASS        | (shortcut) equiv. to *class="CLASS"* on attributes list of a tag |
 | div #ID           | (shortcut) equiv. to *id="ID"* on attributes list of a tag |
-| pass              | the special _pass tag_ generates no output, does *not* accept attributes nor a body |
+| pass              | "empty block" placeholder; generates no output, does *not* accept attributes nor a body |
 | . <br> . &#124; _text_ | the special _null tag_ (.) outputs its body without changes; helps improve vertical alignment of text in adjecent blocks; does *not* accept attributes |
 <!---
 | TAG x=1.0 y={v+1} | named (keyword) attributes of a tag occurrence; space-separated, no parentheses |

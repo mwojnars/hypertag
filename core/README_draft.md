@@ -27,7 +27,7 @@ and provides high level of **modularity** through custom tags and import blocks.
 If you try Hypertag, you will never miss old-school HTML templating.
 --->
 
-## Quick Start
+## Cheet Sheet
 
 ### Control blocks
 
@@ -41,7 +41,7 @@ If you try Hypertag, you will never miss old-school HTML templating.
 | Symbol    | Syntax     | Description     |
 | :-------: | --------------- | --------------- | 
 | ?         |       | *optional block*; like a "try" without an "else" branch; can be applied to a tagged block (on the same line) |
-| for       | for-in |
+| for       | for VAR in SEQ |
 | while     | while EXPR |
 
 Trailing colon (:) in a headline of a control block (for/while) or a clause (if/elif/else/try)
@@ -746,6 +746,10 @@ Examples:
     {(post.authors ', ')? post.title}  -- prints title only if "authors" field is missing in "post"
     
 
+### Filters
+
+TODO
+
 ## DOM
 
 DOM = Document Object Model
@@ -832,6 +836,10 @@ to a script. They can also be imported manually from the `hypertag.html` module,
 **Runtime** ... **dynamic context** of rendering consisting of any python objects 
 can be provided ...
 
+
+## Built-ins
+
+......
 
 ## SDK ??
 
