@@ -257,7 +257,7 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
-Each Hypertag variable points to a Python object and can be used with all the same 
+Each variable points to a Python object and can be used with all the same 
 standard operators as in Python:
 
     ** * / // %
@@ -272,8 +272,9 @@ standard operators as in Python:
     []                  - indexing
     ()                  - function call
 
-Hypertag supports also literal `None`, `False`, `True` and allows for creation
-of standard Python collections: _lists_, _tuples_, _sets_, _dictionaries_.
+To put a literal `{`, `}`, or `$` inside a text block you should use an escape string:
+`{{`, `}}`, or `$$`. Hypertag supports also literal `None`, `False`, `True` and allows for 
+creation of standard Python collections: _lists_, _tuples_, _sets_, _dictionaries_.
 When creating sets and dicts, keep a space between the braces of a collection and the
 surrounding embedding, otherwise the double braces `{{` and `}}` may be interpreted
 as escape strings.
@@ -290,9 +291,8 @@ Output:
     this is a set:    {1, 2}
     this is a dict:   {'a': 1, 'b': 2}
 
-To put a literal `{`, `}`, or `$` inside a text block you should use 
-an escape string: `{{`, `}}`, or `$$`. Assignment blocks can handle _augmented assignments_,
-where multiple variables are assigned to, all at once:
+Assignment blocks can handle _augmented assignments_, where multiple variables 
+are assigned to, all at once:
 
     $ a, (b, c) = 1, (2, 3)
 
@@ -717,22 +717,20 @@ These include:
   including tagged and control blocks.
 - The `pass` keyword can be used in place of a block, as an "empty block" placeholder.
   This quasi-block generates no output, similarly to the `pass` keyword in Python. 
-  The use of `pass` is never enforced by the syntax, given that empty body 
-  is always a valid alternative and can be used inside all kinds of parent blocks.
-  In some cases, though, the use of explicit `pass` may be preferred due to aesthetic
-  considerations.
+  The use of `pass` is never enforced by the syntax: empty body is always a valid alternative
+  and can be used inside parent blocks of all types. In some cases, though, the use of 
+  explicit `pass` may be preferred due to aesthetic considerations.
 - In expressions, you can create literal strings with the `'...'` and `"..."` syntax.
   This syntax actually creates _formatted strings_ (equivalent to Python's f-strings),
   which may contain _embedded expressions_ of both the `$...` and `{...}` form.
-  If you want to create raw strings instead, so that `$` and `{}` are treated as regular
+  If you want to create raw strings instead, such that `$` and `{}` are treated as regular
   characters, the `r'...'` and `r"..."` syntax can be used.
-- Hypertag provides a special _concatenation operator_ not present in Python.
-  If multiple expressions are put one after another separated by 1+ whitespace
-  (a space is the operator): EXPR1 EXPR2 EXPR3 ...
-  their values are automatically converted to strings with `str(EXPR)` and concatenated.
+- Hypertag provides a special _concatenation operator_. If multiple expressions are put 
+  one after another separated by 1+ whitespace (a space is the operator): EXPR1 EXPR2 EXPR3 ...
+  their values get automatically converted to strings (`str(EXPR)`) and concatenated.
   This is an extension of Python syntax for concatenating literal strings, like in:
   `'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`
-  In Python, this works for literals only. In Hypertag, all types of expressions
+  In Python, this works for literals only, while in Hypertag, all types of expressions
   can be handled in this way.
 
 
