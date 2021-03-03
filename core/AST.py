@@ -1142,6 +1142,10 @@ class NODES(object):
     class xexpr_factor(expression_root): pass
     class xexpr_strict(expression_root): pass
     class xexpr_augment(expression_root): pass
+        # """Augmented expression: may consist of multiple sub-expressions that form a tuple."""
+        # def evaluate(self, state):
+        #     return tuple(child.evaluate(state) for child in self.children)
+        
     
     class variable(expression):
         """Common code for both a variable's definition (xvar_def) and a variable's occurrence (xvar_use)."""
@@ -1480,6 +1484,9 @@ class NODES(object):
         def evaluate(self, state):
             return tuple(child.evaluate(state) for child in self.children)
 
+    class xexpr_tuple(xtuple):
+        pass
+        
     class xset(expression):
         def evaluate(self, state):
             return set(child.evaluate(state) for child in self.children)
@@ -1891,16 +1898,6 @@ if __name__ == '__main__':
     #         else / x+1 = {x+1}!
     # """
     text = """
-        % fancy_text @body size='10px':
-            | *****
-            p style={"color: blue; font-size:" + $size}
-                @body
-            | *****
-
-        fancy_text '20px'
-            | This text is rendered through a FANCY hypertag!
-    """
-    text = """
         DIV
             < try | {True}!
             < try | {False}!
@@ -1933,13 +1930,6 @@ if __name__ == '__main__':
     #     $x = 4
     #     H
     # """
-    # text = """
-    #     for i in [1,2,3]:
-    #         $x = i
-    #         %H | $x
-    #     $x = 4
-    #     H
-    # """
 
     # text = """
     #     for i in [2,1,0]:
@@ -1961,14 +1951,17 @@ if __name__ == '__main__':
     """
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
-    ctx = {'width': 500, 'height': 1000}
+    p = ObjDict(name = 'Pen', price = 100)
+    ctx = {'width': 500, 'height': 1000, 'products': []}
     text = """
-    $cars = {'ford': 60000, 'audi': 80000}
-    try
-        | Price of Opel is $cars['opel'].
-    else
-        | Price of Opel is unknown.
+    $ a, (b, c) = 1, (2, 3)
+    | values: $a, $b, $c
     """
+    # """
+    # $x = item.date : date("M/d") : lower
+    # $x = item.date:date("M/d"):lower
+    # $x = item.date|date("M/d")|lower
+    # """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
     

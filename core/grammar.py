@@ -166,9 +166,9 @@ expr         =  expr_root ''                # basic (standard) form of an expres
 expr_var     =  factor_var ''               # reduced form of an expression: a variable, with optional trailer; used for inline $... embedding (embedding_eval) and attributes lists
 expr_factor  =  factor ''                   # reduced form of an expression: any atom, with optional trailer; used for non-embedded attribute values
 expr_strict  =  factor_strict ''            # reduced form of an expression: any atom with a trailer, but no spaces inside (before the trailer)
-expr_augment =  expr_root / expr_tuple      # augmented form of an expression: includes unbounded tuples (no parentheses); used in augmented assignments
+expr_augment =  expr_tuple / expr_root      # augmented form of an expression: includes unbounded tuples (no parentheses); used in augmented assignments
+expr_tuple   =  expr ws ',' (ws expr ws ',')* (ws expr)?      # unbounded tuple, without parentheses ( ); used in `expr_augment` only
 
-expr_tuple   =  expr ws ',' (ws expr ws ',')* (ws expr)?      # unbounded tuple, without parentheses ( ); used in selected grammar structures only
 subexpr      =  '(' ws expr ws ')'
 
 var_use      =  mark_eval? name_id ''                         # occurrence (use) of a variable; $ is allowed inside {...} for convenience

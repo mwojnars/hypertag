@@ -248,6 +248,12 @@ def test_007_variables():
         | $x
     """
     assert render(src).strip() == "0"
+    src = """
+        $ a, (b, c) = 1, (2, 3)
+        | $a, $b, $c
+    """
+    assert render(src).strip() == "1, 2, 3"
+
 
 def test_008_variables_err():
     with pytest.raises(Exception, match = 'referenced before assignment') as ex_info:
