@@ -4,6 +4,8 @@
 
 
 ########################################################################################################################################################
+###
+###  Regex patterns for character sets allowed in XML identifiers, to be put inside [...] in a regex.
 grammar = r"""
 
 ###  Before the grammar is applied, indentation in the input text must be converted into
@@ -145,7 +147,7 @@ attr_short       =  ('.' / '#') (attr_short_lit / embedding)        # shorthands
 attr_short_lit   =  ~"[a-z0-9_-]+"i                                 # shorthand literal value MAY contain "-", unlike python identifiers!
 attr_named       =  name_xml ws '=' ws value_of_attr                # name="value" OR name=value OR name=$(...)
 attr_unnamed     =  value_of_attr ''
-value_of_attr    =  embedding / expr_strict     #embedding_or_factor ''
+value_of_attr    =  embedding / expr_strict
 
 ###  ARGUMENTS of functions
 
@@ -168,6 +170,7 @@ expr_factor  =  factor ''                   # reduced form of an expression: any
 expr_strict  =  factor_strict ''            # reduced form of an expression: any atom with a trailer, but no spaces inside (before the trailer)
 expr_augment =  expr_tuple / expr_root      # augmented form of an expression: includes unbounded tuples (no parentheses); used in augmented assignments
 expr_tuple   =  expr ws ',' (ws expr ws ',')* (ws expr)?      # unbounded tuple, without parentheses ( ); used in `expr_augment` only
+expr_bitwise =  or_expr ''                  # reduced form of an expression: only arithmetic and bitwise operators; other ops must be enclosed in (...)
 
 subexpr      =  '(' ws expr ws ')'
 
@@ -176,12 +179,14 @@ tuple        =  '(' ws ((expr comma)+ (expr ws)?)? ')'
 list         =  '[' ws (expr comma)* (expr ws)? ']'
 set          =  '{' ws expr (comma expr)* ws (',' ws)? '}'    # obligatory min. 1 element in a set
 dict         =  '{' ws (dict_pair comma)* (dict_pair ws)? '}'
-dict_pair    =  expr ws ':' ws expr
+dict_pair    =  expr_bitwise ws ':' ws expr                   # here, `expr_bitwise` is used instead of `expr` to avoid ambiguity with pipeline operator
 
 atom         =  literal / var_use / subexpr / tuple / list / dict / set
 factor_var   =  var_use trailer* qualifier?                   # reduced form of `factor`: a variable with optional trailer, no spaces allowed
 factor_strict=  atom trailer* qualifier?                      # reduced form of `factor`: no spaces allowed before the trailer
+factor_filt  =  atom trailer_filt*                            # reduced form of `factor`: no function call () allowed; for use as filter function in `pipeline`
 factor       =  atom (ws trailer)* qualifier?                 # operators: () [] .
+
 pow_expr     =  factor (ws op_power ws factor)*
 term         =  pow_expr (ws op_multiplic ws pow_expr)*       # operators: * / // percent
 arith_expr   =  neg? ws term (ws op_additive ws term)*        # operators: neg + -
@@ -190,7 +195,9 @@ shift_expr   =  arith_expr (ws op_shift ws arith_expr)*
 and_expr     =  shift_expr (ws '&' ws shift_expr)*
 xor_expr     =  and_expr (ws '^' ws and_expr)*
 or_expr      =  xor_expr (ws '|' ws xor_expr)*
-concat_expr  =  or_expr (space or_expr)*                      # string concatenation: space-delimited list of items
+
+pipeline     =  or_expr (ws ':' ws filter)*                   # "pipeline" operator, x:fun(a,b) gets executed as fun(x,a,b)
+concat_expr  =  pipeline (space pipeline)*                    # string concatenation: space-delimited list of items
 
 comparison   =  concat_expr (ws op_comp ws concat_expr)*
 not_test     =  (not space)* comparison                       # spaces are obligatory around: not, and, or, if, else,
@@ -203,16 +210,20 @@ ifelse_test  =  or_test (space 'if' space or_test (space 'else' space ifelse_tes
 expr_root    =  ifelse_test ''
 
 
-###  TAIL OPERATORS:  call, slice, member access, qualifier ...
+###  TAIL OPERATORS:  call, slice, member access, filter application, qualifier ...
 
-slice_value  =  ws (expr ws)?                # empty value '' serves as a placeholder, so that we know which part of *:*:* we're at
+slice_value  =  ws (expr_bitwise ws)?           # empty value '' serves as a placeholder, so that we know which part of *:*:* we're at; expr_bitwise is used to avoid collission with pipeline operator
 slice        =  slice_value ':' slice_value (':' slice_value)?
 subscript    =  slice / (ws expr_augment ws)
 
 call         =  '(' ws (args ws)? ')'
-index        =  '[' subscript ']'            # handles atomic indices [i] and all types of [*:*:*] slices
+index        =  '[' subscript ']'               # handles atomic indices [i] and all types of [*:*:*] slices
 member       =  '.' ws name_id
 trailer      =  call / index / member
+trailer_filt =  index / member                  # reduced form of `trailer` for use in `factor_filt` and `pipeline`
+
+partial_call =  '(' ws (args ws)? ')'
+filter       =  factor_filt partial_call? qualifier?        # no space is allowed between the function and its arguments
 
 qualifier    =  ~"[\?!]"                      # ? means that None/empty(false)/exceptions shall be converted to '' ... ! means that empty (false) value triggers exception
 # obligatory   =  '!'
@@ -285,8 +296,6 @@ ws          =  ~"[ \t]*"                     # optional whitespace, no newlines
 ###  SYMBOLS that mark TYPES of blocks or text spans
 
 """
-###
-###  Regex patterns for character sets allowed in XML identifiers, to be put inside [...] in a regex.
 ###  XML identifiers differ substantially from typical name patterns in other computer languages. Main differences:
 ###   1) national Unicode characters are allowed, specified by ranges of unicode point values
 ###   2) special characters are allowed:  ':' (colon) '.' (dot) '-' (minus)

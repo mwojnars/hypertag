@@ -304,6 +304,16 @@ def test_009_collections():
     src = "| {{ }}"
     assert merge_spaces(render(src)) == "{ }"           # this is NOT a dict! sequences {{ and }} represent { and } characters escaped
 
+    src = "| { 'ala'[1:2:1] }"
+    assert merge_spaces(render(src)) == "l"
+    src = "| { 'Ala'[3:0:-1] }"
+    assert merge_spaces(render(src)) == "al"
+    src = "| { 'Ala'[1+2 : 0*0 : -1+5*0] }"
+    assert merge_spaces(render(src)) == "al"
+    src = "| { {1+2:3-4, -5 : 6*7*0} }"
+    assert merge_spaces(render(src)) == "{3: -1, -5: 0}"
+    
+
 def test_010_for():
     src = """
         $x = 1
@@ -1034,6 +1044,38 @@ def test_025_attributes():
     """
     assert render(src).strip() == out.strip()
 
+def test_026_pipelines():
+    
+    src = """
+        | { 'Hypertag' : str.upper : list : sorted(reverse=True) }
+    """
+    assert render(src).strip() == "['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']"
+    src = """
+        | { 'Hypertag':str.upper():sorted }
+    """
+    assert render(src).strip() == "['A', 'E', 'G', 'H', 'P', 'R', 'T', 'Y']"
+    
+def test_027_django_filters():
+    
+    from hypertag.django.filters import slugify
+    assert slugify('Hypertag rocks') == 'hypertag-rocks'
+
+    src = """
+        from hypertag.django.filters import $slugify
+        | { 'Hypertag rocks' : slugify }
+    """
+    assert render(src).strip() == "hypertag-rocks"
+    src = """
+        from hypertag.django.filters import *
+        | { 'Hypertag rocks' : slugify : upper }
+    """
+    assert render(src).strip() == "HYPERTAG-ROCKS"
+    src = """
+        from hypertag.django.filters import *
+        | { '123.45' : floatformat(4) }
+    """
+    assert render(src).strip() == "123.4500"
+    
 
 #####################################################################################################################################################
 

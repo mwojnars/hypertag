@@ -30,7 +30,7 @@ from hypertag import HyperHTML
 
 script = \
 """
-    import $blue
+    from ~ import $blue
     html: body:
         h1 style="color: $blue"
             / Example document with a <u>list of items</u>
@@ -316,15 +316,15 @@ the latter must have the ".hy" extension in order to be recognized.
 The interpretation of import paths is runtime-specific, so some other (custom)
 runtime classes could parse these paths differently, for instance, to enable the import 
 of scripts from a DB instead of files, or from remote locations etc.
+Wildcard import is supported: `from PATH import *`.
 
 HyperHTML supports also a special import path "~" (tilde), which denotes 
 the _dynamic context_ of script execution: a dictionary of all variables that have
 been passed to the rendering method (`HyperHTML.render()`) as extra keyword arguments.
 These variables can only be accessed in the script after they
-have been _explicitly_ imported with "from ~ import ..." or "import ..." blocks:
+have been _explicitly_ imported with `from ~ import ...`:
 
-    from ~ import $width
-    import $height
+    from ~ import $width, $height
     
     | Page dimensions imported from the context: $width x $height
 
@@ -511,9 +511,71 @@ You can do this in Hypertag with either `--` or `#` prefix:
 
 --->
 
+### Filters
+
+Hypertag defines a new operator not present in Python, the _pipeline_ (`:`).
+It is used in a similar way as pipes `|` in templating languages:
+for passing a result of an expression as an argument to a function (a _filter_),
+without putting the entire expression inside the function-call parentheses,
+as would normally be required. A typical example of filters in a templating language:
+
+    title | truncate(50) | upper
+
+this takes a `title` string, truncates it to no more than 50 characters and then converts 
+to upper case. In Hypertag, this expression will look the same, except the pipes are
+replaced with colons:
+
+    title : truncate(50) : upper
+
+Templating languages, like Jinja or Django's templates, require that functions are explicitly
+declared as filters before they can be used in template code.
+In Hypertag, there are _no_ such restrictions. Rather, _all callables_ (functions, methods,
+class constructors etc.) can be used in pipelines without special preparation. 
+A pipeline is just another syntax for a function call, so every expression of the form:
+
+    EXPR : FUN(*args, **kwargs)
+
+gets translated internally to:
+
+    FUN(EXPR, *args, **kwarg)
+
+Obviously, pipeline operators can be chained together, so `EXPR:FUN1:FUN2` is
+equivalent to `FUN2(FUN1(EXPR))`. The function can be given as a compound expression,
+so the use of `obj.fun` or similar constructs is possible. For example, the standard `str.upper`
+can be used instead of implementing a custom `upper()` function:
+
+    'Hypertag' : str.upper : list : sorted(reverse=True)
+
+output:
+
+    ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
+
+<!---
+Remember that all Python built-ins are available in Hypertag, that is why `str`, `list`,
+`sorted` etc. are accessible without an explicit import.
+--->
+As an addition to the pipeline syntax, Hypertag provides seamless integration of Django's 
+several dozens well-known [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
+They can be imported from `hypertag.django.filters` and used either as regular functions
+of as filters. Django must be installed on the system.
+
+    from hypertag.django.filters import $slugify, $upper
+    from hypertag.django.filters import $truncatechars, $floatformat
+
+    | { 'Hypertag rocks' : slugify : upper }
+    | { 'Hypertag rocks' : truncatechars(6) }
+    | { '123.45' : floatformat(4) }
+    
+output:
+
+    HYPERTAG-ROCKS
+    Hyper…
+    123.4500
+
+
 ### Control blocks
 
-Last but not least, control blocks of multiple types are available in Hypertag
+Control blocks of multiple types are available in Hypertag
 to help you manipulate the input data directly inside the document 
 without going back and forth between Python and templating code. The blocks available:
 
@@ -727,11 +789,19 @@ These include:
   characters, the `r'...'` and `r"..."` syntax can be used.
 - Hypertag provides a special _concatenation operator_. If multiple expressions are put 
   one after another separated by 1+ whitespace (a space is the operator): EXPR1 EXPR2 EXPR3 ...
-  their values get automatically converted to strings (`str(EXPR)`) and concatenated.
+  their values get automatically converted to strings `str(EXPR)` and concatenated.
   This is an extension of Python syntax for concatenating literal strings, like in:
-  `'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`
+  `'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`.
   In Python, this works for literals only, while in Hypertag, all types of expressions
-  can be handled in this way.
+  can be joined in this way. This operator has lower priority than binary "or" (`|`)
+  and higher than comparisons.
+
+There are also some _gotcha!_ you need to keep in mind when coding with Hypertag:
+
+- Inside dicts and array slices, operators other than arithmetic and bitwise must be enclosed
+in parentheses. This is to avoid ambiguity of the colon ":", which normally serves as a pipeline
+operator, but in dicts and slices plays a role of a field separator.
+
 
 
 ## Cheat Sheet

@@ -1,6 +1,11 @@
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
+    body {
+     font:16px/24px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+     color:#555;
+    }
+    
     section {
       /* width: 590px; */
       width: 990px;
@@ -40,13 +45,13 @@
 
 Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
-where _indentation_ determines relations between nested elements 
-and thus removes the need for explicit closing tags.
-Hypertag provides: advanced control of page rendering with
-native control blocks, high level of modularity with Python-like imports,
+where _indentation_ determines relationships between nested elements 
+and hence removes the need for explicit closing tags.
+Hypertag provides advanced control of page rendering with native control blocks, 
+high level of modularity with Python-like imports,
 unprecedented support for code reuse with native custom tags (_hypertags_),
-and much more. Authored by Marcin Wojnarski ([LinkedIn](http://www.linkedin.com/in/marcinwojnarski)).
+and much more. Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
-See the Hypertag's [Github page](https://github.com/mwojnars/hypertag) for a quick start and examples.
+See the Hypertag's **[Github page](https://github.com/mwojnars/hypertag)** for a Quick Start and examples.

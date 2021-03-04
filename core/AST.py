@@ -55,6 +55,16 @@ class ImportedTag(Tag):
         module_state = State(self.module_symbols)
         return self.native_tag.translate_tag(module_state, *args, **kwargs)
 
+def partial(func, *args, **kwargs):
+    """
+    Create a partial function during processing of a filter pipeline, like in x:fun(a,b)
+    - the returned function represents application of (a,b) to a `fun`; whatever argument will be supplied later,
+    it will be PREPENDED to the argument list, unlike in functools.partial() which APPENDS new arguments at the end.
+    """
+    def newfunc(*newargs):
+        return func(*newargs, *args, **kwargs)
+    return newfunc
+
 
 #####################################################################################################################################################
 #####
@@ -699,7 +709,7 @@ class NODES(object):
         #     for in_slot, out_slot in mapping.items():
         #         value = in_slot.get(state)
         #         out_slot.set(state, value)
-            
+        
         def _select_branch(self, state):
             raise NotImplementedError
         
@@ -761,7 +771,7 @@ class NODES(object):
             return self.body.translate(state) if self.body else Sequence()
         # def render(self, state):
         #     return self.body.render(state)
-            
+        
     class xblock_while(control_block):
         def _analyse_branches(self, ctx):
             self.children[0].analyse(ctx)
@@ -1142,10 +1152,7 @@ class NODES(object):
     class xexpr_factor(expression_root): pass
     class xexpr_strict(expression_root): pass
     class xexpr_augment(expression_root): pass
-        # """Augmented expression: may consist of multiple sub-expressions that form a tuple."""
-        # def evaluate(self, state):
-        #     return tuple(child.evaluate(state) for child in self.children)
-        
+    class xexpr_bitwise(expression_root): pass
     
     class variable(expression):
         """Common code for both a variable's definition (xvar_def) and a variable's occurrence (xvar_use)."""
@@ -1219,20 +1226,22 @@ class NODES(object):
 
     class xcall(tail):
         title = 'function call (...)'                   # for error messaging
+        def apply(self, fun, state):
+            args, kwargs = self._evaluate_args(state)
+            return fun(*args, **kwargs)
         
-        # def compactify(self, state):
-        #     assert len(self.children) <= 1
-        #     if len(self.children) == 1:
-        #         assert self.children[0].type == 'args'
-        #     self.children = [n.compactify(state) for n in self.children]
-        #     return self
-        
-        def apply(self, obj, state):
-            
+        def _evaluate_args(self, state):
             items  = [(c.name if c.type == 'kwarg' else None, c.evaluate(state)) for c in self.children]
             args   = [value       for name, value in items if name is None]
             kwargs = {name: value for name, value in items if name is not None}
-            return obj(*args, **kwargs)
+            return args, kwargs
+            
+    class xpartial_call(xcall):
+        """Partial function call inside pipeline operator, like in x:fun(a,b)."""
+        def apply(self, fun, state):
+            if not self.children: return fun
+            args, kwargs = self._evaluate_args(state)
+            return partial(fun, *args, **kwargs)
             
     class xslice_value(expression):
         def evaluate(self, state):
@@ -1277,7 +1286,7 @@ class NODES(object):
     class xfactor(expression):
         """A chain of tail operators: () [] . with optional trailing qualifier ? or ! """
         atom      = None
-        tail      = None        # optional chain of tail operators: call / index / member
+        tail      = None        # list of tail operators: call / index / member
         qualifier = None        # optional qualifier: ? or !
         
         def setup(self):
@@ -1298,7 +1307,9 @@ class NODES(object):
             return val
     
     class xfactor_var(xfactor): pass
+    class xfactor_filt(xfactor): pass
     class xfactor_strict(xfactor): pass
+    class xfilter(xfactor): pass
     
     
     ###  EXPRESSIONS - OPERATORS (BINARY / TERNARY)  ###
@@ -1416,6 +1427,16 @@ class NODES(object):
             "x | y. If 'y' is a function or method, returns y(x) (filter application), else calculates x | y in a standard way."
             #if isfunction(y): return y(x)
             return x | y                            # here, 'y' can be a Filter instance
+    class xpipeline(simple_chain_expression):
+        """
+        Chain of "pipeline" operators, x:fun(a,b) gets executed as fun(x,a,b).
+        For oper() execution, fun(a,b) is represented as a partial function returned by our custom partial() implementation.
+        """
+        name = ':'
+        @staticmethod
+        def oper(x, partial_fun):
+            return partial_fun(x)
+            
             
     class xcomparison(chain_expression):
         "chain of comparison operators: < > == >= <= != in is, not in, is not"
@@ -1687,13 +1708,13 @@ class HypertagAST(BaseTree):
                 "tail_for tail_if tail_verbat tail_normal tail_markup core_verbat core_normal core_markup " \
                 "attrs_def attrs_val attr_val value_of_attr args arg " \
                 "embedding embedding_braces embedding_eval target " \
-                "expr_root subexpr slice subscript trailer atom literal dict_pair " \
+                "expr_root subexpr slice subscript trailer trailer_filt atom literal dict_pair " \
                 "string string_quot1 string_quot2"
     
     # nodes that will be replaced with their child if there is exactly 1 child AFTER rewriting of all children;
     # they must have a corresponding x... node class, because pruning is done after rewriting, not before
-    _compact_ = "factor_strict factor_var factor pow_expr term arith_expr shift_expr and_expr xor_expr or_expr concat_expr " \
-                "comparison not_test and_test or_test ifelse_test expr_tuple " \
+    _compact_ = "factor_filt factor_strict factor_var factor pow_expr term arith_expr shift_expr and_expr xor_expr or_expr concat_expr " \
+                "pipeline comparison not_test and_test or_test ifelse_test expr_tuple " \
                 "block_struct"
 
     _reduce_anonym_ = True      # reduce all anonymous nodes, i.e., nodes generated by unnamed expressions, typically groupings (...)
@@ -1951,13 +1972,17 @@ if __name__ == '__main__':
     """
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
-    p = ObjDict(name = 'Pen', price = 100)
-    ctx = {'width': 500, 'height': 1000, 'products': []}
     text = """
-    $ a, (b, c) = 1, (2, 3)
-    | values: $a, $b, $c
+    from hypertag.django.filters import $slugify, $upper
+    from hypertag.django.filters import $truncatechars, $floatformat
+
+    | { 'Hypertag rocks' : slugify : upper }
+    | { 'Hypertag rocks' : truncatechars(6) }
+    | { '123.45' : floatformat(4) }
     """
     # """
+    #     | { name : upper : truncatewords(30) }
+    #     | { name:upper:truncatewords(30) }
     # $x = item.date : date("M/d") : lower
     # $x = item.date:date("M/d"):lower
     # $x = item.date|date("M/d")|lower
@@ -1993,6 +2018,8 @@ if __name__ == '__main__':
     # print(module.__package__)
     # print(inspect.getfile(module))
     # print(inspect.getfile(text))
+    # from hypertag.django.filters import slugify
+    # print(slugify('Hypertag rocks'))
     
     
 # TODO:
