@@ -1973,9 +1973,15 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    from hypertag.django.filters import $apnumber, $ordinal
-    | "5" spelled out is "{ 5:apnumber }"
-    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
+    for i in [1,2,3]  | $i
+
+    for i in [1,2,3]:
+        li | item no. $i
+
+    $s = 'abc'
+    while len(s) > 0               -- Python built-ins ("len") can be used
+        | letter "$s[0]"
+        $s = s[1:]                 -- assignments can occur inside loops
     """
     # """
     #     | { name : upper : truncatewords(30) }

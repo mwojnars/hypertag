@@ -572,7 +572,7 @@ output:
     Hyper…
     123.4500
 
-Django filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
+Django's extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
 (the "human touch" to data) are also available:
 
     from hypertag.django.filters import $apnumber, $ordinal
@@ -587,9 +587,9 @@ output:
 
 ### Control blocks
 
-Control blocks of multiple types are available in Hypertag
-to help you manipulate the input data directly inside the document 
-without going back and forth between Python and templating code. The blocks available:
+Control blocks of multiple types are available in Hypertag to help you manipulate input data
+directly inside the document without going back and forth between Python and templating code.
+The blocks are:
 
 - **if-elif-else**
 - **try-else**
@@ -598,9 +598,8 @@ without going back and forth between Python and templating code. The blocks avai
 
 The semantics of "if", "for", "while" blocks is analogous to what it is in Python.
 Both inline and outline body is supported, although the former comes with restrictions:
-the preceeding expression (a condition in "if/while", a collection in "for")
-may need to be transformed to an atom by enclosing it in (...) or {...} 
-to avoid parsing errors. Trailing colons in clause headlines are optional.
+the preceeding expression (a condition in "if/while", a collection in "for") may need to be
+enclosed in (...) or {...} to avoid parsing errors. Trailing colons in clause headlines are optional.
 
 An example with outline body:
 
@@ -625,6 +624,8 @@ The same code as above, but with inline body, notice the parentheses around expr
 
 Examples of loops:
 
+    for i in [1,2,3]  | $i
+
     for i in [1,2,3]:
         li | item no. $i
 
@@ -636,6 +637,8 @@ Examples of loops:
 output:
 
 ```html
+123
+
 <li>item no. 1</li>
 <li>item no. 2</li>
 <li>item no. 3</li>
@@ -770,12 +773,14 @@ output:
     1, c
     2, t
 
-Additionally, HyperHTML defines a number of its own built-in tags and variables:
+As mentioned earlier, Hypertag allows easy import of Django template filters to be used as
+standalone functions or as filters inside pipelines.
+
+Additionally, HyperHTML defines a number of its own built-in tags and functions:
 
 1. HTML-specific tags.
 2. General-purpose tags.
-3. Functions.
-4. Filters
+3. Functions & filters.
 
 (TODO...)
 
