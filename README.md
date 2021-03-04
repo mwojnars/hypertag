@@ -599,9 +599,9 @@ The blocks are:
 The semantics of "if", "for", "while" blocks is analogous to what it is in Python.
 Both inline and outline body is supported, although the former comes with restrictions:
 the preceeding expression (a condition in "if/while", a collection in "for") may need to be
-enclosed in (...) or {...} to avoid parsing errors. Trailing colons in clause headlines are optional.
+enclosed in (...) or {...}. Trailing colons in clause headlines are optional.
 
-An example with outline body:
+An example "if" block with outline body:
 
     $size = 5
     if size > 10      
@@ -774,13 +774,15 @@ output:
     2, t
 
 As mentioned earlier, Hypertag allows easy import of Django template filters to be used as
-standalone functions or as filters inside pipelines.
+standalone functions or inside pipelines.
 
-Additionally, HyperHTML defines a number of its own built-in tags and functions:
+Additionally, Hypertag provides a number of predefined tags and functions:
 
-1. HTML-specific tags.
-2. General-purpose tags.
-3. Functions & filters.
+1. General-purpose tags.
+2. Functions & filters.
+3. HTML-specific tags.
+
+All of the above are automatically imported as built-in symbols by HyperHTML runtime.
 
 (TODO...)
 
@@ -800,25 +802,25 @@ These include:
   and can be used inside parent blocks of all types. In some cases, though, the use of 
   explicit `pass` may be preferred due to aesthetic considerations.
 - In expressions, you can create literal strings with the `'...'` and `"..."` syntax.
-  This syntax actually creates _formatted strings_ (equivalent to Python's f-strings),
+  This actually creates _formatted strings_ (equivalent to Python's f-strings),
   which may contain _embedded expressions_ of both the `$...` and `{...}` form.
   If you want to create raw strings instead, such that `$` and `{}` are treated as regular
-  characters, the `r'...'` and `r"..."` syntax can be used.
+  characters, the `r'...'` and `r"..."` syntax shall be used.
 - Hypertag provides a special _concatenation operator_. If multiple expressions are put 
   one after another separated by 1+ whitespace (a space is the operator): EXPR1 EXPR2 EXPR3 ...
   their values get automatically converted to strings `str(EXPR)` and concatenated.
   This is an extension of Python syntax for concatenating literal strings, like in:
   `'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`.
   In Python, this works for literals only, while in Hypertag, all types of expressions
-  can be joined in this way. This operator has lower priority than binary "or" (`|`)
-  and higher than comparisons.
+  can be joined in this way. The concatenation operator has lower priority than binary "or" (`|`)
+  and a pipeline (`:`); and higher than comparisons.
 
 There are also some _gotcha!_ you need to keep in mind when coding with Hypertag:
 
-- Inside dicts and array slices, operators other than arithmetic and bitwise must be enclosed
-in parentheses. This is to avoid ambiguity of the colon ":", which normally serves as a pipeline
-operator, but in dicts and slices plays a role of a field separator.
-
+- Inside dicts `{...}` and array slices `[a:b:c]`, operators other than arithmetic and bitwise 
+  must be enclosed in parentheses. This is to avoid ambiguity of the colon ":",
+  which normally serves as a pipeline operator, but in dicts and slices plays a role 
+  of a field separator.
 
 
 ## Cheat Sheet

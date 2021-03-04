@@ -1118,7 +1118,7 @@ class NODES(object):
             
             # `val` is false ... check qualifiers to undertake appropriate action
             if self.qualifier == '?': return ''
-            if self.qualifier == '!': raise MissingValueEx("Obligatory expression has a false or empty value", self)
+            if self.qualifier == '!': raise MissingValueEx(f"Obligatory expression evaluates to a false value ({repr(val)})", self)
             return val
 
         def _eval_inner_qualified(self, state):
@@ -1973,15 +1973,8 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    for i in [1,2,3]  | $i
-
-    for i in [1,2,3]:
-        li | item no. $i
-
-    $s = 'abc'
-    while len(s) > 0               -- Python built-ins ("len") can be used
-        | letter "$s[0]"
-        $s = s[1:]                 -- assignments can occur inside loops
+        from hypertag.django.filters import *
+        | text: "{ '' : slugify! : upper }"
     """
     # """
     #     | { name : upper : truncatewords(30) }
