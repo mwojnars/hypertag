@@ -513,9 +513,9 @@ You can do this in Hypertag with either `--` or `#` prefix:
 
 ### Filters
 
-Hypertag defines a new operator not present in Python, the _pipeline_ (`:`).
-It is used in a similar way as pipes `|` in templating languages:
-for passing a result of an expression as an argument to a function (a _filter_),
+Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.
+It is applied in a similar way as pipes `|` in templating languages:
+to pass a result of an expression to a function (a _filter_) as its first argument,
 without putting the entire expression inside the function-call parentheses,
 as would normally be required. A typical example of filters in a templating language:
 
@@ -529,7 +529,7 @@ replaced with colons:
 
 Templating languages, like Jinja or Django's templates, require that functions are explicitly
 declared as filters before they can be used in template code.
-In Hypertag, there are _no_ such restrictions. Rather, _all callables_ (functions, methods,
+In Hypertag, there are _no_ such restrictions. Rather, all _callables_ (functions, methods,
 class constructors etc.) can be used in pipelines without special preparation. 
 A pipeline is just another syntax for a function call, so every expression of the form:
 
@@ -541,8 +541,8 @@ gets translated internally to:
 
 Obviously, pipeline operators can be chained together, so `EXPR:FUN1:FUN2` is
 equivalent to `FUN2(FUN1(EXPR))`. The function can be given as a compound expression,
-so the use of `obj.fun` or similar constructs is possible. For example, the standard `str.upper`
-can be used instead of implementing a custom `upper()` function:
+such that the use of `obj.fun` or similar constructs is possible. For example, the standard
+`str.upper` can be used instead of implementing a custom `upper()` function:
 
     'Hypertag' : str.upper : list : sorted(reverse=True)
 
@@ -555,9 +555,9 @@ Remember that all Python built-ins are available in Hypertag, that is why `str`,
 `sorted` etc. are accessible without an explicit import.
 --->
 As an addition to the pipeline syntax, Hypertag provides seamless integration of Django's 
-several dozens well-known [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
-They can be imported from `hypertag.django.filters` and used either as regular functions
-of as filters. Django must be installed on the system.
+several dozens of well-known [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
+They can be imported from `hypertag.django.filters` and either called as regular functions
+of used inside pipelines. Django must be installed on the system.
 
     from hypertag.django.filters import $slugify, $upper
     from hypertag.django.filters import $truncatechars, $floatformat
