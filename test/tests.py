@@ -1075,6 +1075,16 @@ def test_027_django_filters():
         | { '123.45' : floatformat(4) }
     """
     assert render(src).strip() == "123.4500"
+    src = """
+        from hypertag.django.filters import $apnumber, $ordinal
+        | "5" spelled out is "{ 5:apnumber }"
+        | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
+    """
+    out = """
+        "5" spelled out is "five"
+        example ordinals 1st, 2nd, 5th
+    """
+    assert render(src).strip() == out.strip()
     
 
 #####################################################################################################################################################

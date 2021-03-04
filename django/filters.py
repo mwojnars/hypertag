@@ -5,7 +5,8 @@ A complete list and documentation of filters:  https://docs.djangoproject.com/en
 
 import django
 from django.conf import settings as __settings__
-from django.template.defaultfilters import register as __register__
+from django.template.defaultfilters import register as __register_default__
+from django.contrib.humanize.templatetags.humanize import register as __register_humanize__
 
 ##
 ## for now, Django's default settings are always used in those filters that depend on them
@@ -25,4 +26,5 @@ django.setup()
 ##      from hypertag.django.filters import $slugify
 ##
 
-globals().update(__register__.filters)
+globals().update(__register_humanize__.filters)
+globals().update(__register_default__.filters)

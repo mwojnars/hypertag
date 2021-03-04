@@ -557,7 +557,7 @@ Remember that all Python built-ins are available in Hypertag, that is why `str`,
 As an addition to the pipeline syntax, Hypertag provides seamless integration of Django's 
 several dozens of well-known [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
 They can be imported from `hypertag.django.filters` and either called as regular functions
-of used inside pipelines. Django must be installed on the system.
+or used inside pipelines. Django must be installed on the system.
 
     from hypertag.django.filters import $slugify, $upper
     from hypertag.django.filters import $truncatechars, $floatformat
@@ -571,6 +571,18 @@ output:
     HYPERTAG-ROCKS
     Hyper…
     123.4500
+
+Django filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
+(the "human touch" to data) are also available:
+
+    from hypertag.django.filters import $apnumber, $ordinal
+    | "5" spelled out is "{ 5:apnumber }"
+    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
+
+output:
+
+    "5" spelled out is "five"
+    example ordinals 1st, 2nd, 5th
 
 
 ### Control blocks

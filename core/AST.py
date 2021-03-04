@@ -1973,12 +1973,9 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    from hypertag.django.filters import $slugify, $upper
-    from hypertag.django.filters import $truncatechars, $floatformat
-
-    | { 'Hypertag rocks' : slugify : upper }
-    | { 'Hypertag rocks' : truncatechars(6) }
-    | { '123.45' : floatformat(4) }
+    from hypertag.django.filters import $apnumber, $ordinal
+    | "5" spelled out is "{ 5:apnumber }"
+    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
     """
     # """
     #     | { name : upper : truncatewords(30) }
