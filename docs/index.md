@@ -54,8 +54,8 @@
       background: #555;
     }
 
-    div.highlight {
-        max-height: 200px;
+    pre.highlight {
+        max-height: 184px;
         overflow-y: auto;
     }
 </style>
