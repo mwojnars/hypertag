@@ -58,7 +58,6 @@
       /* border: 1px solid #c7c7c7; */
       border: 1px solid #ddd;
     }
-    
     code {
       /* background: #333; */
       /* background: #444; */
@@ -74,32 +73,26 @@
       /* color: #f4bf75; */
       color: #f29717;
     }
-    
     .highlight .na {
       /* color: #6a9fb5; */
       color: #3e8aaa;
     }
-    
     .highlight .s, .highlight .sb, .highlight .sc, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
       /* color: #90a959; */
       color: #75a609;
     }
-    
     .highlight .m, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mb, .highlight .mx {
       /* color: #90a959; */
       color: #85aa34;
     }
-    
     .highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
       /* color: #aa759f; */
       color: #9f508f;
     }
-    
     a {
       /* color: #3399cc; */
       color: #0594db;
     }
-
 </style>
 
 
@@ -111,7 +104,7 @@ where _indentation_ determines relationships between nested elements
 and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
-with native custom tags (_hypertags_), and much more. 
+with native custom tags (_hypertags_), and more. 
 If you are new to Hypertag, see the [Github page](https://github.com/mwojnars/hypertag)
 and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
 
@@ -189,7 +182,7 @@ Spaces after special characters: |/!:$% - are never obligatory, and in some case
 (inside expressions) they may be disallowed.
 
 Sometimes it is useful to put comments that will be excluded from the output.
-You can do this using either `--` or `#` prefix.
+This can be done using either `--` or `#` prefix.
 
 ## Tags
 

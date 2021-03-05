@@ -15,7 +15,10 @@ where _indentation_ determines relationships between nested elements
 and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
-with native custom tags (_hypertags_), and [much more](#why-to-use-hypertag). 
+with native custom tags (_hypertags_), and [more](#why-to-use-hypertag). 
+See the [Quick Start](#quick-start) below or a full 
+[language reference](http://hypertag.io) on hypertag.io for details.
+
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
@@ -81,10 +84,10 @@ The `script` in the code above is rendered to `html` as shown below
   from Python modules, and from the dynamic _context_ of script rendering;
   scripts and modules are arranged into packages;
   with these mechanisms in place, building libraries of reusable components is easy and fun.
-- **Applicability** to different target languages: 
-  Hypertag is _not_ just a templating system added on top of HTML. 
+- **Applicability** to different target languages. 
+  Hypertag is _not_ just a templating system put on top of HTML. 
   Hypertag is a full-featured standalone programming language tailored to the generation
-  of documents of all kinds: by defining new tags, it can be adapted to produce an arbitrary
+  of documents of all kinds. By defining new tags, Hypertag can be adapted to produce an arbitrary
   document description language.
   
 <!---
@@ -141,10 +144,9 @@ In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 
 ### Tags
 
-Content of a tagged block can be arranged as _inline_,
-_outline_ ("out of the line"), or mixed inline+outline.
-Inline content starts right after the tag in the _headline_ and is rendered 
-to a more compact form.
+Content of a tagged block can be arranged as _inline_, _outline_ ("out of the line"),
+or mixed inline+outline. Inline content starts right after the tag in the _headline_ 
+and is rendered to a more compact form.
 
     h1 | This is "inline" text, no surrounding newlines are printed in the output.
     p
@@ -241,6 +243,8 @@ output:
 
 Without inline content, a colon can still be used at the end of blocks' headlines.
 The two forms, with and without a trailing colon, are equivalent.
+
+Comments can be put in the code using `--` or `#` prefix.
 
 
 ### Expressions
