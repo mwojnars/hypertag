@@ -103,7 +103,7 @@
 </style>
 
 
-#Introduction
+# Introduction
 
 Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
