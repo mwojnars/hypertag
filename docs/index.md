@@ -53,7 +53,6 @@
       /* background: #333; */
       background: #444;
       /* font-size: 13px; */
-      font-size: 12px;
       line-height: 20px;
     }
 
@@ -66,7 +65,7 @@
 Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
-and hence removes the need for explicit closing tags.
+and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks, 
 high level of modularity with Python-like imports,
 unprecedented support for code reuse with native custom tags (_hypertags_),
@@ -331,7 +330,7 @@ have been _explicitly_ imported with `from ~ import ...`:
 
 This script can be rendered in the following way:
 
-```python3
+```python
 html = HyperHTML().render(script, width = 500, height = 1000)
 print(html)
 ```
