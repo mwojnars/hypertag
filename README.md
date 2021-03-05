@@ -16,8 +16,8 @@ and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
 with native custom tags (_hypertags_), and [more](#why-to-use-hypertag). 
-See the [Quick Start](#quick-start) below or a full 
-[language reference](http://hypertag.io) on hypertag.io for details.
+See the [Quick Start](#quick-start) below, or a full 
+[Language Reference](http://hypertag.io) on hypertag.io, for details.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
@@ -78,7 +78,7 @@ The `script` in the code above is rendered to `html` as shown below
 - **Fine-grained control** over rendering process is possible with
   a range of native _control blocks_ (for, while, if-elif-else, try-else) 
   constituting a core part of Hypertag syntax, unlike in templating languages, 
-  where control structures are artificially overlaid on another language (HTML).
+  where control structures are artificially overlaid on top of another language (HTML).
 - **Modularity** in Hypertag is modeled after Python's: 
   every script may import tags and variables from other scripts,
   from Python modules, and from the dynamic _context_ of script rendering;
@@ -244,7 +244,7 @@ output:
 Without inline content, a colon can still be used at the end of blocks' headlines.
 The two forms, with and without a trailing colon, are equivalent.
 
-Comments can be put in the code using `--` or `#` prefix.
+Comments in the code start with `--` or `#` prefix.
 
 
 ### Expressions
@@ -332,18 +332,16 @@ and the output is:
 
 ### Custom tags
 
-One of the key features of Hypertag is the support for custom tags (_hypertags_)
-that can be defined directly in a Hypertag script using _hypertag definition_ blocks (%):
+Custom tags (_hypertags_) can be defined directly in a Hypertag script 
+using _hypertag definition_ blocks (%):
 
     % tableRow name price='UNKNOWN'
         tr        
             td | $name
             td | $price
 
-Here, `tableRow` is a custom tag that wraps up plain-text contents of table cells
-with appropriate `tr` & `td` tags to produce a listing of products.
-As you can see, a hypertag may accept attributes, and they can have default values,
-similar to Python functions. A hypertag can be used with named (keyword) or unnamed attributes:
+A hypertag may accept attributes, possibly with default values. 
+In places of occurrence, it can be passed positional (unnamed) and/or keyword (named) attributes:
 
     table
         tableRow 'Porsche'  '200,000'
@@ -351,8 +349,7 @@ similar to Python functions. A hypertag can be used with named (keyword) or unna
         tableRow 'Maserati' '300,000'
         tableRow name='Cybertruck'
 
-In raw HTML, and in many templating languages too, you would need much more typing
-to produce the same table:
+output:
 
 ```html
 <table>
@@ -374,8 +371,6 @@ to produce the same table:
     </tr>
 </table>
 ```
-
-No doubt which version is more readable and maintainable?
 
 Imagine that at some point you decided to add a CSS class to all cells in the price column?
 In HTML, you'd have to walk through all the cells and manually modify 
