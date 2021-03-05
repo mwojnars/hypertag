@@ -20,8 +20,10 @@ document         =  core_blocks? margin?
 tail_blocks      =  (indent_s core_blocks dedent_s) / (indent_t core_blocks dedent_t)
 core_blocks      =  tail_blocks / block+
 
-block            =  margin_out dedent? (block_control / block_def / block_import / block_struct / block_comment / special_tag)
-dedent           =  '<' ws
+block            =  margin_out (modifier ws)? (block_control / block_def / block_import / block_struct / block_comment / special_tag)
+modifier         =  dedent / append
+dedent           =  '<'                         # marks the block shall be dedented by one level (to parent's indentation)
+append           =  '...'                       # marks the block is a continuation and should be appended to a previous block without a newline (no top margin, inline mode)
 
 ###  CONTROL BLOCKS
 
@@ -223,9 +225,9 @@ trailer      =  call / index / member
 trailer_filt =  index / member                  # reduced form of `trailer` for use in `factor_filt` and `pipeline`
 
 partial_call =  '(' ws (args ws)? ')'
-filter       =  factor_filt partial_call? qualifier?        # no space is allowed between the function and its arguments
+filter       =  factor_filt partial_call?       # no space is allowed between the function and its arguments
 
-qualifier    =  ~"[\?!]"                      # ? means that None/empty(false)/exceptions shall be converted to '' ... ! means that empty (false) value triggers exception
+qualifier    =  ~"[\?!]"                        # ? means that None/empty(false)/exceptions shall be converted to '' ... ! means that empty (false) value triggers exception
 # obligatory   =  '!'
 # optional     =  '?'
 
@@ -233,8 +235,8 @@ qualifier    =  ~"[\?!]"                      # ? means that None/empty(false)/e
 ###  SIMPLE OPERATORS
 
 op_power     =  '**'
-neg          =  '-'                            # multiple negation, e.g., "---x", not allowed -- unlike in Python
-op_multiplic =  '*' / '//' / '/' / '%%'        # double percent means single percent, only we need to escape for grammar string formatting
+neg          =  '-'                             # multiple negation, e.g., "---x", not allowed -- unlike in Python
+op_multiplic =  '*' / '//' / '/' / '%%'         # double percent means single percent, only we need to escape for grammar string formatting
 op_additive  =  '+' / '-'
 op_shift     =  '<<' / '>>'
 op_empty     =  '?' / '!'

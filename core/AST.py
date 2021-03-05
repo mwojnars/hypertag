@@ -371,18 +371,23 @@ class NODES(object):
 
     class xblock(node):
         """Wrapper around all specific types of blocks that adds top margin and marks "outline" mode for the first returned HNode."""
-        dedent = None           # True if indentation should be cleared through the use of a "dedent" marker (<)
+        modifier = None         # optional modifier of layout  ("<", "...") that preceeds the block
         
         def setup(self):
             assert 2 <= len(self.children) <= 3 and self.children[0].type == 'margin_out'
             if len(self.children) == 3:
-                self.dedent = True
+                self.modifier = self.children[1].value
                 del self.children[1]                    # for translate() there must remain 2 children: [margin, block]
             
         def translate(self, state):
             margin, block = (c.translate(state) for c in self.children)
-            if block: block[0].set_outline()            # mark the 1st node of the block as being "outline" not "inline"
-            if self.dedent: block.set_indent('')
+            append = (self.modifier == '...')
+            dedent = (self.modifier == '<')
+            
+            if block and not append:
+                block[0].set_outline()            # mark the 1st node of the block as being "outline" not "inline"
+            if dedent:
+                block.set_indent('')
             return Sequence(margin, block)
             
     class block_text(node):
@@ -1572,6 +1577,7 @@ class NODES(object):
     class xtext_quot1(static):  pass
     class xtext_quot2(static):  pass
     class xdedent(static):      pass
+    class xappend(static):      pass
     class xmargin(static):      pass
     
     class xmargin_out(static):
@@ -1703,7 +1709,7 @@ class HypertagAST(BaseTree):
                 "mark_struct mark_verbat mark_normal mark_markup mark_embed mark_eval mark_def mark_comment"
     
     # nodes that will be replaced with a list of their children
-    _reduce_  = "block_control target core_blocks tail_blocks headline body_text generic_control generic_struct " \
+    _reduce_  = "modifier block_control target core_blocks tail_blocks headline body_text generic_control generic_struct " \
                 "item_import rename try_long try_short special_tag head_verbat head_normal head_markup " \
                 "tail_for tail_if tail_verbat tail_normal tail_markup core_verbat core_normal core_markup " \
                 "attrs_def attrs_val attr_val value_of_attr args arg " \
@@ -1973,16 +1979,13 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-        from hypertag.django.filters import *
-        | text: "{ '' : slugify! : upper }"
+        %H x | $x
+        | (
+        ... H 1
+        ... | ,
+        ... H 2
+        ... | )
     """
-    # """
-    #     | { name : upper : truncatewords(30) }
-    #     | { name:upper:truncatewords(30) }
-    # $x = item.date : date("M/d") : lower
-    # $x = item.date:date("M/d"):lower
-    # $x = item.date|date("M/d")|lower
-    # """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
     
@@ -2020,8 +2023,5 @@ if __name__ == '__main__':
     
 # TODO:
 # - czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
-# - inline hypertag definition with multiple tags:
-#     % aCategory : a href=$item.__category__.url() | {item.__category__.name? or item.__category__}
-#     % aCategory : inline ...
 # - selectors @body[...]
 # - builtin tags

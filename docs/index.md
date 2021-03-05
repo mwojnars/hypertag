@@ -8,32 +8,32 @@
     
     section {
       /* width: 590px; */
-      width: 990px;
+      width: 890px;
     }
 
     .wrapper {
       /* width: 650px; */
-      width: 1050px;
+      width: 950px;
     }
 
     nav {
       /* margin-left: -580px; */
-      margin-left: -780px;
+      margin-left: -730px;
     }
 
     #banner {
       /* margin-right: -382px; */
-      margin-right: -582px;
+      margin-right: -532px;
     }
 
     #banner .fork {
       /* margin-left: -325px; */
-      margin-left: -525px;
+      margin-left: -475px;
     }
 
     footer {
       /* margin-left: -530px; */
-      margin-left: -730px;
+      margin-left: -680px;
     }
 
     #dummybodyid > header {

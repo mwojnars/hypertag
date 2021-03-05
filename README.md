@@ -82,9 +82,17 @@ The `script` in the code above is rendered to `html` as shown below
   scripts and modules are arranged into packages;
   with these mechanisms in place, building libraries of reusable components is easy and fun.
 - **Applicability** to different target languages: 
+  Hypertag is _not_ just a templating system added on top of HTML. 
+  Hypertag is a full-featured standalone programming language tailored to the generation
+  of documents of all kinds: by defining new tags, it can be adapted to produce an arbitrary
+  document description language.
+  
+<!---
   Hypertag is *not* limited to (X)HTML; by defining new tags,
-  it can be adapted to produce (potentially) any other document description language.
-
+  it can be adapted to produce an arbitrary document description language.
+HTML templating is one of applications, but Hypertag's capabilities are much bigger than that.
+whose one of use cases is being a replacement for web templating languages.
+--->
 
 ## Quick Start
 
@@ -723,7 +731,7 @@ a more verbose if-else test:
 
     %display name='' price=0
         try  | Product "$name!" costs {price}!.
-        else | Product "$name!" is available, but the price is not set yet.
+        else | Product "$name!" is available, but the price is unknown yet.
         else | There is a product priced at {price!}.
         else | Sorry, we're closed.
 
@@ -734,7 +742,7 @@ a more verbose if-else test:
 output:
 
     Product "Pen" costs 100.
-    Product "Pencil" is available, but the price is not set yet.
+    Product "Pencil" is available, but the price is unknown yet.
     There is a product priced at 25.
 
 Qualifiers can be used in loop headlines, as well, to test for non-emptiness
@@ -792,10 +800,12 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 There is a number of additional elements of Hypertag that have not been mentioned so far.
 These include:
 
-- The _dedent_ marker (`<`): when put at the beginning of a block's headline,
+- The _dedent_ modifier (`<`): when put at the beginning of a block's headline,
   it decreases the output indentation of this block by one level (makes the indentation
-  equal to the parent's). The dedent marker can be used with all types of blocks, 
+  equal to the parent's). The dedent modifier can be used with all types of blocks, 
   including tagged and control blocks.
+- The _append_ modifier (`...`): when put at the beginning of a block, it marks that
+  this block is a continuation and should be appended to the previous one without a newline.
 - The `pass` keyword can be used in place of a block, as an "empty block" placeholder.
   This quasi-block generates no output, similarly to the `pass` keyword in Python. 
   The use of `pass` is never enforced by the syntax: empty body is always a valid alternative
@@ -821,6 +831,7 @@ There are also some _gotcha!_ you need to keep in mind when coding with Hypertag
   must be enclosed in parentheses. This is to avoid ambiguity of the colon ":",
   which normally serves as a pipeline operator, but in dicts and slices plays a role 
   of a field separator.
+- So far, Hypertag hasn't been yet optimized for performance.
 
 
 ## Cheat Sheet

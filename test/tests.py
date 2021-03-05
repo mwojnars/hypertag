@@ -161,6 +161,46 @@ def test_004_layout():
         </DIV>
     """
     assert render(src).strip() == out.strip()
+    src = """
+        | Ala ma
+        ...| kota
+    """
+    assert render(src).strip() == "Ala makota"
+    src = """
+        | Ala ma
+        ...|  kota
+    """
+    assert render(src).strip() == "Ala ma kota"
+    src = """
+        p
+            i  | line1
+            ...| line2
+        ... |line3
+    """
+    out = """
+        <p>
+            <i>line1</i>line2
+        </p>line3
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        i  | line1
+        ...| line2
+        ... b | line3
+    """
+    out = """
+        <i>line1</i>line2<b>line3</b>
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        %H x | $x
+        | (
+        ... H 1
+        ... | ,
+        ... H 2
+        ... | )
+    """
+    assert render(src).strip() == "(1,2)"
 
 def test_005_doc_margins():
     src = """\n\n p | text  \n  \n  """

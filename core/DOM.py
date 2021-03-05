@@ -1,5 +1,6 @@
 """
-Classes that represent Hypertag's native DOM tree (Document Object Model).
+Classes that represent Hypertag's native DOM tree (Document Object Model) that is produced as an output
+of script "translation". The DOM can subsequently undergo "rendering" to a document in a target language.
 
 @author:  Marcin Wojnarski
 """
