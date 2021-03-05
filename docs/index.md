@@ -109,17 +109,19 @@ Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
 and removes the need for explicit closing tags.
-Hypertag provides advanced control of page rendering with native control blocks, 
-high level of modularity with Python-like imports, unprecedented support for code reuse 
+Hypertag provides advanced control of page rendering with native control blocks;
+high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
 with native custom tags (_hypertags_), and much more. 
-If you are new to Hypertag, first see the [Github page](https://github.com/mwojnars/hypertag)
+If you are new to Hypertag, see the [Github page](https://github.com/mwojnars/hypertag)
 and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
-
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
+## Install
+
+(TODO)
 
 # Language Reference
 
@@ -186,6 +188,9 @@ All the rules of text layout and processing as described in the next examples
 Spaces after special characters: |/!:$% - are never obligatory, and in some cases
 (inside expressions) they may be disallowed.
 
+Sometimes it is useful to put comments that will be excluded from the output.
+You can do this using either `--` or `#` prefix.
+
 ## Tags
 
 In a tagged block, the text may start on the same line (_headline_) as the tag (_inline_ content)
@@ -218,7 +223,7 @@ in the headline followed by lines of text and no more markers.
 </div>
 ```
 
-Inline (but not multiline) text can be combined with other sub-blocks if a colon (:)
+Inline (but not multiline) text can be combined with sub-blocks if a colon (:)
 is placed before the text marker. A special _null_ tag (.) can be used to better align
 tagged an untagged blocks:
 
@@ -550,9 +555,6 @@ the imported name with `$` (a variable) or `%` (a tag).
 
 <!---
 This is something that differentiates hypertags from plain Python functions.
-Sometimes it is useful to put comments that will be excluded from the output.
-You can do this in Hypertag with either `--` or `#` prefix:
-
 --->
 
 ## Filters

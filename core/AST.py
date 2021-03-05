@@ -1979,15 +1979,10 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-        %H x | $x
-        | (
-        ... H 1
-        ... | ,
-
-        ... H 2
-        ... | )
-            line
-            line
+    p
+      i | This line is in italics ...
+      . | ... and this one is not, but both are vertically aligned in the script.
+      . | The null tag helps with code alignment when a tag is missing.
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
