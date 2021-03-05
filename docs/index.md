@@ -68,6 +68,36 @@
       line-height: 20px;
     }
 
+    .highlight .nt {
+      /* color: #f4bf75; */
+      color: #f29717;
+    }
+    
+    .highlight .na {
+      /* color: #6a9fb5; */
+      color: #3e8aaa;
+    }
+    
+    .highlight .s, .highlight .sb, .highlight .sc, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+      /* color: #90a959; */
+      color: #75a609;
+    }
+    
+    .highlight .m, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mb, .highlight .mx {
+      /* color: #90a959; */
+      color: #85aa34;
+    }
+    
+    .highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+      /* color: #aa759f; */
+      color: #9f508f;
+    }
+    
+    a {
+      /* color: #3399cc; */
+      color: #0594db;
+    }
+
 </style>
 
 Hypertag is a modern language for front-end development that allows
