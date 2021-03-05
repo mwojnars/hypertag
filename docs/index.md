@@ -1,4 +1,3 @@
-<!---
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -42,7 +41,6 @@
       padding-right: 0px;
     }
 </style>
---->
 
 Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
