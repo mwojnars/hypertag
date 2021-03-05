@@ -1,12 +1,12 @@
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
-    .tag-h1 { text-decoration: underline }
-    .tag-h2 { font-weight: bold; }
+    /*.tag-h1 { text-decoration: underline }*/
+    /*.tag-h2 { font-weight: bold; }*/
 
     body {
      font:16px/24px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
-     color:#555;
+     color:#444;
     }
     
     section {
@@ -54,14 +54,13 @@ high level of modularity with Python-like imports,
 unprecedented support for code reuse with native custom tags (_hypertags_),
 and much more. Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
-**NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
+If you are new to Hypertag, see the [**Github page**](https://github.com/mwojnars/hypertag) first
+for a brief introduction and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start).
 
-If you are new to Hypertag, see the **[Github page](https://github.com/mwojnars/hypertag)** first
-for a brief introduction and a Quick Start.
+**NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
 
 # Language Reference
-
 
 ## Blocks
 
@@ -248,9 +247,9 @@ standard operators as in Python:
     ()                  - function call
 
 To put a literal `{`, `}`, or `$` inside a text block you should use an escape string:
-{%raw%}{{{%endraw%}, {%raw%}}}{%endraw%},
-or `$$`. Hypertag supports also literal `None`, `False`, `True` and allows for 
-creation of standard Python collections: _lists_, _tuples_, _sets_, _dictionaries_.
+`{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, or `$$`. Hypertag supports also literal 
+`None`, `False`, `True` and allows for creation of standard Python collections: 
+_lists_, _tuples_, _sets_, _dictionaries_.
 When creating sets and dicts, keep a space between the braces of a collection and the
 surrounding embedding, otherwise the double braces may be interpreted as escape strings.
 
