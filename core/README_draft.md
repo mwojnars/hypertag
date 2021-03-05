@@ -95,13 +95,6 @@ although any other language can be supported if an appropriate subclass
 of `hypertag.core.runtime.Runtime` is implemented to provide language-specific configuration: 
 predefined tags, an escape function etc. (see the ..... section for details).
 
-All top-level blocks in a document (or sub-blocks at any given depth)
-must have the _same indentation_. Both a space (` `) and a tab character (`\t`)
-can be used for indenting, although we recommend only using spaces to avoid confusion:
-two indentation strings are considered the same if and only if they are equal
-in Python sense, which means that a space in one line cannot be replaced with a tab
-in another equally-indented line. These are similar rules as in Python.
-
 ### Text blocks
 
 The most elementary type of block is a _text block_, which comes in three variants:

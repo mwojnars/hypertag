@@ -43,6 +43,21 @@
       padding-left: 0px;
       padding-right: 0px;
     }
+
+    pre {
+      /* background: #333333; */
+      background: #555;
+    }
+    
+    code {
+      /* background: #333; */
+      background: #555;
+    }
+
+    div.highlight {
+        max-height: 200px;
+        overflow-y: auto;
+    }
 </style>
 
 Hypertag is a modern language for front-end development that allows
@@ -54,7 +69,7 @@ high level of modularity with Python-like imports,
 unprecedented support for code reuse with native custom tags (_hypertags_),
 and much more. Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
-If you are new to Hypertag, see the [**Github page**](https://github.com/mwojnars/hypertag) first
+If you are new to Hypertag, see the [Github page](https://github.com/mwojnars/hypertag) first
 for a brief introduction and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
@@ -110,6 +125,15 @@ Plain-text block may contain embedded expressions &amp; its output is HTML-escap
 Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
 In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 ```
+
+## Layout
+
+All top-level blocks in a document (or sub-blocks at any given depth)
+must have the _same indentation_. Both a space (` `) and a tab character (`\t`)
+can be used for indenting, although we recommend only using spaces to avoid confusion:
+two indentation strings are considered the same if and only if they are equal
+in Python sense, which means that a space in one line cannot be replaced with a tab
+in another equally-indented line. These are similar rules as in Python.
 
 All the rules of text layout and processing as described in the next examples 
 (inline text, multiline text etc.) hold equally for _all types_ of text blocks.
@@ -182,8 +206,8 @@ and so are the "div" blocks below:
       p | Some contents...
 --->
 
-Tags may have _attributes_ and can be _chained_ together with a colon `:`,
-like the h1+b+a tags below:
+Tags may have _attributes_ and can be _chained_ together using a colon `:`,
+like the three tags below:
 
     h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
         | Tags can be chained together using a colon ":".
@@ -231,8 +255,8 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
-Each variable points to a Python object and can be used with all the same 
-standard operators as in Python:
+Each variable points to a Python object and can be used with all the standard operators
+known from Python:
 
     ** * / // %
     + - unary minus
