@@ -6,7 +6,7 @@
 
     body {
      font:16px/24px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
-     color:#444;
+     color:#333;
     }
     
     section {
@@ -46,16 +46,19 @@
 
     pre {
       /* background: #333333; */
-      background: #555;
+      background: #444;
     }
     
     code {
       /* background: #333; */
-      background: #555;
+      background: #444;
+      /* font-size: 13px; */
+      font-size: 12px;
+      line-height: 20px;
     }
 
     pre.highlight {
-        max-height: 184px;
+        max-height: 176px;
         overflow-y: auto;
     }
 </style>
