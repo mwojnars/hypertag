@@ -110,14 +110,13 @@ writing (X)HTML documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
 and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks, 
-high level of modularity with Python-like imports,
-unprecedented support for code reuse with native custom tags (_hypertags_),
-and much more. 
-
-Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
-
+high level of modularity with Python-like imports, unprecedented support for code reuse 
+with native custom tags (_hypertags_), and much more. 
 If you are new to Hypertag, first see the [Github page](https://github.com/mwojnars/hypertag)
 and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
+
+
+Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
