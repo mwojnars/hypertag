@@ -1,6 +1,9 @@
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
+    .tag-h1 { text-decoration: underline }
+    .tag-h2 { font-weight: bold; }
+
     body {
      font:16px/24px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
      color:#555;
@@ -57,10 +60,10 @@ If you are new to Hypertag, see the **[Github page](https://github.com/mwojnars/
 for a brief introduction and a Quick Start.
 
 
-## Language Reference
+# Language Reference
 
 
-### Blocks
+## Blocks
 
 A typical Hypertag script consists of nested blocks with tags:
 
@@ -114,7 +117,7 @@ All the rules of text layout and processing as described in the next examples
 Spaces after special characters: |/!:$% - are never obligatory, and in some cases
 (inside expressions) they may be disallowed.
 
-### Tags
+## Tags
 
 In a tagged block, the text may start on the same line (_headline_) as the tag (_inline_ content)
 and may extend to subsequent lines (_multiline_ content) unless sub-blocks are present.
@@ -209,7 +212,7 @@ output:
 <p id="main-content" class="wide-paragraph">text...</p>
 ```
 
-### Expressions
+## Expressions
 
 A Hypertag script may define _variables_ to be used subsequently in _expressions_
 inside plain-text and markup blocks, or inside attribute lists.
@@ -245,11 +248,11 @@ standard operators as in Python:
     ()                  - function call
 
 To put a literal `{`, `}`, or `$` inside a text block you should use an escape string:
-`{{`, `}}`, or `$$`. Hypertag supports also literal `None`, `False`, `True` and allows for 
+{%raw%}{{{%endraw%}, {%raw%}}}{%endraw%},
+or `$$`. Hypertag supports also literal `None`, `False`, `True` and allows for 
 creation of standard Python collections: _lists_, _tuples_, _sets_, _dictionaries_.
 When creating sets and dicts, keep a space between the braces of a collection and the
-surrounding embedding, otherwise the double braces `{{` and `}}` may be interpreted
-as escape strings.
+surrounding embedding, otherwise the double braces may be interpreted as escape strings.
 
     | this is a list:   { [1,2,3] }
     | this is a tuple:  { (1,2,3) }
@@ -311,7 +314,7 @@ and the output is:
     Page dimensions imported from the context: 500 x 1000
 
 
-### Custom tags
+## Custom tags
 
 One of the key features of Hypertag is the support for custom tags (_hypertags_)
 that can be defined directly in a Hypertag script using _hypertag definition_ blocks (%):
@@ -483,7 +486,7 @@ You can do this in Hypertag with either `--` or `#` prefix:
 
 --->
 
-### Filters
+## Filters
 
 Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.
 It is applied in a similar way as pipes `|` in templating languages:
@@ -557,7 +560,7 @@ output:
     example ordinals 1st, 2nd, 5th
 
 
-### Control blocks
+## Control blocks
 
 Control blocks of multiple types are available in Hypertag to help you manipulate input data
 directly inside the document without going back and forth between Python and templating code.
@@ -725,7 +728,7 @@ When passed `$products=[]`, the above code outputs:
 Qualifiers can be used after all atomic expressions and embeddings, no space is allowed.
 
 
-### Built-ins
+## Built-ins
 
 When using HyperHTML runtime, all Python built-in symbols (`builtins.*`) are automatically
 imported as variables at the beginning of script rendering, so all commonly used Python
@@ -759,7 +762,7 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 (TODO...)
 
 
-### Extras
+## Extras
 
 There is a number of additional elements of Hypertag that have not been mentioned so far.
 These include:
