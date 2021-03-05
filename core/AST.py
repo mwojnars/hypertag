@@ -1983,8 +1983,11 @@ if __name__ == '__main__':
         | (
         ... H 1
         ... | ,
+
         ... H 2
         ... | )
+            line
+            line
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

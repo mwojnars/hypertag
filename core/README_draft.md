@@ -87,7 +87,7 @@ Run: .......
 
 ## Blocks
 
-Every Hypertag script consists of a list of **blocks**. During parsing,
+A Hypertag script consists of a list of **blocks**. During parsing,
 blocks are first **translated** into Hypertag's native Document Object Model (DOM),
 and then the DOM undergoes **rendering** to produce a document string in a target language. 
 Typically, the target language is HTML (see `hypertag.HyperHTML`) or XHTML, 

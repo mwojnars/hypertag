@@ -11,7 +11,9 @@
     
     section {
       /* width: 590px; */
-      width: 890px;
+      width: 850px;
+      /* padding: 30px 30px 50px 30px; */
+      padding: 40px 50px 50px 50px; 
     }
 
     .wrapper {
@@ -100,6 +102,9 @@
 
 </style>
 
+
+#Introduction
+
 Hypertag is a modern language for front-end development that allows
 writing (X)HTML documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
@@ -107,10 +112,12 @@ and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks, 
 high level of modularity with Python-like imports,
 unprecedented support for code reuse with native custom tags (_hypertags_),
-and much more. Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
+and much more. 
 
-If you are new to Hypertag, see the [Github page](https://github.com/mwojnars/hypertag) first
-for a brief introduction and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start).
+Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
+
+If you are new to Hypertag, first see the [Github page](https://github.com/mwojnars/hypertag)
+and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
@@ -835,7 +842,8 @@ These include:
   equal to the parent's). The dedent modifier can be used with all types of blocks, 
   including tagged and control blocks.
 - The _append_ modifier (`...`): when put at the beginning of a block, it marks that
-  this block is a continuation and should be appended to the previous one without a newline.
+  this block is a continuation of the previous block and should be appended to it without a newline.
+  There should be no empty line between the two blocks, otherwise a newline will still be inserted.
 - The `pass` keyword can be used in place of a block, as an "empty block" placeholder.
   This quasi-block generates no output, similarly to the `pass` keyword in Python. 
   The use of `pass` is never enforced by the syntax: empty body is always a valid alternative

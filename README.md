@@ -109,7 +109,8 @@ whose one of use cases is being a replacement for web templating languages.
 | ! _verbatim_    | verbatim block; expressions are *not* parsed; output is *not* HTML-escaped |
 | &#124; _multi-line_<br>&nbsp;&nbsp;_text....._ | text blocks may span *multiple lines*, also when preceded by a tag; subsequent lines must be indented |
 | -- _comment_ <br> # _comment_ | line of comment; is excluded from output; may occur at the end of a block's headline (_inline comment_) or on a separate line (_block comment_) |
-| < BLOCK       | _dedent marker_ (<): when put on the 1st line of a BLOCK, causes the output to be dedented by one level during rendering; applies to blocks of all types (text, control etc.) |
+| < BLOCK       | _dedent_ modifier (<): when put on the 1st line of a BLOCK, causes the output to be dedented by one level during rendering; applies to blocks of all types (text, control etc.) |
+| ... BLOCK     | _append_ modifier (...): when put on the 1st line of a BLOCK, causes the output to be appended to the previous block without a newline |
 
 ### Expressions
 
