@@ -195,7 +195,7 @@ Line 2
 </div>
 ```
 
-A special _null_ tag (.) can be used to better align tagged an untagged blocks:
+A special _null_ tag (.) can be used to better align tagged an untagged blocks in the code:
 
     p
       i | This line is in italics ...
@@ -212,8 +212,7 @@ output:
 </p>
 ```
 
-Tags may have _attributes_ and can be _chained_ together using a colon `:`,
-like below:
+Tags may have _attributes_ and can be _chained_ together using a colon `:`, like below:
 
     h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
         | Tags can be chained together using a colon ":".
@@ -230,7 +229,7 @@ output:
 </a></b></h1>
 ```
 
-Shortcut syntax can be used for the two most common HTML attribute names: 
+Shortcuts are available for the two most common HTML attribute names: 
 `.CLASS` is equivalent to `class=CLASS`, and `#ID` means `id=ID`.
 
     p #main-content .wide-paragraph | text...
@@ -240,19 +239,18 @@ output:
 ```html
 <p id="main-content" class="wide-paragraph">text...</p>
 ```
-
+<!---
 Without inline content, a colon can still be used at the end of blocks' headlines.
 The two forms, with and without a trailing colon, are equivalent.
-
 Comments in the code start with `--` or `#` prefix.
-
+--->
 
 ### Expressions
 
 A Hypertag script may define _variables_ to be used in _expressions_
 inside plain-text and markup blocks, or inside attribute lists.
 A variable is created by an _assignment block_ ($). 
-Expressions are embedded in text blocks using {...}  or $... syntax:
+Expressions are embedded in text blocks using `{...}`  or `$...` syntax:
 
     $ k = 3
     $ name = "Ala"
@@ -281,7 +279,7 @@ known from Python:
     []                  - indexing
     ()                  - function call
 
-Standard Python collections - _lists_, _tuples_, _sets_, _dictionaries_ - can be created:
+Standard Python collections: _lists_, _tuples_, _sets_, _dictionaries_, can also be created:
 
     | this is a list:   { [1,2,3] }
     | this is a tuple:  { (1,2,3) }
@@ -295,7 +293,7 @@ output:
     this is a set:    {1, 2}
     this is a dict:   {'a': 1, 'b': 2}
 
-Assignment blocks can handle _augmented assignments_:
+Assignment blocks support _augmented assignments_:
 
     $ a, (b, c) = 1, (2, 3)
 
@@ -340,8 +338,8 @@ using _hypertag definition_ blocks (%):
             td | $name
             td | $price
 
-A hypertag may accept attributes, possibly with default values. 
-In places of occurrence, it can be passed positional (unnamed) and/or keyword (named) attributes:
+A hypertag may declare attributes, possibly with default values. 
+In places of occurrence, hypertags accept positional (unnamed) and/or keyword (named) attributes:
 
     table
         tableRow 'Porsche'  '200,000'
@@ -367,23 +365,23 @@ output:
 </table>
 ```
 
+<!---
 If, at some point, you decided to add a CSS class `.style-price` to all cells in the price column,
 it is enough to modify the hypertag definition instead of walking through
 all the rows and manually updating corresponding `td` occurrences:
-<!---
+
 Imagine that at some point you decided to add a CSS class to all cells in the price column?
 In HTML, you'd have to walk through all the cells and manually modify 
 every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
 taking care not to modify `<td>` cells of another column accidentally.
 In Hypertag, which provides powerful ways to deduplicate code, it is enough to modify
 the hypertag definition adding `.style-price` in one place, and voilà:
---->
 
     % tableRow name price='UNKNOWN'
         tr        
             td | $name
             td .style-price | $price
-<!---
+
 This definition can be moved out to a separate "utility" script,
 or stay in the same file where it is being used, for easy maintenance - 
 the programmer can choose whatever location is best in a given case.
@@ -392,12 +390,15 @@ often the best you can do is separate out duplicated HTML code into a Python fun
 introducing code fragmentation along the way and spreading presentation code over 
 different types of files (views vs. models) and languages (HTML vs. Python) - 
 a very unclean and confusing approach.
+
+Let's say you wanted to add another column containing formatted (rich-text) information 
+about a car model: funny quotes, pictures etc. Passing it as a regular attribute would be
+difficult, as you'd have to somehow encode the entire HTML structure: paragraphs, styles, images.
+Instead, you can add a special _body attribute_ (@) to the hypertag definition:
 --->
 
-Now, let's say you want to add another column containing formatted (rich-text) information 
-about a car model: funny quotes, pictures etc. Passing it as a regular attribute is inconvenient,
-as you'd have to somehow encode the entire HTML structure: paragraphs, styles, images.
-Instead, you can add a special _body attribute_ (@) to the hypertag definition:
+If you want to pass structured (rich-text) data to a hypertag, you can declare 
+a _body attribute_ (@) in the hypertag definition:
 
     % tableRow @info name price='UNKNOWN'
         tr
@@ -406,9 +407,10 @@ Instead, you can add a special _body attribute_ (@) to the hypertag definition:
             td
                @ info           # inline form can be used, as well:  td @ info
 
-and then apply this hypertag to a non-empty _actual body_ which will be passed
-in a structural form via the "info" attribute and will get printed in the right 
-place inside the output table with all its rich contents and formatting preserved:
+This special attribute (here, `info`; an arbitrary name can be chosen) will hold the 
+_actual body_ of hypertag's occurrence and will pass it in a structured form of the 
+Hypertag's native Document Object Model (DOM), so that all rich contents and formatting 
+are preserved:
 
     table
         tableRow 'Porsche' '200,000'
@@ -422,7 +424,7 @@ place inside the output table with all its rich contents and formatting preserve
             | If you liked Minecraft you will like this one, too.
             / (Honestly, I did it for the memes. <i>Elon Musk</i>)
 
-Output:
+output:
 ```html
 <table>
     <tr>
@@ -461,9 +463,9 @@ if there is no other meaningful alternative...
 Yes, any associations with Python's "self" are intended and well justified.
 --->
 
-Like variables, custom tags can be imported from Hypertag scripts and Python modules.
+Like variables, tags also can be imported from Hypertag scripts and Python modules.
 Because of separation of namespaces (variables vs. tags), all imported symbols must be 
-prepended with either `$` (a variable) or `%` (a tag).
+prepended with either `$` (to denote a variable) or `%` (a tag).
 
     from my.utils import $variable
     from my.utils import %tag
@@ -472,7 +474,7 @@ prepended with either `$` (a variable) or `%` (a tag).
 ### Filters
 
 Hypertag defines a colon `:` as a _pipeline operator_ that allows functions (and all callables)
-be used as chained _filters_ inside expressions:
+to be used as chained _filters_ in expressions:
 
     'Hypertag' : str.upper : list : sorted(reverse=True)
 
@@ -480,9 +482,13 @@ output:
 
     ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
 
-In the code above, standard Python functions and methods are used, with no need for them to be
-registered as filters beforehand. This is because Hypertag's pipelines are just another syntax 
-for a function call, and every expression of the form:
+In the code above, standard Python functions and methods are used - they do _not_ have to be
+registered as filters, unlike in popular templating languages.
+
+<!---
+This is because Hypertag's pipelines are implemented as 
+just another syntax for a function call,
+and every expression of the form:
 
     EXPR : FUN(*args, **kwargs)
 
@@ -490,7 +496,6 @@ gets translated internally to:
 
     FUN(EXPR, *args, **kwarg)
 
-<!---
 Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.
 It is applied in a similar way as pipes `|` in templating languages:
 to pass a result of an expression to a function (a _filter_) as its first argument,
@@ -561,7 +566,7 @@ output:
 
 ### Control blocks
 
-You can use control blocks in Hypertag: "if", "try", "for", "while". Example:
+There are _control blocks_ in Hypertag: "if", "try", "for", "while". Example:
 
     $size = 5
     if size > 10      
@@ -575,7 +580,7 @@ output:
 
     medium size
 
-The same code as above, but with inline body, notice the parentheses around expressions:
+Clauses may have inline body; notice the parentheses around expressions:
 
     $size = 5
     if (size > 10)    | large size
@@ -608,9 +613,10 @@ letter "b"
 letter "c"
 ```
 
-The "try" block consists of a single "try" clause plus any number (possibly none) of "else" clauses.
+The "try" block consists of a single `try` clause plus any number (possibly none) of `else` clauses.
 The first clause that does _not_ raise an exception is returned.
-All exceptions that inherit from Python's Exception are caught. Example:
+All exceptions that inherit from Python's Exception are caught; there is no way to
+customize this behavior. Example:
 
     $cars = {'ford': 60000, 'audi': 80000}
     try
@@ -618,7 +624,7 @@ All exceptions that inherit from Python's Exception are caught. Example:
     else
         | Price of Opel is unknown.
 
-output:
+output (the 'opel' key is missing in the dictionary):
 
     Price of Opel is unknown.
 
@@ -638,20 +644,20 @@ output:
     Let's stick with a Ford: 60000.
 --->
 
-There is a shortcut version "?" of the "try" syntax which
-can only be used without "else" clauses, to suppress exceptions:
+There is a shortcut version "?" of the "try" syntax, which has no "else" clauses, and so is 
+only used to suppress exceptions:
 
     ? | Price of Opel is $cars['opel'].
 
-Importantly, the shortcut "?" _can_ be used as a prefix (on the same line) 
-with a tagged block, which is not possible with the basic syntax. 
+Importantly, the shortcut "?" can prepend a tagged block (on the same line),
+which is not possible with the basic syntax. 
 The code below renders empty string instead of raising an exception:
 
-    ? b : a href=$cars.url | the "a" tag fails because "cars" has no "url"
+    ? b : a href=$cars.url | the "a" tag fails because "cars" has no "url" member
 
-The "try" block is particularly useful when combined with expression
-_qualifiers_: "optional" (`?`) and "obligatory" (`!`), placed at the end
-of (sub)expressions to mark that a given piece of calculation either:
+The "try" block is particularly useful when combined with _qualifiers_: 
+"optional" (`?`) and "obligatory" (`!`), placed at the end of (sub)expressions to mark 
+that a given piece of calculation either:
 
 - can be ignored (replaced with `''`) if it fails with an exception (`?`); or
 - must be non-empty (not false), otherwise an exception will be raised (`!`).
@@ -670,11 +676,11 @@ to approximate the price from another entry. The output:
 
     Price of Opel is 64000.0
 
-The "obligatory" qualifier `!` can be used to verify that a variable has a non-default 
+With the "obligatory" qualifier `!` one can verify that a variable has a non-default 
 (non-empty) value, and adapt the displayed message accordingly, with no need for 
 a more verbose if-else test:
 
-    %display name='' price=0
+    % display name='' price=0
         try  | Product "$name!" costs {price}!.
         else | Product "$name!" is available, but the price is unknown yet.
         else | There is a product priced at {price!}.
@@ -690,8 +696,8 @@ output:
     Product "Pencil" is available, but the price is unknown yet.
     There is a product priced at 25.
 
-Qualifiers can be used in loop headlines, as well, to test for non-emptiness
-of collections to be iterated over:
+Qualifiers can also be used in loops to test for non-emptiness of the collections 
+to be iterated over:
 
     try
         for p in products!
@@ -703,7 +709,7 @@ When passed `$products=[]`, the above code outputs:
 
     No products currently available.
 
-Qualifiers can be used after all atomic expressions and embeddings, no space is allowed.
+Qualifiers can be placed after all atomic expressions and embeddings, no space is allowed.
 
 
 ### Built-ins
@@ -725,9 +731,6 @@ output:
     0, a
     1, c
     2, t
-
-As mentioned earlier, Hypertag allows easy import of Django template filters to be used as
-standalone functions or inside pipelines.
 
 Additionally, Hypertag provides a number of predefined tags and functions:
 

@@ -333,8 +333,8 @@ Output:
     this is a set:    {1, 2}
     this is a dict:   {'a': 1, 'b': 2}
 
-Assignment blocks can handle _augmented assignments_, where multiple variables 
-are assigned to, all at once:
+Assignment blocks support _augmented assignments_, where multiple variables 
+are assigned to all at once:
 
     $ a, (b, c) = 1, (2, 3)
 
@@ -752,7 +752,7 @@ to approximate the price from another entry. The output:
 
     Price of Opel is 64000.0
 
-The "obligatory" qualifier `!` can be used to verify that a variable has a non-default 
+With the "obligatory" qualifier `!` one can verify that a variable has a non-default 
 (non-empty) value, and adapt the displayed message accordingly, with no need for 
 a more verbose if-else test:
 
@@ -772,8 +772,8 @@ output:
     Product "Pencil" is available, but the price is unknown yet.
     There is a product priced at 25.
 
-Qualifiers can be used in loop headlines, as well, to test for non-emptiness
-of collections to be iterated over:
+Qualifiers can also be used in loops to test for non-emptiness of the collections 
+to be iterated over:
 
     try
         for p in products!
@@ -785,7 +785,7 @@ When passed `$products=[]`, the above code outputs:
 
     No products currently available.
 
-Qualifiers can be used after all atomic expressions and embeddings, no space is allowed.
+Qualifiers can be placed after all atomic expressions and embeddings, no space is allowed.
 
 
 ## Built-ins
