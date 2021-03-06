@@ -319,7 +319,7 @@ as extra keyword arguments.
     
     | Page dimensions imported from the context: $width x $height
 
-This script can be rendered in the following way:
+The above script can be rendered in the following way:
 
 ```python
 html = HyperHTML().render(script, width = 500, height = 1000)
@@ -346,7 +346,6 @@ In places of occurrence, it can be passed positional (unnamed) and/or keyword (n
     table
         tableRow 'Porsche'  '200,000'
         tableRow 'Jaguar'   '150,000'
-        tableRow 'Maserati' '300,000'
         tableRow name='Cybertruck'
 
 output:
@@ -362,28 +361,29 @@ output:
         <td>150,000</td>
     </tr>
     <tr>
-        <td>Maserati</td>
-        <td>300,000</td>
-    </tr>
-    <tr>
         <td>Cybertruck</td>
         <td>UNKNOWN</td>
     </tr>
 </table>
 ```
 
+If, at some point, you decided to add a CSS class `.style-price` to all cells in the price column,
+it is enough to modify the hypertag definition instead of walking through
+all the rows and manually updating corresponding `td` occurrences:
+<!---
 Imagine that at some point you decided to add a CSS class to all cells in the price column?
 In HTML, you'd have to walk through all the cells and manually modify 
 every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
 taking care not to modify `<td>` cells of another column accidentally.
 In Hypertag, which provides powerful ways to deduplicate code, it is enough to modify
 the hypertag definition adding `.style-price` in one place, and voilà:
+--->
 
     % tableRow name price='UNKNOWN'
         tr        
             td | $name
             td .style-price | $price
-
+<!---
 This definition can be moved out to a separate "utility" script,
 or stay in the same file where it is being used, for easy maintenance - 
 the programmer can choose whatever location is best in a given case.
@@ -392,20 +392,19 @@ often the best you can do is separate out duplicated HTML code into a Python fun
 introducing code fragmentation along the way and spreading presentation code over 
 different types of files (views vs. models) and languages (HTML vs. Python) - 
 a very unclean and confusing approach.
+--->
 
-One more crucial element of the hypertag syntax is the _body attribute_.
-Imagine that in the example above, we wanted to add another column containing
-formatted (rich-text) information about a car model: funny quotes, pictures etc.
-Passing it as a regular attribute is inconvenient, as we'd have to somehow encode
-the entire HTML structure of the description: paragraphs, styles, images.
-Instead, we can add a _body attribute_ (@) to the hypertag definition:
+Now, let's say you want to add another column containing formatted (rich-text) information 
+about a car model: funny quotes, pictures etc. Passing it as a regular attribute is inconvenient,
+as you'd have to somehow encode the entire HTML structure: paragraphs, styles, images.
+Instead, you can add a special _body attribute_ (@) to the hypertag definition:
 
     % tableRow @info name price='UNKNOWN'
         tr
             td | $name
             td | $price
             td
-               @ info           # this could be inlined instead:  td @ info
+               @ info           # inline form can be used, as well:  td @ info
 
 and then apply this hypertag to a non-empty _actual body_ which will be passed
 in a structural form via the "info" attribute and will get printed in the right 
@@ -454,17 +453,17 @@ Output:
 </table>
 ```
 
-Note that there can only be one _body_ attribute in a hypertag; it must be the first one
+<!---
+There can only be one _body_ attribute in a hypertag; it must be the first one
 on the list; it can be missing (then the tag is _void_ and its 
 occurrences must have empty body); and it can have arbitrary name: we suggest _@body_ 
 if there is no other meaningful alternative... 
 Yes, any associations with Python's "self" are intended and well justified.
+--->
 
-Like variables, custom tags can also be imported from other Hypertag scripts and from 
-Python modules. The syntax is a bit different, though. Because of separation of 
-namespaces (variables vs. tags), every import block must clearly indicate whether
-a particular symbol is a variable or a tag. This is done be prepending 
-the imported name with `$` (a variable) or `%` (a tag).
+Like variables, custom tags can be imported from Hypertag scripts and Python modules.
+Because of separation of namespaces (variables vs. tags), all imported symbols must be 
+prepended with either `$` (a variable) or `%` (a tag).
 
     from my.utils import $variable
     from my.utils import %tag
@@ -472,6 +471,26 @@ the imported name with `$` (a variable) or `%` (a tag).
 
 ### Filters
 
+Hypertag defines a colon `:` as a _pipeline operator_ that allows functions (and all callables)
+be used as chained _filters_ inside expressions:
+
+    'Hypertag' : str.upper : list : sorted(reverse=True)
+
+output:
+
+    ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
+
+In the code above, standard Python functions and methods are used, with no need for them to be
+registered as filters beforehand. This is because Hypertag's pipelines are just another syntax 
+for a function call, and every expression of the form:
+
+    EXPR : FUN(*args, **kwargs)
+
+gets translated internally to:
+
+    FUN(EXPR, *args, **kwarg)
+
+<!---
 Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.
 It is applied in a similar way as pipes `|` in templating languages:
 to pass a result of an expression to a function (a _filter_) as its first argument,
@@ -489,7 +508,7 @@ replaced with colons:
 Templating languages, like Jinja or Django's templates, require that functions are explicitly
 declared as filters before they can be used in template code.
 In Hypertag, there are _no_ such restrictions. Rather, all _callables_ (functions, methods,
-class constructors etc.) can be used in pipelines without special preparation. 
+class instantiation etc.) can be used in pipelines without special preparation. 
 A pipeline is just another syntax for a function call, so every expression of the form:
 
     EXPR : FUN(*args, **kwargs)
@@ -509,21 +528,26 @@ output:
 
     ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
 
-<!---
 Remember that all Python built-ins are available in Hypertag, that is why `str`, `list`,
 `sorted` etc. are accessible without an explicit import.
 --->
-As an addition to the pipeline syntax, Hypertag provides seamless integration of Django's 
-several dozens of well-known [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
+
+Hypertag seamlessly integrates all of Django's [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
 They can be imported from `hypertag.django.filters` and either called as regular functions
-or used inside pipelines. Django must be installed on the system.
+or used inside pipelines. Extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
+(the "human touch" to data) are also available. Django must be installed on the system.
 
     from hypertag.django.filters import $slugify, $upper
     from hypertag.django.filters import $truncatechars, $floatformat
+    from hypertag.django.filters import $apnumber, $ordinal
 
     | { 'Hypertag rocks' : slugify : upper }
     | { 'Hypertag rocks' : truncatechars(6) }
     | { '123.45' : floatformat(4) }
+
+    # from django.contrib.humanize:
+    | "5" spelled out is "{ 5:apnumber }"
+    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
     
 output:
 
@@ -531,36 +555,13 @@ output:
     Hyper…
     123.4500
 
-Django's extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
-(the "human touch" to data) are also available:
-
-    from hypertag.django.filters import $apnumber, $ordinal
-    | "5" spelled out is "{ 5:apnumber }"
-    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
-
-output:
-
     "5" spelled out is "five"
     example ordinals 1st, 2nd, 5th
 
 
 ### Control blocks
 
-Control blocks of multiple types are available in Hypertag to help you manipulate input data
-directly inside the document without going back and forth between Python and templating code.
-The blocks are:
-
-- **if-elif-else**
-- **try-else**
-- **for**
-- **while**
-
-The semantics of "if", "for", "while" blocks is analogous to what it is in Python.
-Both inline and outline body is supported, although the former comes with restrictions:
-the preceeding expression (a condition in "if/while", a collection in "for") may need to be
-enclosed in (...) or {...}. Trailing colons in clause headlines are optional.
-
-An example "if" block with outline body:
+You can use control blocks in Hypertag: "if", "try", "for", "while". Example:
 
     $size = 5
     if size > 10      
@@ -607,18 +608,9 @@ letter "b"
 letter "c"
 ```
 
-The "try" block differs from the corresponding Python statement.
-It consists of a single "try" clause plus any number (possibly none) of "else" clauses.
+The "try" block consists of a single "try" clause plus any number (possibly none) of "else" clauses.
 The first clause that does _not_ raise an exception is returned.
-All exceptions that inherit from Python's Exception are caught.
-Empty string is rendered if all clauses fail.
-
-Exceptions are checked only after semantic analysis, so if there are any syntactical 
-or name resolution errors (e.g., an undefined variable in a clause), they are still being raised.
-Also, note that the semantics of "else" is _opposite_ to what it is in Python,
-where the "else" clause of a "try-else" statement only gets executed if _no_ exceptions occured.
-
-Example:
+All exceptions that inherit from Python's Exception are caught. Example:
 
     $cars = {'ford': 60000, 'audi': 80000}
     try
@@ -630,6 +622,7 @@ output:
 
     Price of Opel is unknown.
 
+<!---
 Similar code as above, but with inline body:
 
     $cars = {'ford': 60000, 'audi': 80000}
@@ -643,9 +636,10 @@ output:
 
     Neither Opel nor Seat is available.
     Let's stick with a Ford: 60000.
+--->
 
-There is a shortcut version "?" of the "try" syntax. 
-It can only be used without "else" clauses, to suppress exceptions:
+There is a shortcut version "?" of the "try" syntax which
+can only be used without "else" clauses, to suppress exceptions:
 
     ? | Price of Opel is $cars['opel'].
 

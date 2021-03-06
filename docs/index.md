@@ -477,7 +477,7 @@ Instead, we can add a _body attribute_ (@) to the hypertag definition:
             td | $name
             td | $price
             td
-               @ info           # this could be inlined instead:  td @ info
+               @ info           # inline form can be used, as well:  td @ info
 
 and then apply this hypertag to a non-empty _actual body_ which will be passed
 in a structural form via the "info" attribute and will get printed in the right 
@@ -526,7 +526,7 @@ Output:
 </table>
 ```
 
-Note that there can only be one _body_ attribute in a hypertag; it must be the first one
+There can only be one _body_ attribute in a hypertag; it must be the first one
 on the list; it can be missing (then the tag is _void_ and its 
 occurrences must have empty body); and it can have arbitrary name: we suggest _@body_ 
 if there is no other meaningful alternative... 
@@ -538,10 +538,9 @@ tags it enables cleaner separation between presentation logic (tags) and textual
 --->
 
 Like variables, custom tags can also be imported from other Hypertag scripts and from 
-Python modules. The syntax is a bit different, though. Because of separation of 
-namespaces (variables vs. tags), every import block must clearly indicate whether
-a particular symbol is a variable or a tag. This is done be prepending 
-the imported name with `$` (a variable) or `%` (a tag).
+Python modules. Because of separation of namespaces (variables vs. tags),
+every import block must clearly indicate whether a particular symbol is a variable or a tag.
+This is done be prepending the imported name with `$` (a variable) or `%` (a tag).
 
     from my.utils import $variable
     from my.utils import %tag
@@ -569,7 +568,7 @@ replaced with colons:
 Templating languages, like Jinja or Django's templates, require that functions are explicitly
 declared as filters before they can be used in template code.
 In Hypertag, there are _no_ such restrictions. Rather, all _callables_ (functions, methods,
-class constructors etc.) can be used in pipelines without special preparation. 
+class instantiation etc.) can be used in pipelines without special preparation. 
 A pipeline is just another syntax for a function call, so every expression of the form:
 
     EXPR : FUN(*args, **kwargs)
@@ -593,32 +592,29 @@ output:
 Remember that all Python built-ins are available in Hypertag, that is why `str`, `list`,
 `sorted` etc. are accessible without an explicit import.
 --->
-As an addition to the pipeline syntax, Hypertag provides seamless integration of Django's 
-several dozens of well-known [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
+
+Hypertag seamlessly integrates all of Django's [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
 They can be imported from `hypertag.django.filters` and either called as regular functions
-or used inside pipelines. Django must be installed on the system.
+or used inside pipelines. Extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
+(the "human touch" to data) are also available. Django must be installed on the system.
 
     from hypertag.django.filters import $slugify, $upper
     from hypertag.django.filters import $truncatechars, $floatformat
+    from hypertag.django.filters import $apnumber, $ordinal
 
     | { 'Hypertag rocks' : slugify : upper }
     | { 'Hypertag rocks' : truncatechars(6) }
     | { '123.45' : floatformat(4) }
+
+    # from django.contrib.humanize:
+    | "5" spelled out is "{ 5:apnumber }"
+    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
     
 output:
 
     HYPERTAG-ROCKS
     Hyper…
     123.4500
-
-Django's extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
-(the "human touch" to data) are also available:
-
-    from hypertag.django.filters import $apnumber, $ordinal
-    | "5" spelled out is "{ 5:apnumber }"
-    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
-
-output:
 
     "5" spelled out is "five"
     example ordinals 1st, 2nd, 5th
@@ -724,8 +720,8 @@ output:
     Neither Opel nor Seat is available.
     Let's stick with a Ford: 60000.
 
-There is a shortcut version "?" of the "try" syntax. 
-It can only be used without "else" clauses, to suppress exceptions:
+There is a shortcut version "?" of the "try" syntax which
+can only be used without "else" clauses, to suppress exceptions:
 
     ? | Price of Opel is $cars['opel'].
 
