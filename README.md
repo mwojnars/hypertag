@@ -716,7 +716,7 @@ to be iterated over:
     else
         | No products currently available.
 
-When passed `$products=[]`, the above code outputs:
+When initialized with `$products=[]`, the above code outputs:
 
     No products currently available.
 
