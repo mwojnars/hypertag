@@ -112,9 +112,20 @@ Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
-## Install
+## Setup
 
 (TODO)
+
+## Troubleshooting
+
+(TODO)
+
+## Acknowledgements
+
+Hypertag was inspired by indentation-based templating languages:
+[Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
+[Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
+
 
 # Language Reference
 
@@ -309,7 +320,7 @@ known from Python:
     == != >= <= < > in is "not in" "is not"
     not and or
     X if TEST else Y    - the "else" clause is optional and defaults to "else None"
-    A:B:C               - array slice operator
+    A:B:C               - slice operator inside [...]
     .                   - member access
     []                  - indexing
     ()                  - function call
@@ -477,7 +488,7 @@ Instead, we can add a _body attribute_ (@) to the hypertag definition:
             td | $name
             td | $price
             td
-               @ info           # inline form can be used, as well:  td @ info
+               @ info           # inline form can be used as well:  td @ info
 
 and then apply this hypertag to a non-empty _actual body_ which will be passed
 in a structural form via the "info" attribute and will get printed in the right 

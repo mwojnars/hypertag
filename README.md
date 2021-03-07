@@ -229,7 +229,7 @@ output:
 </a></b></h1>
 ```
 
-Shortcuts are available for the two most common HTML attribute names: 
+Shortcuts are available for the two most common HTML attributes: 
 `.CLASS` is equivalent to `class=CLASS`, and `#ID` means `id=ID`.
 
     p #main-content .wide-paragraph | text...
@@ -274,12 +274,12 @@ known from Python:
     == != >= <= < > in is "not in" "is not"
     not and or
     X if TEST else Y    - the "else" clause is optional and defaults to "else None"
-    A:B:C               - array slice operator
+    A:B:C               - slice operator inside [...]
     .                   - member access
     []                  - indexing
     ()                  - function call
 
-Standard Python collections: _lists_, _tuples_, _sets_, _dictionaries_, can also be created:
+Python collections: _lists_, _tuples_, _sets_, _dictionaries_, can be created in a standard way:
 
     | this is a list:   { [1,2,3] }
     | this is a tuple:  { (1,2,3) }
@@ -398,19 +398,25 @@ Instead, you can add a special _body attribute_ (@) to the hypertag definition:
 --->
 
 If you want to pass structured (rich-text) data to a hypertag, you can declare 
-a _body attribute_ (@) in the hypertag definition:
+a _body attribute_ (@) in the hypertag definition block, and then paste its contents
+in any place you wish:
 
     % tableRow @info name price='UNKNOWN'
         tr
             td | $name
             td | $price
             td
-               @ info           # inline form can be used, as well:  td @ info
+               @ info           # inline form can be used as well:  td @ info
 
+This special attribute will hold the _actual body_ of hypertag's occurrence, 
+represented as a tree of nodes of Hypertag's native Document Object Model (DOM),
+so that all rich contents and formatting are preserved:
+<!---
 This special attribute (here, `info`; an arbitrary name can be chosen) will hold the 
 _actual body_ of hypertag's occurrence and will pass it in a structured form of the 
 Hypertag's native Document Object Model (DOM), so that all rich contents and formatting 
 are preserved:
+--->
 
     table
         tableRow 'Porsche' '200,000'
@@ -463,7 +469,7 @@ if there is no other meaningful alternative...
 Yes, any associations with Python's "self" are intended and well justified.
 --->
 
-Like variables, tags also can be imported from Hypertag scripts and Python modules.
+Like variables, tags can also be imported from Hypertag scripts and Python modules.
 Due to separation of namespaces (variables vs. tags), all symbols must be 
 prepended with either `$` (denotes a variable) or `%` (a tag):
 
@@ -748,6 +754,11 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 
 (TODO...)
 
+### Further reading
+
+The Quick Start only presented a small part of the features provided by Hypertag.
+See the [Language Reference](http://hypertag.io) on hypertag.io for more details.
+
 
 ## Cheat Sheet
 
@@ -802,10 +813,3 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 | TAG x=1.0 y={v+1} | named (keyword) attributes of a tag occurrence; space-separated, no parentheses |
 | TAG "yes" 3 True  | unnamed attributes of a tag occurrence; values are matched to formal attributes in a way similar to how Python matches function arguments (by order) |
 --->
-
-
-## Acknowledgements
-
-Hypertag was inspired by indentation-based templating languages:
-[Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
-[Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
