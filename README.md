@@ -464,8 +464,8 @@ Yes, any associations with Python's "self" are intended and well justified.
 --->
 
 Like variables, tags also can be imported from Hypertag scripts and Python modules.
-Because of separation of namespaces (variables vs. tags), all imported symbols must be 
-prepended with either `$` (to denote a variable) or `%` (a tag).
+Due to separation of namespaces (variables vs. tags), all symbols must be 
+prepended with either `$` (denotes a variable) or `%` (a tag):
 
     from my.utils import $variable
     from my.utils import %tag
@@ -474,16 +474,24 @@ prepended with either `$` (to denote a variable) or `%` (a tag).
 ### Filters
 
 Hypertag defines a colon `:` as a _pipeline operator_ that allows functions (and all callables)
-to be used as chained _filters_ in expressions:
+to be used in expressions as chained _filters_. A pipeline expression of the form:
+
+    EXPR : FUN(*args, **kwargs)
+
+gets translated internally to:
+
+    FUN(EXPR, *args, **kwarg)
+
+For example, the expression:
 
     'Hypertag' : str.upper : list : sorted(reverse=True)
 
-output:
+evaluates to:
 
     ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
 
-In the code above, standard Python functions and methods are used - they do _not_ have to be
-registered as filters, unlike in popular templating languages.
+Here, standard Python functions and methods are used. Functions do _not_ have to be registered 
+as filters before use, unlike in popular templating languages.
 
 <!---
 This is because Hypertag's pipelines are implemented as 
@@ -566,7 +574,7 @@ output:
 
 ### Control blocks
 
-There are _control blocks_ in Hypertag: "if", "try", "for", "while". Example:
+There are _control blocks_ in Hypertag: "if", "try", "for", "while". For example:
 
     $size = 5
     if size > 10      
@@ -615,8 +623,7 @@ letter "c"
 
 The "try" block consists of a single `try` clause plus any number (possibly none) of `else` clauses.
 The first clause that does _not_ raise an exception is returned.
-All exceptions that inherit from Python's Exception are caught; there is no way to
-customize this behavior. Example:
+All exceptions that inherit from Python's Exception are caught (this cannot be changed). Example:
 
     $cars = {'ford': 60000, 'audi': 80000}
     try
@@ -644,13 +651,12 @@ output:
     Let's stick with a Ford: 60000.
 --->
 
-There is a shortcut version "?" of the "try" syntax, which has no "else" clauses, and so is 
-only used to suppress exceptions:
+There is a shortcut version "?" of the "try" syntax, which has no "else" clauses, so its 
+only function is to suppress exceptions:
 
     ? | Price of Opel is $cars['opel'].
 
-Importantly, the shortcut "?" can prepend a tagged block (on the same line),
-which is not possible with the basic syntax. 
+Importantly, unlike the basic form of "try", the shortcut "?" can prepend a tagged block. 
 The code below renders empty string instead of raising an exception:
 
     ? b : a href=$cars.url | the "a" tag fails because "cars" has no "url" member
@@ -664,21 +670,20 @@ that a given piece of calculation either:
 
 Together, these language constructs enable fine-grained control over data post-processing,
 sanitization and display.
-They can be used to verify the availability of particular elements of input data
-(keys in dictionaries, attributes of objects) and to easily create alternative paths 
-of calculation that will handle multiple edge cases at once.
+They can be used to verify the availability of particular elements of data
+(keys in dictionaries, attributes of objects) and create alternative paths of calculation 
+that will handle multiple edge cases at once:
 
-    try | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
+    | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
 
 In the above code, the price of Opel is not present in the dictionary, but thanks 
 to the "optional" qualifier `?`, a KeyError is caught early, and a fallback is used 
-to approximate the price from another entry. The output:
+to approximate the price from another entry:
 
     Price of Opel is 64000.0
 
 With the "obligatory" qualifier `!` one can verify that a variable has a non-default 
-(non-empty) value, and adapt the displayed message accordingly, with no need for 
-a more verbose if-else test:
+(non-empty) value, and adapt the displayed message if not:
 
     % display name='' price=0
         try  | Product "$name!" costs {price}!.
@@ -709,14 +714,15 @@ When passed `$products=[]`, the above code outputs:
 
     No products currently available.
 
+<!---
 Qualifiers can be placed after all atomic expressions and embeddings, no space is allowed.
-
+--->
 
 ### Built-ins
 
-When using HyperHTML runtime, all Python built-in symbols (`builtins.*`) are automatically
-imported as variables at the beginning of script rendering, so all commonly used Python
-types and functions: `list`, `set`, `dict`, `int`, `min`, `max`, `enumerate`, `sorted` etc., 
+HyperHTML runtime automatically imports all Python built-in symbols (`builtins.*`) 
+at the beginning of script rendering, so all common types and functions: 
+`list`, `set`, `dict`, `int`, `min`, `max`, `enumerate`, `sorted` etc., 
 are available to a script.
 
     | $len('cat'), $list('cat')

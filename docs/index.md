@@ -744,7 +744,7 @@ They can be used to verify the availability of particular elements of input data
 (keys in dictionaries, attributes of objects) and to easily create alternative paths 
 of calculation that will handle multiple edge cases at once.
 
-    try | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
+    | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
 
 In the above code, the price of Opel is not present in the dictionary, but thanks 
 to the "optional" qualifier `?`, a KeyError is caught early, and a fallback is used 
