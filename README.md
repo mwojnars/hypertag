@@ -496,20 +496,10 @@ evaluates to:
 
     ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
 
-Here, standard Python functions and methods are used. Functions do _not_ have to be registered 
-as filters before use, unlike in popular templating languages.
+Functions do _not_ have to be explicitly registered as filters before use, which is in contrast 
+to popular templating languages (Jinja, Django templates etc.).
 
 <!---
-This is because Hypertag's pipelines are implemented as 
-just another syntax for a function call,
-and every expression of the form:
-
-    EXPR : FUN(*args, **kwargs)
-
-gets translated internally to:
-
-    FUN(EXPR, *args, **kwarg)
-
 Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.
 It is applied in a similar way as pipes `|` in templating languages:
 to pass a result of an expression to a function (a _filter_) as its first argument,
@@ -528,13 +518,6 @@ Templating languages, like Jinja or Django's templates, require that functions a
 declared as filters before they can be used in template code.
 In Hypertag, there are _no_ such restrictions. Rather, all _callables_ (functions, methods,
 class instantiation etc.) can be used in pipelines without special preparation. 
-A pipeline is just another syntax for a function call, so every expression of the form:
-
-    EXPR : FUN(*args, **kwargs)
-
-gets translated internally to:
-
-    FUN(EXPR, *args, **kwarg)
 
 Obviously, pipeline operators can be chained together, so `EXPR:FUN1:FUN2` is
 equivalent to `FUN2(FUN1(EXPR))`. The function can be given as a compound expression,
@@ -553,7 +536,7 @@ Remember that all Python built-ins are available in Hypertag, that is why `str`,
 
 Hypertag seamlessly integrates all of Django's [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
 They can be imported from `hypertag.django.filters` and either called as regular functions
-or used inside pipelines. Extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
+or used inside pipelines. The extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
 (the "human touch" to data) are also available. Django must be installed on the system.
 
     from hypertag.django.filters import $slugify, $upper

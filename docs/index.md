@@ -112,15 +112,15 @@ Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
-## Setup
+### Setup
 
 (TODO)
 
-## Troubleshooting
+### Troubleshooting
 
 (TODO)
 
-## Acknowledgements
+### Acknowledgements
 
 Hypertag was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
@@ -606,7 +606,7 @@ Remember that all Python built-ins are available in Hypertag, that is why `str`,
 
 Hypertag seamlessly integrates all of Django's [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
 They can be imported from `hypertag.django.filters` and either called as regular functions
-or used inside pipelines. Extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
+or used inside pipelines. The extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
 (the "human touch" to data) are also available. Django must be installed on the system.
 
     from hypertag.django.filters import $slugify, $upper
