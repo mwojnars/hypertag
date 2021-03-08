@@ -17,7 +17,7 @@ from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, Missi
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
 from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
 from hypertag.core.structs import Context, State, Slot, ValueSlot
-from hypertag.core.DOM import add_indent, del_indent, get_indent, Sequence, HText, HNode, HRoot
+from hypertag.core.DOM import del_indent, get_indent, Sequence, HText, HNode, HRoot
 from hypertag.core.tag import Tag, NativeTag, null_tag
 
 DEBUG = False
@@ -1979,12 +1979,9 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    div
-      p | First paragraph
-      # l
-      p | Second paragraph
-    | { "this is a formatted string with an embedded expression: {2+3}" }
-    | {r"this is a raw string and the expression is left unparsed: {2+3}" }
+    p
+        ... | using "...", a block with no predecessors
+        ... /  can be inlined into its parent
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

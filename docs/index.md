@@ -1,3 +1,4 @@
+<!---
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -5,7 +6,7 @@
     /*.tag-h2 { font-weight: bold; }*/
 
     body {
-     font:16px/24px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+     font:16px/23px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
      color:#333;
     }
     
@@ -94,6 +95,7 @@
       color: #0594db;
     }
 </style>
+--->
 
 # Introduction
 
@@ -123,14 +125,13 @@ Run: .......
 (TODO)
 --->
 
-<br>
-
 ### Acknowledgements
 
 Hypertag was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
+<br>
 
 # Language Reference
 <br>
@@ -215,18 +216,67 @@ two indentation strings are considered the same if and only if they are equal
 in Python sense, which means that a space in one line cannot be replaced with a tab
 in another equally-indented line. These are similar rules as in Python.
 
-All the rules of text layout and processing as described in the next examples 
-(inline text, multiline text etc.) hold equally for _all types_ of text blocks.
+All the rules of text layout and processing (inline text, multiline text etc.) hold equally 
+for _all types_ of text blocks (plain-text, markup, verbatim). 
 Spaces after special characters: |/!:$% - are never obligatory, and in some cases
 (inside expressions) they may be disallowed.
 
-- The _dedent_ modifier (`<`): when put at the beginning of a block's headline,
-  it decreases the output indentation of this block by one level (makes the indentation
-  equal to the parent's). The dedent modifier can be used with all types of blocks, 
-  including tagged and control blocks.
-- The _append_ modifier (`...`): when put at the beginning of a block, it marks that
-  this block is a continuation of the previous block and should be appended to it without a newline.
-  There should be no empty line between the two blocks, otherwise a newline will still be inserted.
+**Modifiers**
+
+Hypertag defines _block layout modifiers_: special symbols that can be put at the beginning 
+of a block's headline to change the block's indentation and/or position relative 
+to the previous block. There are two types of modifiers: _dedent_ (`<`) and _append_ (`...`).
+
+The _dedent_ modifier (`<`) decreases the output indentation of a block by one level 
+(makes the indentation equal to the parent's). It can be used with all types of blocks, 
+including tagged and control blocks.
+
+The _append_ modifier (`...`) marks a given block as a continuation of the previous block 
+which should be appended to the latter _without_ a newline:
+
+    i   | word1
+    ... | word2
+    ... b | word3
+
+output:
+
+```html
+<i>word1</i>word2<b>word3</b>
+```
+
+There should be no empty lines between the two blocks in the code, otherwise a newline will still 
+be inserted. Indentation of the modified block is preserved and applied to any newlines that 
+may occur within the block's own body:
+
+    p
+        i  | When appending blocks...
+        ...|  the indentation in
+             a multiline block
+             is still preserved!
+
+output:
+
+```html
+<p>
+    <i>when appending blocks...</i> the indentation in
+    a multiline block
+    is still preserved!
+</p>
+```
+
+The "append" modifier can also be used to convert an outline block into an inline sub-block 
+of its parent:
+   
+    p
+        ... | Using "..." modifier, a block with no predecessors
+        ... |  can be inlined into its parent.
+
+output:
+
+```html
+<p>Using "..." modifier, a block with no predecessors can be inlined into its parent.</p>
+```
+
 
 ## Tags
 
@@ -386,7 +436,7 @@ Hypertag supports the following literal expressions:
 - formatted strings (f-strings): `"text"`, `'text'`
 - raw strings (r-strings): `r"text"`, `r'text'`
 - escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` 
-  to produce `{`, `}`, `$` respectively
+  to produce `{`, `}`, `$` as output, respectively
 
 Literal strings can be created with the `'...'` or `"..."` syntax.
 This creates _formatted strings_ (equivalent to Python's f-strings),

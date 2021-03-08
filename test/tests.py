@@ -201,6 +201,30 @@ def test_004_layout():
         ... | )
     """
     assert render(src).strip() == "(1,2)"
+    src = """
+        p
+            i  | line1
+            ...|  + a multiline block
+                 is appended
+                 with indentation preserved
+    """
+    out = """
+        <p>
+            <i>line1</i> + a multiline block
+            is appended
+            with indentation preserved
+        </p>
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        p
+            ... | a block with no predecessors
+            ... /  can be inlined into its parent
+    """
+    out = """
+        <p>a block with no predecessors can be inlined into its parent</p>
+    """
+    assert render(src).strip() == out.strip()
 
 def test_005_doc_margins():
     src = """\n\n p | text  \n  \n  """

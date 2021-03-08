@@ -16,13 +16,22 @@ from hypertag.core.errors import VoidTagEx, TypeErrorEx
 #####  UTILITIES
 #####
 
-def add_indent(text, indent, re_start = re.compile(r'(?m)^(?=.)')):
+
+# def add_indent(text, indent, re_start = re.compile(r'(?m)^(?=.)')):
+#     """
+#     Append `indent` string at the beginning of each line of `text`, including the 1st line.
+#     Empty lines (containing zero characters, not even a space) are left untouched!
+#     """
+#     if not indent: return text
+#     return re_start.sub(indent, text)
+
+def add_indent(text, indent, re_start = re.compile(r'\n(?=.)')):
     """
-    Append `indent` string at the beginning of each line of `text`, including the 1st line.
+    Append `indent` string at the beginning of each line of `text` excluding the 1st line (!).
     Empty lines (containing zero characters, not even a space) are left untouched!
     """
     if not indent: return text
-    return re_start.sub(indent, text)
+    return re_start.sub('\n' + indent, text)
     # if not text: return text
     # return indent + text.replace('\n', '\n' + indent)
     
@@ -187,10 +196,12 @@ class HNode:
         
         text = self.outline * '\n' + self._render_body()
         
-        if self.outline and self.indent:
-            assert self.indent[:1] != '\n'      # self.indent must have been converted already to relative
+        # if self.outline and self.indent:
+        if self.indent:
+            assert self.indent[:1] != '\n'                      # self.indent must have been converted already to relative
             text = add_indent(text, self.indent)
-
+            # text = text.replace('\n', '\n' + self.indent)       # indentation is only added where \n is present, the 1st line is left untouched!
+            
         return text
     
     def _render_body(self):
