@@ -80,11 +80,6 @@ Trailing colon (:) after a header indicates that subsequent lines will contain b
 rather than multi-line text - even if there is a text-block marker .
 
 
-## Setup
-
-Install: ........
-Run: .......
-
 ## Blocks
 
 A Hypertag script consists of a list of **blocks**. During parsing,
@@ -432,29 +427,7 @@ from PATH import NAME -- import from a module denoted by PATH, which can be any 
 ...
 
 
-### Comments
-
-Comments start with either "#" or "--". There are two types of comments:
-_block comments_ (outline comments) and _inline comments_.
-
 #### Block comments
-
-A block comment starts with # (hash) or -- (double dash),
-followed by any verbatim text that gets ignored during parsing.
-It must follow general rules of block alignment: have the same indentation 
-as neighboring blocks and deeper indentation than a parent block. For example:
-
-    div
-      p | First paragraph
-      #   Comment...
-      p | Second paragraph
-
-A block comment behaves similar to text blocks and, like them, can span multiple lines,
-if a proper indentation of subsequent lines is kept:
-
-    # this is a long ... 
-        ... multiline
-      block comment
 
 
 #### Inline comments
@@ -630,24 +603,6 @@ to test for errors or false results:
     | {x+y}?  -- is converted to empty string if false, or if exception was raised
     | $x.call()!  -- raises an exception if x.call() is false
 
-
-### Literals
-
-Literal expressions include: integers, real numbers, strings, 
-boolean values (True, False), and None.
-
-    | {True} {False} {None} {5} {-5.5} {'text'} {"text"}
-
-### Strings
-
-- raw strings (_r-strings_)
-- formatted strings (_f-strings_)
-
-
-
-### Collections
-
-Lists, dicts ...
 
 ### Operators
 

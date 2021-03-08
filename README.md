@@ -739,8 +739,12 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 
 ### Further reading
 
-The Quick Start only presented a small part of the features provided by Hypertag.
-See the [Language Reference](http://hypertag.io) on hypertag.io for more details.
+There are still many more features that Hypertag provides, that have not found a place 
+in the Quick Start. These include: block layout modifiers (_dedent_, _append_); 
+comments (`#` and `--`); the _pass_ keyword; raw (r-) vs. formatted (f-) strings; 
+concatenation operator (_space_); DOM tree manipulation etc. 
+
+See the [Language Reference](http://hypertag.io/#language-reference) on hypertag.io for more details.
 
 
 ## Cheat Sheet

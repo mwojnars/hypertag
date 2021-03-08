@@ -116,9 +116,13 @@ Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 (TODO)
 
-### Troubleshooting
+<!---
+Install: ........
+Run: .......
 
+### Community
 (TODO)
+--->
 
 ### Acknowledgements
 
@@ -178,6 +182,26 @@ Markup block may contain expressions; output is not escaped, so <b>raw tags</b> 
 In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 ```
 
+Blocks starting with double dash (`--`) or hash (`#`) are treated as comments and are excluded
+from the output. They must follow general rules of block alignment: have the same indentation 
+as neighboring blocks and deeper indentation than a parent block. For example:
+
+    div
+      p | First paragraph
+      #   Comment...
+      p | Second paragraph
+
+A block comment behaves similar to text blocks and, like them, can span multiple lines (!),
+if a proper indentation of subsequent lines is kept:
+
+    # this is a long ... 
+        multiline ...
+      block comment
+
+A comment line can also be put at the end of a block headline (_inline comment_), but not together 
+with inline contents of this block. Comments cannot be used inside text blocks.
+
+
 ## Layout
 
 All top-level blocks in a document (or sub-blocks at any given depth)
@@ -192,8 +216,13 @@ All the rules of text layout and processing as described in the next examples
 Spaces after special characters: |/!:$% - are never obligatory, and in some cases
 (inside expressions) they may be disallowed.
 
-Sometimes it is useful to put comments that will be excluded from the output.
-This can be done using either `--` or `#` prefix.
+- The _dedent_ modifier (`<`): when put at the beginning of a block's headline,
+  it decreases the output indentation of this block by one level (makes the indentation
+  equal to the parent's). The dedent modifier can be used with all types of blocks, 
+  including tagged and control blocks.
+- The _append_ modifier (`...`): when put at the beginning of a block, it marks that
+  this block is a continuation of the previous block and should be appended to it without a newline.
+  There should be no empty line between the two blocks, otherwise a newline will still be inserted.
 
 ## Tags
 
@@ -325,9 +354,51 @@ known from Python:
     []                  - indexing
     ()                  - function call
 
-To put a literal `{`, `}`, or `$` inside a text block you should use an escape string:
-`{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, or `$$`. Hypertag supports also literal 
-`None`, `False`, `True` and allows for creation of standard Python collections: 
+Hypertag provides also a special _concatenation operator_. If multiple expressions are put 
+one after another separated by 1+ whitespace (a space is the operator): EXPR1 EXPR2 EXPR3 ...
+their values get automatically converted to strings through `str(EXPR)` and concatenated.
+This is an extension of Python syntax for concatenating literal strings, like in:
+`'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`.
+In Python, this works for literals only, while in Hypertag, all types of expressions
+can be joined in this way. The concatenation operator has lower priority than binary "or" (`|`)
+and a pipeline (`:`); and higher than comparisons.
+
+Assignment blocks support _augmented assignments_, where multiple variables 
+are assigned to all at once:
+
+    $ a, (b, c) = 1, (2, 3)
+
+All identifiers (of variables and tags) are case-sensitive.
+There are separate namespaces for tags and variables, so you don't need to worry
+about possible name collissions between local variables and predefined tags: "a", "b", "i" etc.
+
+
+## Literals
+
+Hypertag supports the following literal expressions:
+
+- `None`, `False`, `True`
+- numbers: `123`, `-987.65`, `3.14e-10`
+- formatted strings (f-strings): `"text"`, `'text'`
+- raw strings (r-strings): `r"text"`, `r'text'`
+- escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` 
+  to produce `{`, `}`, `$` respectively
+
+Literal strings can be created with the `'...'` or `"..."` syntax.
+This creates _formatted strings_ (equivalent to Python's f-strings),
+which may contain _embedded expressions_ of both the `$...` and `{...}` form.
+If one wants to create raw strings instead, such that `$`, `{`, `}` are treated as regular
+characters, the `r'...'` and `r"..."` syntax shall be used:
+
+    | { "this is a formatted string with an embedded expression: {2+3}" }
+    | {r"this is a raw string, so the expression is left unparsed: {2+3}" }
+
+output:
+
+    this is a formatted string with an embedded expression: 5
+    this is a raw string, so the expression is left unparsed: {2+3}
+
+Hypertag syntax allows for creation of standard Python collections: 
 _lists_, _tuples_, _sets_, _dictionaries_.
 When creating sets and dicts, keep a space between the braces of a collection and the
 surrounding embedding, otherwise the double braces may be interpreted as escape strings.
@@ -344,14 +415,8 @@ Output:
     this is a set:    {1, 2}
     this is a dict:   {'a': 1, 'b': 2}
 
-Assignment blocks support _augmented assignments_, where multiple variables 
-are assigned to all at once:
 
-    $ a, (b, c) = 1, (2, 3)
-
-All identifiers (of variables and tags) are case-sensitive.
-There are separate namespaces for tags and variables, so you don't need to worry
-about possible name collissions between local variables and predefined tags: "a", "b", "i" etc.
+## Imports
 
 Variables can also be imported from other Hypertag scripts and Python modules
 using an _import_ block. Objects of any type can be imported in this way, 
@@ -838,31 +903,11 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 There is a number of additional elements of Hypertag that have not been mentioned so far.
 These include:
 
-- The _dedent_ modifier (`<`): when put at the beginning of a block's headline,
-  it decreases the output indentation of this block by one level (makes the indentation
-  equal to the parent's). The dedent modifier can be used with all types of blocks, 
-  including tagged and control blocks.
-- The _append_ modifier (`...`): when put at the beginning of a block, it marks that
-  this block is a continuation of the previous block and should be appended to it without a newline.
-  There should be no empty line between the two blocks, otherwise a newline will still be inserted.
 - The `pass` keyword can be used in place of a block, as an "empty block" placeholder.
   This quasi-block generates no output, similarly to the `pass` keyword in Python. 
   The use of `pass` is never enforced by the syntax: empty body is always a valid alternative
   and can be used inside parent blocks of all types. In some cases, though, the use of 
   explicit `pass` may be preferred due to aesthetic considerations.
-- In expressions, you can create literal strings with the `'...'` and `"..."` syntax.
-  This actually creates _formatted strings_ (equivalent to Python's f-strings),
-  which may contain _embedded expressions_ of both the `$...` and `{...}` form.
-  If you want to create raw strings instead, such that `$` and `{}` are treated as regular
-  characters, the `r'...'` and `r"..."` syntax shall be used.
-- Hypertag provides a special _concatenation operator_. If multiple expressions are put 
-  one after another separated by 1+ whitespace (a space is the operator): EXPR1 EXPR2 EXPR3 ...
-  their values get automatically converted to strings `str(EXPR)` and concatenated.
-  This is an extension of Python syntax for concatenating literal strings, like in:
-  `'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`.
-  In Python, this works for literals only, while in Hypertag, all types of expressions
-  can be joined in this way. The concatenation operator has lower priority than binary "or" (`|`)
-  and a pipeline (`:`); and higher than comparisons.
 
 There are also some _gotcha!_ you need to keep in mind when coding with Hypertag:
 
