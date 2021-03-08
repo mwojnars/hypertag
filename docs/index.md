@@ -10,7 +10,7 @@
     }
     pre 
     {
-      font: 12px/16px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font: 13px/20px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
    
     section {
