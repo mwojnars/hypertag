@@ -95,7 +95,6 @@
     }
 </style>
 
-
 # Introduction
 
 Hypertag is a modern language for front-end development that allows
@@ -181,6 +180,8 @@ Plain-text block may contain embedded expressions &amp; its output is HTML-escap
 Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
 In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 ```
+
+### Comments
 
 Blocks starting with double dash (`--`) or hash (`#`) are treated as comments and are excluded
 from the output. They must follow general rules of block alignment: have the same indentation 
