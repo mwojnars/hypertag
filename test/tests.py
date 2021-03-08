@@ -807,6 +807,23 @@ def test_017_comments():
         yes
     """
     assert render(src).strip() == out.strip()
+    src = """
+        | a
+        # this is a long ...
+            multiline ...
+          block comment
+        | b
+        -- this is another long ...
+         multiline ...
+         block comment
+        | c
+    """                                 # inline comments
+    out = """
+        a
+        b
+        c
+    """
+    assert render(src).strip() == out.strip()
 
 def test_018_while():
     src = """

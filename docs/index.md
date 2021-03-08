@@ -54,7 +54,7 @@
     pre {
       /* background: #333333; */
       /* background: #444; */
-      background: #f4f6f8;                  /* #f9f7f4; */
+      background: #f0f3f6;                  /* #f9f7f4; */
       /* border: 1px solid #c7c7c7; */
       border: 1px solid #ddd;
     }
@@ -123,6 +123,8 @@ Run: .......
 (TODO)
 --->
 
+<br>
+
 ### Acknowledgements
 
 Hypertag was inspired by indentation-based templating languages:
@@ -131,6 +133,7 @@ Hypertag was inspired by indentation-based templating languages:
 
 
 # Language Reference
+<br>
 
 ## Blocks
 
@@ -181,21 +184,21 @@ Markup block may contain expressions; output is not escaped, so <b>raw tags</b> 
 In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 ```
 
-### Comments
+**Comments**
 
 Blocks starting with double dash (`--`) or hash (`#`) are treated as comments and are excluded
 from the output. They must follow general rules of block alignment: have the same indentation 
-as neighboring blocks and deeper indentation than a parent block. For example:
+as sibling blocks and deeper indentation than a parent block:
 
     div
       p | First paragraph
       #   Comment...
       p | Second paragraph
 
-A block comment behaves similar to text blocks and, like them, can span multiple lines (!),
-if a proper indentation of subsequent lines is kept:
+A block comment behaves similarly to text blocks and, like them, can span multiple lines,
+if only a proper indentation of subsequent lines is kept:
 
-    # this is a long ... 
+    -- this is a long ... 
         multiline ...
       block comment
 

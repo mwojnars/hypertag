@@ -1981,7 +1981,7 @@ if __name__ == '__main__':
     text = """
     div
       p | First paragraph
-    #   Comment...
+      # l
       p | Second paragraph
     | { "this is a formatted string with an embedded expression: {2+3}" }
     | {r"this is a raw string and the expression is left unparsed: {2+3}" }
