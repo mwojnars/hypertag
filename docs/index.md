@@ -8,7 +8,11 @@
      font:16px/23px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
      color:#333;
     }
-    
+    pre 
+    {
+      font: 12px/16px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+   
     section {
       /* width: 590px; */
       width: 850px;
@@ -127,7 +131,7 @@ Run: .......
 
 ### Acknowledgements
 
-Hypertag was inspired by indentation-based templating languages:
+Hypertag was inspired by Python and indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
@@ -187,8 +191,9 @@ In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 
 **Comments**
 
-Blocks starting with double dash (`--`) or hash (`#`) are treated as comments and are excluded
-from the output. They must follow general rules of block alignment: have the same indentation 
+Blocks starting with double dash (`--`) or hash (`#`) are treated as comments:
+their content is left unparsed (like "verbatim" block) and is excluded from the output.
+They must follow general rules of block alignment: have the same indentation 
 as sibling blocks and deeper indentation than a parent block:
 
     div
@@ -196,7 +201,7 @@ as sibling blocks and deeper indentation than a parent block:
       #   Comment...
       p | Second paragraph
 
-A block comment behaves similarly to text blocks and, like them, can span multiple lines,
+A block comment behaves similarly to text blocks and, like them, can span multiple lines (!),
 if only a proper indentation of subsequent lines is kept:
 
     -- this is a long ... 
@@ -223,16 +228,13 @@ Spaces after special characters: |/!:$% - are never obligatory, and in some case
 
 **Modifiers**
 
-Hypertag defines _block layout modifiers_: special symbols that can be put at the beginning 
+Hypertag defines _layout modifiers_: special symbols that can be put at the beginning 
 of a block's headline to change the block's indentation and/or position relative 
-to the previous block. There are two types of modifiers: _dedent_ (`<`) and _append_ (`...`).
+to the previous block. There are two types of modifiers: _append_ (`...`) and _dedent_ (`<`).
+Modifiers cannot be mixed and there can be at most one modifier in a given block.
 
-The _dedent_ modifier (`<`) decreases the output indentation of a block by one level 
-(makes the indentation equal to the parent's). It can be used with all types of blocks, 
-including tagged and control blocks.
-
-The _append_ modifier (`...`) marks a given block as a continuation of the previous block 
-which should be appended to the latter _without_ a newline:
+The _append_ modifier (`...`) marks that a given block is a continuation of the previous block 
+and should be appended to it _without_ a newline:
 
     i   | word1
     ... | word2
@@ -245,7 +247,7 @@ output:
 ```
 
 There should be no empty lines between the two blocks in the code, otherwise a newline will still 
-be inserted. Indentation of the modified block is preserved and applied to any newlines that 
+be inserted. Indentation of the appended block is preserved and applied to any newlines that 
 may occur within the block's own body:
 
     p
@@ -276,6 +278,51 @@ output:
 ```html
 <p>Using "..." modifier, a block with no predecessors can be inlined into its parent.</p>
 ```
+
+The _dedent_ modifier (`<`) decreases the output indentation of a block by one level 
+(makes the indentation equal to the parent's). It can be used with all types of blocks, 
+including tagged and control blocks:
+
+    div
+        < p
+            < i | This line's output indentation is equal to the parent's and grandparent's.
+
+output:
+
+```html
+<div>
+<p>
+<i>This line's output indentation is equal to the parent's and grandparent's.</i>
+</p>
+</div>
+```    
+
+There is also a built-in tag called _dedent_. When used without parameters, or with `full=True`,
+this tag removes all (multi-level) output indentation of the inner blocks,
+up to its own indentation:
+
+    div
+      dedent
+        div
+          p
+            | Everything inside "dedent" is de-indented up to the level
+              of "dedent" block itself.
+
+output:
+
+```html
+<div>
+  <div>
+  <p>
+  Everything inside "dedent" is de-indented up to the level
+  of "dedent" block itself.
+  </p>
+  </div>
+</div>
+```
+
+When used with `full=False`, the "dedent" tag only removes the top-most indentation of its 
+inner blocks. Note that the "dedent" tag _can_ be combined with dedent/append modifiers. 
 
 
 ## Tags
@@ -393,6 +440,9 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
+Escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` shall be used inside 
+text blocks and strings to produce `{`, `}`, `$`, respectively.
+
 Each variable points to a Python object and can be used with all the standard operators
 known from Python:
 
@@ -423,8 +473,8 @@ are assigned to all at once:
     $ a, (b, c) = 1, (2, 3)
 
 All identifiers (of variables and tags) are case-sensitive.
-There are separate namespaces for tags and variables, so you don't need to worry
-about possible name collissions between local variables and predefined tags: "a", "b", "i" etc.
+There are separate namespaces for tags and variables, so programmers run no risk of 
+name collissions between local variables and predefined tags: "a", "b", "i" etc.
 
 
 ## Literals
@@ -435,13 +485,11 @@ Hypertag supports the following literal expressions:
 - numbers: `123`, `-987.65`, `3.14e-10`
 - formatted strings (f-strings): `"text"`, `'text'`
 - raw strings (r-strings): `r"text"`, `r'text'`
-- escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` 
-  to produce `{`, `}`, `$` as output, respectively
 
 Literal strings can be created with the `'...'` or `"..."` syntax.
 This creates _formatted strings_ (equivalent to Python's f-strings),
 which may contain _embedded expressions_ of both the `$...` and `{...}` form.
-If one wants to create raw strings instead, such that `$`, `{`, `}` are treated as regular
+If you want to create raw strings instead, such that `$`, `{`, `}` are treated as regular
 characters, the `r'...'` and `r"..."` syntax shall be used:
 
     | { "this is a formatted string with an embedded expression: {2+3}" }
@@ -472,7 +520,7 @@ Output:
 
 ## Imports
 
-Variables can also be imported from other Hypertag scripts and Python modules
+Variables can be imported from other Hypertag scripts and Python modules
 using an _import_ block. Objects of any type can be imported in this way, 
 including functions and classes:
 

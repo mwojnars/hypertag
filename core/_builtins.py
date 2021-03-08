@@ -35,9 +35,9 @@ Filters:
 
 class DedentTag(ExternalTag):
     text = True
-    def expand(self, text, nested = True, _re_indent = re.compile(r'(?m)^\s+')):
-        if nested: return _re_indent.sub('', text)
-        return del_indent(text, get_indent(text))
+    def expand(self, text, full = True, _re_indent = re.compile(r'(?m)^\s+')):
+        if full: return _re_indent.sub('', text)
+        return del_indent(text) #, get_indent(text))
         
 class JavascriptTag(ExternalTag):
     """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""

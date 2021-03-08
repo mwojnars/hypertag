@@ -2,8 +2,8 @@
 
 <!---
 If you want to build commercial websites with Hypertag
-I'd be glad to supervise or consult on your projects.
-Please drop me an e-mail or contact via LinkedIn to hire me.
+I can supervise or consult on your projects.
+Please drop me an e-mail or contact me via LinkedIn.
 
 Hypertag enables advanced control of document rendering process through
 native **control blocks** (if-elif-else, for, while, try);
@@ -427,9 +427,6 @@ from PATH import NAME -- import from a module denoted by PATH, which can be any 
 ...
 
 
-#### Block comments
-
-
 #### Inline comments
 
 An inline comment occurs at the end of a line containing a header of any structural block
@@ -443,7 +440,6 @@ An inline comment occurs at the end of a line containing a header of any structu
     if test               # comment
         | test is true
 
-Comments can NOT be mixed with textual contents of text blocks.
 
 
 ### Indentation
@@ -694,10 +690,6 @@ Examples:
     {(post.authors ', ')? post.title}  -- prints title only if "authors" field is missing in "post"
     
 
-### Filters
-
-TODO
-
 ## DOM
 
 DOM = Document Object Model
@@ -784,10 +776,6 @@ to a script. They can also be imported manually from the `hypertag.html` module,
 **Runtime** ... **dynamic context** of rendering consisting of any python objects 
 can be provided ...
 
-
-## Built-ins
-
-......
 
 ## SDK ??
 

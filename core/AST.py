@@ -1979,9 +1979,11 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    p
-        ... | using "...", a block with no predecessors
-        ... /  can be inlined into its parent
+      | Base indentation
+      dedent full=False
+        div
+          p
+            | Everything inside "dedent" is de-indented up to the level
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
