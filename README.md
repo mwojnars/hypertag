@@ -16,8 +16,8 @@ and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
 with native custom tags (_hypertags_), and [more](#why-to-use-hypertag). 
-See the [Quick Start](#quick-start) below, or a full 
-[Language Reference](http://hypertag.io) on hypertag.io, for details.
+See the [Quick Start](#quick-start) below, or the 
+[Language Reference](http://hypertag.io) for details.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
@@ -93,8 +93,18 @@ The `script` in the code above is rendered to `html` as shown below
 <!---
   Hypertag is *not* limited to (X)HTML; by defining new tags,
   it can be adapted to produce an arbitrary document description language.
-HTML templating is one of applications, but Hypertag's capabilities are much bigger than that.
-whose one of use cases is being a replacement for web templating languages.
+  HTML templating is one of applications, but Hypertag's capabilities are much bigger than that.
+  whose one of use cases is being a replacement for web templating languages.
+- **consistency** (monolithic architecture): Hypertag combines presentation and logic in one language; 
+  you no longer have to mix presentation code (HTML) with foreign syntax of a 
+  templating language, or PHP etc.
+- **Object-Oriented Programming** (OOP) inside markup, through native language structures (??)
+- **high performace** in web applications achieved through caching of parsed AST,
+  combined with their **compactification**: constant parts of the AST are
+  pre-rendered and merged into single nodes, to avoid repeated rendering
+  with every web page request.
+
+If you try Hypertag, you will never miss old-school HTML templating.
 --->
 
 ## Quick Start
@@ -212,7 +222,7 @@ output:
 </p>
 ```
 
-Tags may have _attributes_ and can be _chained_ together using a colon `:`, like below:
+Tags may have _attributes_ and can be _chained_ together using a colon `:`, like here:
 
     h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
         | Tags can be chained together using a colon ":".
@@ -239,11 +249,7 @@ output:
 ```html
 <p id="main-content" class="wide-paragraph">text...</p>
 ```
-<!---
-Without inline content, a colon can still be used at the end of blocks' headlines.
-The two forms, with and without a trailing colon, are equivalent.
-Comments in the code start with `--` or `#` prefix.
---->
+
 
 ### Expressions
 

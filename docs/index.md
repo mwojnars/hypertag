@@ -51,7 +51,7 @@
     }
 
     pre.highlight {
-        max-height: 176px;
+        max-height: 170px;
         overflow-y: auto;
     }
 
@@ -100,7 +100,6 @@
 </style>
 
 
-
 # Introduction
 
 Hypertag is a modern language for front-end development that allows
@@ -110,8 +109,8 @@ and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
 with native custom tags (_hypertags_), and more. 
-If you are new to Hypertag, see the [Github page](https://github.com/mwojnars/hypertag)
-and a [Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
+If you are new to Hypertag, see the [Quick Start](https://github.com/mwojnars/hypertag#quick-start) 
+for a brief introduction.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
@@ -142,7 +141,8 @@ Hypertag was inspired by Python and indentation-based templating languages:
 
 ## Blocks
 
-A typical Hypertag script consists of nested blocks with tags:
+A Hypertag script consists of a list of **blocks**. Some of them may have tags, and/or nested
+blocks inside:
 
     ul
         li 
@@ -152,8 +152,6 @@ A typical Hypertag script consists of nested blocks with tags:
             / This is the second item. 
               Slash (/) marks a <b>markup block</b> (no HTML escaping).
               Text blocks may consist of multiple lines, like here.
-    p
-        | Indentation of blocks gets preserved in the output.
 
 output:
 
@@ -169,13 +167,19 @@ output:
         Text blocks may consist of multiple lines, like here.
     </li>
 </ul>
-<p>
-    Indentation of blocks gets preserved in the output.
-</p>
 ```
 
-There are three types of _text_ blocks: _plain-text_ (|), _markup_ (/), _verbatim_ (!).
-They differ in the way how embedded expressions and raw HTML are handled.
+During parsing, blocks are first **translated** into Hypertag's native Document Object Model (**DOM**),
+and then the DOM undergoes **rendering** to produce a document string in a target language. 
+Typically, the target language is HTML (produced by `hypertag.HyperHTML` standard runtime)
+or XHTML, although any other language can be supported if an appropriate subclass 
+of `hypertag.core.runtime.Runtime` is implemented to provide language-specific configuration.
+
+**Text blocks**
+
+The most elementary type of block is a _text block_, which comes in three variants:
+_plain-text_ (|), _markup_ (/), _verbatim_ (!). They differ in the way how embedded expressions
+and raw HTML are handled.
 
     | Plain-text block may contain {'em'+'bedded'} expressions & its output is HTML-escaped.
     / Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
@@ -192,7 +196,7 @@ In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 **Comments**
 
 Blocks starting with double dash (`--`) or hash (`#`) are treated as comments:
-their content is left unparsed (like "verbatim" block) and is excluded from the output.
+their content is left unparsed (like in a "verbatim" block) and is excluded from the output.
 They must follow general rules of block alignment: have the same indentation 
 as sibling blocks and deeper indentation than a parent block:
 
@@ -215,13 +219,13 @@ with inline contents of this block. Comments cannot be used inside text blocks.
 ## Layout
 
 All top-level blocks in a document (or sub-blocks at any given depth)
-must have the _same indentation_. Both a space (` `) and a tab character (`\t`)
-can be used for indenting, although we recommend only using spaces to avoid confusion:
+must have the _same indentation_. Spaces (` `) and tabs (`\t`) can be used for indenting,
+although we recommend only using spaces to avoid confusion:
 two indentation strings are considered the same if and only if they are equal
 in Python sense, which means that a space in one line cannot be replaced with a tab
 in another equally-indented line. These are similar rules as in Python.
 
-All the rules of text layout and processing (inline text, multiline text etc.) hold equally 
+All the rules of text layout (inline text, multiline text etc.) hold equally 
 for _all types_ of text blocks (plain-text, markup, verbatim). 
 Spaces after special characters: |/!:$% - are never obligatory, and in some cases
 (inside expressions) they may be disallowed.
@@ -234,7 +238,7 @@ to the previous block. There are two types of modifiers: _append_ (`...`) and _d
 Modifiers cannot be mixed and there can be at most one modifier in a given block.
 
 The _append_ modifier (`...`) marks that a given block is a continuation of the previous block 
-and should be appended to it _without_ a newline:
+and should be appended to it without a newline:
 
     i   | word1
     ... | word2
@@ -248,7 +252,7 @@ output:
 
 There should be no empty lines between the two blocks in the code, otherwise a newline will still 
 be inserted. Indentation of the appended block is preserved and applied to any newlines that 
-may occur within the block's own body:
+may occur within this block's own body:
 
     p
         i  | When appending blocks...
@@ -324,8 +328,26 @@ output:
 When used with `full=False`, the "dedent" tag only removes the top-most indentation of its 
 inner blocks. Note that the "dedent" tag _can_ be combined with dedent/append modifiers. 
 
+**Anatomy of a block**
 
-## Tags
+Some types of blocks (_structural blocks_) may contain nested blocks inside. 
+A list of such nested blocks is called a **body**. The initial part of a block that precedes 
+the body is called a **header** - it always fits in a single line (the **headline**). 
+For all types of blocks (control blocks included!), body is _not_ mandatory and can be omitted.
+Moreover, the "if" and "try" [control blocks](#control-blocks) 
+may consist of multiple branches (**clauses**), each branch having its own body.
+
+Contents of a structural block can be arranged as _inline_, _outline_ (short for "out of the line"),
+or mixed inline+outline. Inline content starts right after the header in the headline 
+and is usually rendered to a more compact form (without surrounding newlines).
+
+
+## Tagged blocks
+
+The most common type of structural block is a **tagged block** whose header consists of a name 
+of a tag, optionally followed by a space-separated list of attributes.
+
+....
 
 In a tagged block, the text may start on the same line (_headline_) as the tag (_inline_ content)
 and may extend to subsequent lines (_multiline_ content) unless sub-blocks are present.
@@ -378,21 +400,7 @@ output:
   </p></div>
 ```
 
-If no inline content is present, a colon can optionally be put at the end of 
-the block's headline. The two forms, with and without a trailing colon, are equivalent.
-
-<!---
-and so are the "div" blocks below:
-
-    div:
-      p | Some contents...
-    
-    div
-      p | Some contents...
---->
-
-Tags may have _attributes_ and can be _chained_ together using a colon `:`,
-like the three tags below:
+Tags may have _attributes_ and can be _chained_ together using a colon `:`, like here:
 
     h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
         | Tags can be chained together using a colon ":".
@@ -409,8 +417,8 @@ output:
 </a></b></h1>
 ```
 
-Shortcut syntax can be used for the two most common HTML attribute names: 
-.CLASS is equivalent to class=CLASS, and #ID means id=ID, for example:
+Shortcuts are available for the two most common HTML attributes: 
+`.CLASS` is equivalent to `class=CLASS`, and `#ID` means `id=ID`.
 
     p #main-content .wide-paragraph | text...
     
@@ -419,6 +427,10 @@ output:
 ```html
 <p id="main-content" class="wide-paragraph">text...</p>
 ```
+
+If no inline content is present, a colon can optionally be put at the end of 
+the block's headline. The two forms, with and without a trailing colon, are equivalent.
+
 
 ## Expressions
 
@@ -482,7 +494,7 @@ name collissions between local variables and predefined tags: "a", "b", "i" etc.
 Hypertag supports the following literal expressions:
 
 - `None`, `False`, `True`
-- numbers: `123`, `-987.65`, `3.14e-10`
+- integer/real numbers: `123`, `-987.65`, `3.14e-10`
 - formatted strings (f-strings): `"text"`, `'text'`
 - raw strings (r-strings): `r"text"`, `r'text'`
 
@@ -1013,9 +1025,9 @@ These include:
 
 There are also some _gotcha!_ you need to keep in mind when coding with Hypertag:
 
-- Inside dicts `{...}` and array slices `[a:b:c]`, operators other than arithmetic and bitwise 
-  must be enclosed in parentheses. This is to avoid ambiguity of the colon ":",
-  which normally serves as a pipeline operator, but in dicts and slices plays a role 
+- Inside dictionaries `{...}` and array slices `[a:b:c]`, operators other than arithmetic and 
+  bitwise must be enclosed in parentheses to avoid ambiguity of the colon ":",
+  which normally serves as a pipeline operator, but in dictionaries and slices plays a role 
   of a field separator.
 - So far, Hypertag hasn't been yet optimized for performance.
 

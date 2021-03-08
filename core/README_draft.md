@@ -13,20 +13,6 @@ or as Python functions (_external tags_).
 and provides high level of **modularity** through custom tags and import blocks. 
 --->
 
-<!---
-- **consistency** (monolithic architecture): Hypertag combines presentation and logic in one language; 
-  you no longer have to mix presentation code (HTML) with foreign syntax of a 
-  templating language, or PHP etc.
-- Object-Oriented Programming (**OOP**) inside markup,
-  through native language structures (???)
-- **high performace** in web applications achieved through caching of parsed AST,
-  combined with their **compactification**: constant parts of the AST are
-  pre-rendered and merged into single nodes, to avoid repeated rendering
-  with every web page request.
-
-If you try Hypertag, you will never miss old-school HTML templating.
---->
-
 ## Cheet Sheet
 
 ### Control blocks
@@ -82,34 +68,6 @@ rather than multi-line text - even if there is a text-block marker .
 
 ## Blocks
 
-A Hypertag script consists of a list of **blocks**. During parsing,
-blocks are first **translated** into Hypertag's native Document Object Model (DOM),
-and then the DOM undergoes **rendering** to produce a document string in a target language. 
-Typically, the target language is HTML (see `hypertag.HyperHTML`) or XHTML, 
-although any other language can be supported if an appropriate subclass 
-of `hypertag.core.runtime.Runtime` is implemented to provide language-specific configuration: 
-predefined tags, an escape function etc. (see the ..... section for details).
-
-### Text blocks
-
-The most elementary type of block is a _text block_, which comes in three variants:
-
-- **plain-text** block (marked with "|")
-- **markup** block ("/")
-- **verbatim** block ("!")
-
-Example:
-
-    | Plain-text block supports {'em'+'bedded'} $expressions & escaping.
-    / Markup block does no escaping, so <b>raw tags</b> are passed to output.
-    ! In a verbatim $block$ {expressions} are left unparsed, no <escaping>.
-
-This renders to (after prepending `$expressions='EXPRESSIONS'`):
-
-    Plain-text block supports embedded EXPRESSIONS &amp; escaping.
-    Markup <b>block</b> does no escaping, so <b>raw tags</b> are passed to output.
-    In a verbatim $block$ {expressions} are left unparsed, no <escaping>.
-
 Plain-text and markup blocks may contain embedded expressions, like `$x` or `{a+b}`,
 which are evaluated and replaced with their corresponding values during translation.
 Additionally, the output of a plaintext block is converted to the target language 
@@ -136,13 +94,6 @@ renders to
 
 
 ### Tagged blocks
-
-Some types of blocks (_structural blocks_) may contain nested blocks inside. 
-A list of such nested blocks is called a **body**. 
-The initial part of a block that precedes the body is a **header**. 
-For all types of blocks (control blocks included!), body is _not_ mandatory and can be omitted.
-Moreover, the "if" and "try" control blocks (see section .....) 
-may consist of multiple branches (**clauses**), each branch having its own body.
 
 <!---
 body layout: inline / outline / headline
@@ -462,10 +413,6 @@ The _dedent marker_ and _dedent tag_ can be used together. Example:
             p     / And the parent's indentation is removed, as well
                     (<a> is aligned with top-level <div>), thanks to 
                     the use of the <i>dedent marker</i>.
-
-outputs:
-    
-    ..........
 
 
 ## Symbols
