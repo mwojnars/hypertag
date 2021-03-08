@@ -61,7 +61,7 @@
     code {
       /* background: #333; */
       /* background: #444; */
-      background: #f4f6f8;
+      background: #f0f3f6;
       /* color: #efefef; */
       color: #444;
       text-shadow: none;  /*0px 1px 0px #000;*/
