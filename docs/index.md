@@ -1,3 +1,4 @@
+<!---
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -98,6 +99,7 @@
       color: #0594db;
     }
 </style>
+--->
 
 
 # Introduction
@@ -545,10 +547,15 @@ The third character of the name is: "a"
 Escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` can be used inside 
 text blocks and strings to produce `{`, `}`, `$`, respectively.
 
-Assignment blocks support _augmented assignments_, where multiple variables are assigned to
+Assignment blocks support _augmented_ assignments, where multiple variables are assigned to
 all at once:
 
     $ a, (b, c) = [1, (2, 3)]
+
+as well as _in-place_ assignments:
+
+    $ x += 5
+    $ y *= 2
 
 Each Hypertag variable points to a Python object and can be used with all the standard operators
 known from Python. The list is ordered according to a decreasing operator priority:

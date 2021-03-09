@@ -1979,14 +1979,10 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    % products items=[] maxlen=20
-        % row name price
-            tr
-                td | $name[:maxlen]
-                td | $price
-        table
-            for item in items:
-                row item.name item.price
+    $ x, y = 1, 2
+    $ x += 5
+    $ y *= 2
+    | $x, $y
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
