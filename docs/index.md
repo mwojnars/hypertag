@@ -1,4 +1,3 @@
-<!---
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -99,7 +98,6 @@
       color: #0594db;
     }
 </style>
---->
 
 
 # Introduction
