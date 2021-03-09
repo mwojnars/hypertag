@@ -179,8 +179,12 @@ built-ins and configuration.
 **Text blocks**
 
 The most elementary type of block is a _text block_, which comes in three variants:
-_plain-text_ (|), _markup_ (/), _verbatim_ (!). They differ in the way how embedded expressions
-and raw HTML are handled.
+
+- **plain-text** (`|`),
+- **markup** (`/`),
+- **verbatim** (`!`). 
+
+They differ in the way how embedded expressions and raw HTML are handled:
 
     | Plain-text block may contain {'em'+'bedded'} expressions & its output is HTML-escaped.
     / Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
@@ -206,39 +210,42 @@ as sibling blocks and deeper indentation than a parent block:
       #   Comment...
       p | Second paragraph
 
-A block comment behaves similarly to text blocks and, like them, can span multiple lines (!),
+A block comment behaves similarly to text blocks and, like them, can span multiple lines,
 if only a proper indentation of subsequent lines is kept:
 
     -- this is a long ... 
         multiline ...
       block comment
 
-A comment line can also be put at the end of a block headline (_inline comment_), but not together 
+A comment can also be put at the end of a block headline (_inline comment_), but not together 
 with inline contents of this block. Comments cannot be used inside text blocks.
 
 
 ## Layout
 
 All top-level blocks in a document (or sub-blocks at any given depth)
-must have the _same indentation_. Spaces (` `) and tabs (`\t`) can be used for indenting,
+must have the same _indentation_. Spaces (` `) and tabs (`\t`) can be used for indenting,
 although we recommend only using spaces to avoid confusion:
 two indentation strings are considered the same if and only if they are equal
 in Python sense, which means that a space in one line cannot be replaced with a tab
 in another equally-indented line. These are similar rules as in Python.
 
-All the rules of text layout (inline text, multiline text etc.) hold equally 
-for _all types_ of text blocks (plain-text, markup, verbatim). 
-Spaces after special characters: |/!:$% - are never obligatory, and in some cases
-(inside expressions) they may be disallowed.
+All the rules of text layout (inline text, multiline text etc.) that will be discussed later on
+hold equally for _all types_ of text blocks (plain-text, markup, verbatim). 
+Spaces after special characters: `|/!:$%` - are never obligatory, and in some cases
+(inside expressions) they may be disallowed. A single leading space right after the text-block
+marker (`|/!`) is interpreted as a marker-content separator 
+and gets removed from the output, if present; an additional space should be inserted 
+by the programmer if a space character is still desired in this place in the output.
 
 **Modifiers**
 
 Hypertag defines _layout modifiers_: special symbols that can be put at the beginning 
 of a block's headline to change the block's indentation and/or position relative 
 to the previous block. There are two types of modifiers: _append_ (`...`) and _dedent_ (`<`).
-Modifiers cannot be mixed and there can be at most one modifier in a given block.
+Modifiers cannot be mixed, and there can be at most one modifier for a given block.
 
-The _append_ modifier (`...`) marks that a given block is a continuation of the previous block 
+The _append_ modifier (`...`) marks that a block is a continuation of the previous block 
 and should be appended to it without a newline:
 
     i   | word1
