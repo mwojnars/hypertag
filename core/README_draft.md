@@ -105,14 +105,6 @@ the header on the same line (_inline body_), occupy subsequent lines
 text contents (_multiline body_).
 --->
 
-The most common type of structural block is a **tagged block**
-whose header consists of a name of a tag, optionally followed by a space-separated list
-of attributes:
-
-    div class='main-content' width='1000px'
-        | body node 1
-        | body node 2
-
 A **tag** is a function-like object belonging to the _tags namespace_ 
 (see section ........) that performs some kind of transformation 
 of the block's body represented by a DOM (see section .......).
@@ -151,21 +143,7 @@ For example, `HyperHTML` provides built-in Tags for all valid HTML tags,
 and there are two variants available for each tag: lower-case and upper-case.
 (see section ....... for details).
 
-In a tagged block, multiple tags can be **chained** together using a colon (:). Example:
-
-    h1 : b : a href='#' :
-        | Header in bold with an anchor
-
-outputs:
-
-    <h1><b><a href="#">
-        Header in bold with an anchor
-    </a></b></h1>
-
-Each tag in a chain can have its own list of attributes. 
-Special tags (_pass_, _null_ - see section ......) cannot be used in this way.
-
-
+ 
 ### Special tags
 
 #### Null tag (.)
@@ -294,10 +272,6 @@ A block that starts with $ marks an assignment to a local variable:
     $ dash = x * '-'
     $ title = dash + ' TITLE ' + dash
 
-Hypertag supports also _augmented assignments_ as known from Python:
-
-    $ a, (b, c) = [1, (2, 3)]
-
 
 ### Control blocks
 
@@ -332,13 +306,6 @@ SystemExit, KeyboardInterrupt, GeneratorExit - are being passed up the tree.
 Note that exceptions are caught during _translation_ of the block only.
 If there are syntactical or name resolution errors (e.g., an undefined variable
 was found in any clause), these errors are still passed up the tree.
-
-<!---
-This works with a default tag specification, as well:
-
-    ? .some-class ...
-    ? #some-id ...
---->
 
 
 #### Block "if"
@@ -417,10 +384,6 @@ The _dedent marker_ and _dedent tag_ can be used together. Example:
 
 ## Symbols
 
-Valid symbols for tags ....
-Valid symbols for variables ....
-Valid symbols for attributes ....
-
 ### Namespaces
 
 During translation of a script to a DOM, Hypertag maintains two separate namespaces:
@@ -448,23 +411,6 @@ Many of these tags have very common names (i, b, p, code, form, head, body, ...)
 and without separation of name spaces, name collissions between tags and local variables 
 would be very frequent and lead to confusion. 
 --->
-
-For instance, thanks to namescape separation, it is possible to define `$i`
-as a loop variable in a `for` block while refering to `%i` (a tag) inside the block
-at the same time:
-
-    for i in [1,2,3]:
-        i | number $i printed in italics
-
-outputs:
-
-    <i>number 1 printed in italics</i>
-    <i>number 2 printed in italics</i>
-    <i>number 3 printed in italics</i>
-
-To avoid confusion in documentation and clearly indicate what namespace a given symbol
-belongs to, one can precede its name with `%` or `$`, like in `%i` (denotes a tag)
-or `$i` (denotes a variable).
 
 The ways to add symbols to the two namespaces:
 
@@ -586,29 +532,6 @@ Above these, Hypertag implements a non-standard binary **concatenation operator*
 as well as tail operators: **optional value** ("?") and **obligatory value** ("!").
 They are described in next sections.
 
-
-### Concatenation operator
-
-If multiple expressions are put one after another separated by 1+ whitespace:
-
-    EXPR1 EXPR2 EXPR3 ...
-
-their values are converted to strings and concatenated.
-This is an extension of Python syntax for concatenating literal strings, like in:
-
-       'Hypertag '  "is"   ' cool'
-
-which is parsed by Python into a single string:
-
-       'Hypertag is cool'
-
-In Hypertag, concatenation using whitespace as an operator is performed on runtime,
-hence all (possibly non-literal) expressions are supported as operands, not just literals;
-and values of other types than `<str>` are automatically converted to strings 
-before concatenation.
-
-The programmer must guarantee that the values of all sub-expressions 
-can be converted to `<str>` through the call: `str(value)`
 
 ### Qualifiers: ? and !
 

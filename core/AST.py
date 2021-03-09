@@ -1979,11 +1979,14 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-      | Base indentation
-      dedent full=False
-        div
-          p
-            | Everything inside "dedent" is de-indented up to the level
+    % products items=[] maxlen=20
+        % row name price
+            tr
+                td | $name[:maxlen]
+                td | $price
+        table
+            for item in items:
+                row item.name item.price
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

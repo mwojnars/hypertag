@@ -54,7 +54,7 @@ block_def        =  mark_def ws name_id attrs_def generic_struct
 attrs_def        =  (space attr_body)? (space attr_def)*
 
 attr_body        =  mark_embed ws name_id
-attr_def         =  name_xml (ws '=' ws value_of_attr)?
+attr_def         =  name_id (ws '=' ws value_of_attr)?
 
 block_import     =  ('from' space path_import space)? 'import' space item_import (comma item_import)*
 path_import      =  ~"[^\s\x22\x27]+"                           # import path can be ANY string of 1+ characters unless it contains a whitespace, ' or "

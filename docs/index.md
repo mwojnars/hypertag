@@ -110,7 +110,7 @@ Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
 with native custom tags (_hypertags_), and more. 
 If you are new to Hypertag, see the [Quick Start](https://github.com/mwojnars/hypertag#quick-start) 
-for a brief introduction.
+first for a brief introduction.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
@@ -134,7 +134,7 @@ Hypertag was inspired by Python and indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
-<br>
+<hr>
 
 # Language Reference
 <br>
@@ -173,7 +173,8 @@ During parsing, blocks are first **translated** into Hypertag's native Document 
 and then the DOM undergoes **rendering** to produce a document string in a target language. 
 Typically, the target language is HTML (produced by `hypertag.HyperHTML` standard runtime)
 or XHTML, although any other language can be supported if an appropriate subclass 
-of `hypertag.core.runtime.Runtime` is implemented to provide language-specific configuration.
+of `hypertag.core.runtime.Runtime` is implemented to provide language-specific 
+built-ins and configuration.
 
 **Text blocks**
 
@@ -270,8 +271,7 @@ output:
 </p>
 ```
 
-The "append" modifier can also be used to convert an outline block into an inline sub-block 
-of its parent:
+The "append" modifier can also be used to convert an outline sub-block into an inline one:
    
     p
         ... | Using "..." modifier, a block with no predecessors
@@ -328,27 +328,119 @@ output:
 When used with `full=False`, the "dedent" tag only removes the top-most indentation of its 
 inner blocks. Note that the "dedent" tag _can_ be combined with dedent/append modifiers. 
 
+**The _pass_ keyword**
+
+Hypertag has a special keyword, `pass`, that can be used instead of a block, 
+as an "empty block" placeholder.
+This quasi-block generates no output, similarly to the `pass` keyword in Python. 
+The use of `pass` is never enforced by the syntax: empty body is always a valid alternative
+and can be used inside parent blocks of all types. In some cases, though, the use of 
+explicit `pass` may be preferred due to aesthetic considerations.
+
+
+## Structural blocks
+
 **Anatomy of a block**
 
 Some types of blocks (_structural blocks_) may contain nested blocks inside. 
 A list of such nested blocks is called a **body**. The initial part of a block that precedes 
-the body is called a **header** - it always fits in a single line (the **headline**). 
-For all types of blocks (control blocks included!), body is _not_ mandatory and can be omitted.
-Moreover, the "if" and "try" [control blocks](#control-blocks) 
+the body is called a **header** - it always fits on a single line (the **headline**). 
+For all types of structural blocks (control blocks included!), body is _not_ mandatory 
+and can be omitted. Moreover, the "if" and "try" [control blocks](#control-blocks) 
 may consist of multiple branches (**clauses**), each branch having its own body.
 
-Contents of a structural block can be arranged as _inline_, _outline_ (short for "out of the line"),
+The most common type of structural block is a [tagged block](#tagged-blocks) whose header
+consists of a name of tag, optionally followed by a space-separated list of attributes and a body.
+
+Content of a structural block can be arranged as _inline_, _outline_ (short for "out of the line"),
 or mixed inline+outline. Inline content starts right after the header in the headline 
-and is usually rendered to a more compact form (without surrounding newlines).
+and is usually rendered to a more compact form than outline content 
+(without surrounding newlines):
 
+    h1 | This is inline text, no surrounding newlines are printed in the output.
+    p
+       / These are sub-blocks of an outline content...
+       | ...of the parent paragraph block.
+  
+output:
 
-## Tagged blocks
+```html
+<h1>This is inline text, no surrounding newlines are printed in the output.</h1>
+<p>
+   These are sub-blocks of an outline content...
+   ...of the parent paragraph block.
+</p>
+```
 
-The most common type of structural block is a **tagged block** whose header consists of a name 
-of a tag, optionally followed by a space-separated list of attributes.
+Mixed inline+outline content is allowed if a colon `:` is additionally put in the headline:
 
-....
+    div: | This inline text is followed by a sub-block "p".
+      p
+        i | Line 1
+        b | Line 2
 
+output:
+
+```html
+<div>This inline text is followed by a sub-block "p".
+  <p>
+    <i>Line 1</i>
+    <b>Line 2</b>
+  </p></div>
+```
+
+Without a colon, all content is interpreted as _multiline_ text:
+
+    div |
+      Line 1
+      Line 2
+
+output:
+
+```html
+<div>
+Line 1
+Line 2
+</div>
+```
+
+If no inline content is present, a colon can optionally be put at the end of the block's headline.
+The two forms, with and without a trailing colon, are equivalent:
+
+    p
+        i | text
+    p:
+        i | text
+
+output:
+
+```html
+<p>
+    <i>text</i>
+</p>
+<p>
+    <i>text</i>
+</p>
+```
+
+A special _null_ tag (`.`) can be used to better align tagged and untagged blocks in the code:
+
+    p
+      i | This line is in italics ...
+      . | ... and this one is not, but both are vertically aligned in the script.
+      . | The null tag helps with code alignment when a tag is missing.
+
+output:
+
+```html
+<p>
+  <i>This line is in italics ...</i>
+  ... and this one is not, but both are vertically aligned in the script.
+  The null tag helps with code alignment when a tag is missing.
+</p>
+```
+
+<!---
 In a tagged block, the text may start on the same line (_headline_) as the tag (_inline_ content)
 and may extend to subsequent lines (_multiline_ content) unless sub-blocks are present.
 Any content that starts below the headline is called _outline_ content (short for "out of the line").
@@ -361,11 +453,6 @@ Inline text is rendered to a more compact form than outline text
     div |
       Another way to write a multiline text-only block: with initial "|" marker
       in the headline followed by lines of text and no more markers.
-
-<!---
-      Another example of how a multiline text-only block can be written
-      using an initial "|" marker in the headline and no more markers thereafter.
---->
 
 output:
 
@@ -399,24 +486,30 @@ output:
     The null tag helps with code alignment when a tag is missing.
   </p></div>
 ```
+--->
 
-Tags may have _attributes_ and can be _chained_ together using a colon `:`, like here:
 
-    h1 class='big-title' : b : a href="http://hypertag.io" style="color:DarkBlue"
-        | Tags can be chained together using a colon ":".
-        | Each tag in a chain can have its own attributes.
-        | Attributes are passed in a space-separated list, no parentheses.
+## Tagged blocks
+
+The most common type of structural block is a **tagged block**, whose header
+consists of a name of tag, optionally followed by a space-separated list of attributes and a body:
+
+    div class='main-content' width='1000px'
+        | sub-block 1
+        | sub-block 2
+
+Tags can be _chained_ together in a single block using a colon `:`, like here:
+
+    h1 : b : a href='#' :
+        | This is a bold heading with an anchor.
 
 output:
 
-```html
-<h1 class="big-title"><b><a href="http://hypertag.io" style="color:DarkBlue">
-    Tags can be chained together using a colon ":".
-    Each tag in a chain can have its own attributes.
-    Attributes are passed in a space-separated list, no parentheses.
-</a></b></h1>
-```
+    <h1><b><a href="#">
+        This is a bold heading with an anchor.
+    </a></b></h1>
 
+Each tag in a chain can have its own list of attributes.
 Shortcuts are available for the two most common HTML attributes: 
 `.CLASS` is equivalent to `class=CLASS`, and `#ID` means `id=ID`.
 
@@ -428,16 +521,13 @@ output:
 <p id="main-content" class="wide-paragraph">text...</p>
 ```
 
-If no inline content is present, a colon can optionally be put at the end of 
-the block's headline. The two forms, with and without a trailing colon, are equivalent.
-
 
 ## Expressions
 
 A Hypertag script may define _variables_ to be used subsequently in _expressions_
 inside plain-text and markup blocks, or inside attribute lists.
 A variable is created by an _assignment block_ ($). 
-Expressions are embedded in text blocks using {...}  or $... syntax - the latter can only
+Expressions are embedded in text blocks using `{...}`  or `$...` syntax - the latter can only
 be used for expressions that consist of a variable with (optionally) some tail operators (. [] ()):
 
     $ k = 3
@@ -452,41 +542,161 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
-Escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` shall be used inside 
+Escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` can be used inside 
 text blocks and strings to produce `{`, `}`, `$`, respectively.
 
-Each variable points to a Python object and can be used with all the standard operators
-known from Python:
+Assignment blocks support _augmented assignments_, where multiple variables are assigned to
+all at once:
 
-    ** * / // %
-    + - unary minus
-    << >>
-    & ^ |
-    == != >= <= < > in is "not in" "is not"
-    not and or
-    X if TEST else Y    - the "else" clause is optional and defaults to "else None"
-    A:B:C               - slice operator inside [...]
-    .                   - member access
-    []                  - indexing
-    ()                  - function call
+    $ a, (b, c) = [1, (2, 3)]
 
-Hypertag provides also a special _concatenation operator_. If multiple expressions are put 
+Each Hypertag variable points to a Python object and can be used with all the standard operators
+known from Python. The list is ordered according to a decreasing operator priority:
+
+    . [] ()                     - tail operators (member access, indexing, function call)
+    A:B:C                       - slice operator inside [...] indexing
+    ** * / // %                 - arithmetic 
+    + - unary minus             - arithmetic
+    << >>                       - bitwise
+    & ^ |                       - bitwise
+    == != >= <= < >             - comparison
+    in is "not in" "is not"     - membership & identity
+    not and or                  - logical
+    X if TEST else Y            - logical
+
+Inside the ternary `if-else` operator, the `else` clause is optional and defaults to `else None`.
+
+Inside dictionaries `{...}` and array slices `[a:b:c]`, operators other than arithmetic and 
+bitwise must be enclosed in parentheses to avoid ambiguity of the colon `:`,
+which normally in Hypertag serves as a [pipeline operator](#filters), but in dictionaries
+and slices plays a role of a field separator.
+
+Hypertag defines also a few custom operators:
+
+- The _pipeline_ operator (`:`) allows functions and other callables be used as 
+  chained _filters_. This operator is described in detail in the [Filters](#filters) section.
+- The _concatenation_ operator allows sub-expressions to be put one after another, with only 
+  a whitespace as a separator, like in `EXPR1 EXPR2 EXPR3 ...` The sub-expressions are then
+  converted to strings through `str(EXPR)` and concatenated.
+  The programmer must ensure that `str(EXPR)` is a valid call for each sub-expression.
+  
+<!---
+If multiple expressions are put 
 one after another separated by 1+ whitespace (a space is the operator): EXPR1 EXPR2 EXPR3 ...
 their values get automatically converted to strings through `str(EXPR)` and concatenated.
-This is an extension of Python syntax for concatenating literal strings, like in:
-`'Hypertag '  "is"   ' cool'` which is parsed into a single string: `'Hypertag is cool'`.
-In Python, this works for literals only, while in Hypertag, all types of expressions
-can be joined in this way. The concatenation operator has lower priority than binary "or" (`|`)
-and a pipeline (`:`); and higher than comparisons.
+The programmer must ensure that calling str(...) is a valid operation for each sub-expression.
+--->
+The concatenation operator is an extension of the Python syntax for joining literal strings, 
+like in `'Hypertag '  "is"   ' cool'` which is converted by Python parser to a single string:
+`'Hypertag is cool'`. In Python, this works for literals only, while in Hypertag, 
+all types of expressions can be joined in this way. 
+The concatenation operator has a lower priority than binary "or" (`|`) and a pipeline (`:`);
+and higher than comparisons.
 
-Assignment blocks support _augmented assignments_, where multiple variables 
-are assigned to all at once:
 
-    $ a, (b, c) = 1, (2, 3)
+## Symbols
 
-All identifiers (of variables and tags) are case-sensitive.
-There are separate namespaces for tags and variables, so programmers run no risk of 
-name collissions between local variables and predefined tags: "a", "b", "i" etc.
+All identifiers in Hypertag - of variables, tags, attributes - are case-sensitive.
+
+Names of tags and variables must match the following regular expression:
+`[a-zA-Z_][a-zA-Z0-9_]*` - a name that matches this pattern is called _regular_.
+
+Inside names of tag attributes in a tagged block (but not hypertag definition),
+a much broader set of characters is allowed.
+Basically, Hypertag supports the same format as defined for attributes in the XML
+(see the [_Name_](https://www.w3.org/TR/REC-xml/#NT-NameStartChar) production in the XML grammar),
+with the restriction that a colon `:` must not occur as the first nor the last character.
+For example, the following code is valid:
+
+    div ąłę_źó:1-x = ''
+    div 更車-賈滑 = ''
+
+output:
+
+```html
+<div ąłę_źó:1-x=""></div>
+<div 更車-賈滑=""></div>
+```
+
+A name that satisfies the above rule of naming attributes, but not the previous one 
+of naming regular identifiers, is called _irregular_.
+
+In hypertag definition blocks, names of all attributes must be regular. Otherwise,
+it would be impossible to refer and make use of such attributes inside hypertag's
+definition body.
+
+However, when a custom tag is implemented in Python as a subclass of 
+`hypertag.core.tag.ExternalTag` ([external tag](#custom-tags)), it can accept the extended set
+of attribute names, including irregular ones.
+
+**Namespaces**
+
+There are two separate _namespaces_ in Hypertag: for tags and variables.
+Thanks to the separation, there is no risk of a name collission between local variables 
+and predefined tags: "a", "b", "i" etc.
+For instance, it is possible to define `$i` as a loop variable, while refering to `%i` 
+(an HTML tag) inside the loop at the same time:
+
+    for i in [1,2,3]:
+        i | number $i
+
+output:
+
+```html
+<i>number 1</i>
+<i>number 2</i>
+<i>number 3</i>
+```
+
+By convention, to avoid confusion and clearly indicate what namespace a given symbol belongs to, 
+its name can be prepended in the documentation with `$` or `%`, to denote a variable (`$i`) 
+or a tag (`%i`).
+
+**Name scoping**
+
+The two global namespaces are internally arranged in a hierarchy that follows the structure 
+of the document (_hierarchical name scoping_). Every tagged block, 
+as well as a hypertag definition block, creates a new branch in the namespace:
+new symbols are only added to this branch and are visible to sibling blocks 
+at the same depth and to their sub-blocks, but _not_ to other blocks in the outer scope.
+For example:
+
+    p
+        $x = 1
+        # "x" can be accessed inside the paragraph:
+        | $x
+
+    # "x" cannot be accessed outside the paragraph
+
+Obviously, symbols defined at a higher level can be overwritten in another place
+down the document tree:
+
+    $ x = 1
+    p:
+        $ x = 2
+        | "x" inside the paragraph equals $x
+    | "x" outside the paragraph equals $x
+
+output:
+
+    <p>
+        "x" inside the paragraph equals 2
+    </p>
+    "x" outside the paragraph equals 1
+
+Note that unlike tagged and definition blocks, [control blocks](#control-blocks) do _not_ 
+create new branches in namespaces by themselves. Therefore, it is correct to assign a variable
+inside an if/try/for/while block and still access its value in sibling blocks:
+
+    if True:
+        $x = 1
+    else:
+        $x = 2
+    | x=$x is accessible in a sibling of a control block
+
+output:
+
+    x=1 is accessible in a sibling of a control block
 
 
 ## Literals
@@ -498,11 +708,11 @@ Hypertag supports the following literal expressions:
 - formatted strings (f-strings): `"text"`, `'text'`
 - raw strings (r-strings): `r"text"`, `r'text'`
 
-Literal strings can be created with the `'...'` or `"..."` syntax.
-This creates _formatted strings_ (equivalent to Python's f-strings),
+Literal strings can be created with the `'...'` or `"..."` syntax, both are equivalent.
+This creates _formatted strings_ (analogue of Python's f-strings),
 which may contain _embedded expressions_ of both the `$...` and `{...}` form.
 If you want to create raw strings instead, such that `$`, `{`, `}` are treated as regular
-characters, the `r'...'` and `r"..."` syntax shall be used:
+characters, the `r'...'` and `r"..."` syntax should be used:
 
     | { "this is a formatted string with an embedded expression: {2+3}" }
     | {r"this is a raw string, so the expression is left unparsed: {2+3}" }
@@ -592,8 +802,8 @@ similar to Python functions. A hypertag can be used with named (keyword) or unna
         tableRow 'Maserati' '300,000'
         tableRow name='Cybertruck'
 
-What a clean piece of code it is compared to the always-cluttered HTML? 
-In raw HTML, and in many templating languages too, you would need much more typing
+<!---What a clean piece of code it is compared to the always-cluttered HTML?---> 
+In raw HTML, and in many templating languages too, one would need much more typing
 to produce the same table:
 
 ```html
@@ -617,14 +827,14 @@ to produce the same table:
 </table>
 ```
 
-No doubt which version is more readable and maintainable?
+<!---No doubt which version is more readable and maintainable?--->
 
 Imagine that at some point you decided to add a CSS class to all cells in the price column?
-In HTML, you'd have to walk through all the cells and manually modify 
-every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)!),
+In HTML, you would have to walk through all the cells and manually modify 
+every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)),
 taking care not to modify `<td>` cells of another column accidentally.
-In Hypertag, which provides powerful ways to deduplicate code, it is enough to modify
-the hypertag definition adding `.style-price` in one place, and voilà:
+Hypertag, in contrast, provides powerful ways to deduplicate code, so it is enough to add
+`.style-price` in the hypertag definition, in one place, and voilà:
 
     % tableRow name price='UNKNOWN'
         tr        
@@ -642,23 +852,25 @@ a very unclean and confusing approach.
 
 Needless to say, hypertags can refer to other hypertags.
 Even more, hypertag definitions can be nested: a hypertag can be defined inside another one,
-such that it can only be used locally within the scope of the outer definition.
+such that it can only be used locally within the scope of the outer definition,
+like the `%row` and `%products` tags below:
 
-<!---
-    % products items=[]
+    % products items=[] maxlen=20
         % row name price
             tr        
-                td | $name
+                td | $name[:maxlen]
                 td | $price
         table        
             for item in items:
                 row item.name item.price
---->
+
+Notice that the local tag `%row`, which is being used in a loop in the last line, 
+internally can access the `maxlen` attribute that is declared by the outer hypertag.
 
 One more crucial element of the hypertag syntax is the _body attribute_.
 Imagine that in the example above, we wanted to add another column containing
 formatted (rich-text) information about a car model: funny quotes, pictures etc.
-Passing it as a regular attribute is inconvenient, as we'd have to somehow encode
+Passing it as a regular attribute is inconvenient, as we would have to somehow encode
 the entire HTML structure of the description: paragraphs, styles, images.
 Instead, we can add a _body attribute_ (@) to the hypertag definition:
 
@@ -669,9 +881,9 @@ Instead, we can add a _body attribute_ (@) to the hypertag definition:
             td
                @ info           # inline form can be used as well:  td @ info
 
-and then apply this hypertag to a non-empty _actual body_ which will be passed
-in a structural form via the "info" attribute and will get printed in the right 
-place inside the output table with all its rich contents and formatting preserved:
+This special attribute will hold the _actual body_ of a hypertag's occurrence, 
+represented as a tree of nodes of Hypertag's native Document Object Model (DOM),
+so that all rich contents and formatting are preserved:
 
     table
         tableRow 'Porsche' '200,000'
@@ -716,28 +928,25 @@ Output:
 </table>
 ```
 
-There can only be one _body_ attribute in a hypertag; it must be the first one
+There can be at most one _body_ attribute in a hypertag; it must be the first one
 on the list; it can be missing (then the tag is _void_ and its 
 occurrences must have empty body); and it can have arbitrary name: we suggest _@body_ 
 if there is no other meaningful alternative... 
-Yes, any associations with Python's "self" are intended and well justified.
+Yes, associations with Python's `self` - the special argument to non-static methods -
+are intended and well justified.
 
 <!---
 As you can see, Hypertag is much more concise than raw HTML, and with the help of custom
 tags it enables cleaner separation between presentation logic (tags) and textual contents.
 --->
 
-Like variables, custom tags can also be imported from other Hypertag scripts and from 
-Python modules. Because of separation of namespaces (variables vs. tags),
-every import block must clearly indicate whether a particular symbol is a variable or a tag.
-This is done be prepending the imported name with `$` (a variable) or `%` (a tag).
+Like variables, tags can also be imported from other Hypertag scripts and Python modules.
+Due to separation of namespaces (variables vs. tags), all symbols must be 
+prepended with either `$` (denotes a variable) or `%` (a tag):
 
     from my.utils import $variable
     from my.utils import %tag
 
-<!---
-This is something that differentiates hypertags from plain Python functions.
---->
 
 ## Filters
 
@@ -1011,24 +1220,13 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 
 (TODO...)
 
-
-## Extras
+<!---
+## Final remarks
 
 There is a number of additional elements of Hypertag that have not been mentioned so far.
 These include:
 
-- The `pass` keyword can be used in place of a block, as an "empty block" placeholder.
-  This quasi-block generates no output, similarly to the `pass` keyword in Python. 
-  The use of `pass` is never enforced by the syntax: empty body is always a valid alternative
-  and can be used inside parent blocks of all types. In some cases, though, the use of 
-  explicit `pass` may be preferred due to aesthetic considerations.
-
-There are also some _gotcha!_ you need to keep in mind when coding with Hypertag:
-
-- Inside dictionaries `{...}` and array slices `[a:b:c]`, operators other than arithmetic and 
-  bitwise must be enclosed in parentheses to avoid ambiguity of the colon ":",
-  which normally serves as a pipeline operator, but in dictionaries and slices plays a role 
-  of a field separator.
+There are some _gotcha!_ you need to keep in mind when coding with Hypertag:
 - So far, Hypertag hasn't been yet optimized for performance.
-
+--->
 

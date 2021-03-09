@@ -158,18 +158,18 @@ Content of a tagged block can be arranged as _inline_, _outline_ ("out of the li
 or mixed inline+outline. Inline content starts right after the tag in the _headline_ 
 and is rendered to a more compact form.
 
-    h1 | This is "inline" text, no surrounding newlines are printed in the output.
+    h1 | This is inline text, no surrounding newlines are printed in the output.
     p
-       / These are sub-blocks of an "outline" content...
-       | ...of the parent paragraph.
+       / These are sub-blocks of an outline content...
+       | ...of the parent paragraph block.
   
 output:
 
 ```html
-<h1>This is "inline" text, no surrounding newlines are printed in the output.</h1>
+<h1>This is inline text, no surrounding newlines are printed in the output.</h1>
 <p>
-   These are sub-blocks of an "outline" content...
-   ...of the parent paragraph.
+   These are sub-blocks of an outline content...
+   ...of the parent paragraph block.
 </p>
 ```
 
@@ -205,7 +205,7 @@ Line 2
 </div>
 ```
 
-A special _null_ tag (.) can be used to better align tagged an untagged blocks in the code:
+A special _null_ tag (`.`) can be used to better align tagged and untagged blocks in the code:
 
     p
       i | This line is in italics ...
@@ -270,6 +270,10 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
+Assignment blocks support _augmented assignments_:
+
+    $ a, (b, c) = [1, (2, 3)]
+
 Each variable points to a Python object and can be used with all the standard operators
 known from Python:
 
@@ -298,10 +302,6 @@ output:
     this is a tuple:  (1, 2, 3)
     this is a set:    {1, 2}
     this is a dict:   {'a': 1, 'b': 2}
-
-Assignment blocks support _augmented assignments_:
-
-    $ a, (b, c) = 1, (2, 3)
 
 Variables can be imported from other Hypertag scripts and Python modules using an _import_ block:
 
