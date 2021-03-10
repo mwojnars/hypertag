@@ -4,11 +4,11 @@
     /*.tag-h1 { text-decoration: underline }*/
     /*.tag-h2 { font-weight: bold; }*/
     
-    li .tag-h3 { display: none; }
+    li.tag-h3 { display: none; }
     
     h3 {
      font-size:18px;
-     line-height:40px;
+     line-height:35px;
      color: #333;
      font-weight: bold;
     }
@@ -187,13 +187,13 @@ built-ins and configuration.
 
 ### Text blocks
 
-The most elementary type of block is a _text block_, which comes in three variants:
+The most elementary type of block is a _text block_. It comes in three variants:
 
 - **plain-text** (`|`),
 - **markup** (`/`),
-- **verbatim** (`!`). 
+- **verbatim** (`!`), 
 
-They differ in the way how embedded expressions and raw HTML are handled:
+which differ in the way how embedded expressions and raw HTML are handled:
 
     | Plain-text block may contain {'em'+'bedded'} expressions & its output is HTML-escaped.
     / Markup block may contain expressions; output is not escaped, so <b>raw tags</b> can be used.
