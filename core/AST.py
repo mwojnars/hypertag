@@ -1979,10 +1979,11 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    $ x, y = 1, 2
-    $ x += 5
-    $ y *= 2
-    |   $x, $y
+    div class='content'
+        span | text
+
+    DIV class='content'
+        SPAN | text
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

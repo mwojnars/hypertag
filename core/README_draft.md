@@ -68,15 +68,6 @@ rather than multi-line text - even if there is a text-block marker .
 
 ## Blocks
 
-Plain-text and markup blocks may contain embedded expressions, like `$x` or `{a+b}`,
-which are evaluated and replaced with their corresponding values during translation.
-Additionally, the output of a plaintext block is converted to the target language 
-(*escaped*) before insertion to the DOM. A runtime-specific *escape function* is used
-for this purpose. For example, `hypertag.HyperHTML` runtime performs HTML-escaping: 
-it replaces characters '<', '>' and '&' with HTML entities (`&amp;` `&gt;` `&lt;`).
-For a different target language, the escape function could perform any other operation
-that is necessary to convert plain text to a valid string in this language. 
-
 Contents of a text block may span multiple lines. The additional lines
 must be indented more than the first line. Sub-indentation is preserved in the output:
 
@@ -603,48 +594,6 @@ can also be imported to a Hypertag script as an object ($NAME).
 Additionally, if a module defines a `__tags__` global - which should be a dict
 with strings (tag names) as keys and Tag objects as values - the content of this 
 dictionary can be imported as tags (%NAME) into a Hypertag script.
-
-
-## Runtime
-
-Execution of a Hypertag script constists of 3 phases:
-
-1. **parsing** (script > AST)
-2. **translation** (AST > DOM) -- all *native* hypertags expanded, 
-   external hypertags NOT expanded; DOM can be manipulated
-3. **rendering** (DOM > markup)
-
-Typically, the client code will call `Hypertag.render()` to perform all the above 
-steps at once. In some cases, the client may wish to obtain the structured representation
-of the resulting document - the DOM (Document Object Model) - for example, to manipulate
-the DOM tree before it gets rendered. In such case, the client should call 
-`Hypertag.translate()` and then `render()` on the resulting DOM tree.
-
-Runtime specifies the target language a Hypertag script is being rendered to.
-Runtime decides what built-in symbols (tags and/or variables dependent on the
-target language, see `Runtime.DEFAULT`) 
-are automatically imported at the beginning of rendering.
-Moreover, Runtime specifies an escape function (`Runtime.escape`) that is applied
-to the output of plain-text blocks in order to convert it to the target language.
-
-### HyperHTML
-
-`HyperHTML` is a built-in runtime that renders Hypertag scripts to HTML 
-as a target language. HyperHTML implements HTML-specific tags and an escape function.
-For every HTML tag, HyperHTML provides two alternative Hypertag tags:
-written in lower case and upper case.
-For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags available.
-Output of their expansion differs by letter case, otherwise the behavior is the same.
-It is up to the programmer to decide what variant to use.
-
-Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
-to a script. They can also be imported manually from the `hypertag.html` module, e.g.:
-
-    from hypertag.html import %div, %DIV
-
-
-**Runtime** ... **dynamic context** of rendering consisting of any python objects 
-can be provided ...
 
 
 ## SDK ??

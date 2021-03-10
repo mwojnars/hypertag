@@ -502,8 +502,8 @@ evaluates to:
 
     ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
 
-Functions do _not_ have to be explicitly registered as filters before use, which is in contrast 
-to popular templating languages (Jinja, Django templates etc.).
+Functions do _not_ have to be explicitly registered as filters before use, unlike in
+popular templating languages (Jinja, Django templates etc.).
 
 <!---
 Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.

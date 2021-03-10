@@ -3,6 +3,15 @@
 
     /*.tag-h1 { text-decoration: underline }*/
     /*.tag-h2 { font-weight: bold; }*/
+    
+    li .tag-h3 { display: none; }
+    
+    h3 {
+     font-size:18px;
+     line-height:40px;
+     color: #333;
+     font-weight: bold;
+    }
 
     body {
      font:16px/23px 'Quattrocento Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -116,7 +125,7 @@ Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 
-### Setup
+## Setup
 
 (TODO)
 
@@ -128,9 +137,9 @@ Run: .......
 (TODO)
 --->
 
-### Acknowledgements
+## Acknowledgements
 
-Hypertag was inspired by Python and indentation-based templating languages:
+Hypertag was inspired by Python and by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
@@ -176,7 +185,7 @@ or XHTML, although any other language can be supported if an appropriate subclas
 of `hypertag.core.runtime.Runtime` is implemented to provide language-specific 
 built-ins and configuration.
 
-**Text blocks**
+### Text blocks
 
 The most elementary type of block is a _text block_, which comes in three variants:
 
@@ -198,7 +207,16 @@ Markup block may contain expressions; output is not escaped, so <b>raw tags</b> 
 In a verbatim $block$ {expressions} are left unparsed, no <escaping> is done.
 ```
 
-**Comments**
+Plain-text and markup blocks may contain embedded [expressions](#expressions), like `$x` or `{a+b}`,
+which are evaluated and replaced with their corresponding values during translation.
+Additionally, the output of a plain-text block is converted to the target language 
+(_escaped_) before insertion to the DOM. A runtime-specific _escape function_ is used
+for this purpose. For example, `hypertag.HyperHTML` [runtime](#runtime) performs HTML-escaping: 
+it replaces `<`, `>`, `&` characters with HTML entities (`&lt;` `&gt;` `&amp;`).
+For a different target language, the escape function could perform any other operation
+that is necessary to convert plain text to a valid string in this language. 
+
+### Comments
 
 Blocks starting with double dash (`--`) or hash (`#`) are treated as comments:
 their content is left unparsed (like in a "verbatim" block) and is excluded from the output.
@@ -233,12 +251,12 @@ in another equally-indented line. These are similar rules as in Python.
 All the rules of text layout (inline text, multiline text etc.) that will be discussed later on
 hold equally for _all types_ of text blocks (plain-text, markup, verbatim). 
 Spaces after special characters: `|/!:$%` - are never obligatory, and in some cases
-(inside expressions) they may be disallowed. A single leading space right after the text-block
-marker (`|/!`) is interpreted as a marker-content separator 
+(inside expressions) may be disallowed. A single leading space right after the text-block
+marker (`|/!`) is interpreted as a _marker-content_ separator 
 and gets removed from the output, if present; an additional space should be inserted 
 by the programmer if a space character is still desired in this place in the output.
 
-**Modifiers**
+### Modifiers
 
 Hypertag defines _layout modifiers_: special symbols that can be put at the beginning 
 of a block's headline to change the block's indentation and/or position relative 
@@ -335,7 +353,7 @@ output:
 When used with `full=False`, the "dedent" tag only removes the top-most indentation of its 
 inner blocks. Note that the "dedent" tag _can_ be combined with dedent/append modifiers. 
 
-**The _pass_ keyword**
+### The _pass_ keyword
 
 Hypertag has a special keyword, `pass`, that can be used instead of a block, 
 as an "empty block" placeholder.
@@ -347,7 +365,7 @@ explicit `pass` may be preferred due to aesthetic considerations.
 
 ## Structural blocks
 
-**Anatomy of a block**
+### Anatomy of a block
 
 Some types of blocks (_structural blocks_) may contain nested blocks inside. 
 A list of such nested blocks is called a **body**. The initial part of a block that precedes 
@@ -566,22 +584,17 @@ Each Hypertag variable points to a Python object and can be used with all the st
 known from Python. The list is ordered according to a decreasing operator priority:
 
     . [] ()                     - tail operators (member access, indexing, function call)
-    A:B:C                       - slice operator inside [...] indexing
     ** * / // %                 - arithmetic 
     + - unary minus             - arithmetic
     << >>                       - bitwise
     & ^ |                       - bitwise
+    A:B:C                       - slice operator inside [...] indexing
     == != >= <= < >             - comparison
     in is "not in" "is not"     - membership & identity
     not and or                  - logical
     X if TEST else Y            - logical
 
 Inside the ternary `if-else` operator, the `else` clause is optional and defaults to `else None`.
-
-Inside dictionaries `{...}` and array slices `[a:b:c]`, operators other than arithmetic and 
-bitwise must be enclosed in parentheses to avoid ambiguity of the colon `:`,
-which normally in Hypertag serves as a [pipeline operator](#filters), but in dictionaries
-and slices plays a role of a field separator.
 
 Hypertag defines also a few custom operators:
 
@@ -604,6 +617,90 @@ like in `'Hypertag '  "is"   ' cool'` which is converted by Python parser to a s
 all types of expressions can be joined in this way. 
 The concatenation operator has a lower priority than binary "or" (`|`) and a pipeline (`:`);
 and higher than comparisons.
+
+Note that inside dictionaries `{...}` and array slices `[a:b:c]`, operators other than 
+arithmetic and bitwise must be enclosed in parentheses to avoid ambiguity of the colon `:`,
+which in Hypertag serves as a pipeline operator, but in dictionaries and slices plays a role
+of a field separator.
+
+
+## Filters
+
+Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.
+It is applied in a similar way as pipes `|` in templating languages:
+to pass a result of an expression (a _feed_) to a function (a _filter_) as its first argument,
+without putting the entire expression inside the function-call parentheses,
+as would normally be required. A typical example of filters in a templating language:
+
+    title | truncate(50) | upper
+
+this takes a `title` string, truncates it to no more than 50 characters and then converts 
+to upper case. In Hypertag, this expression will look the same, except the pipes are
+replaced with colons:
+
+    title : truncate(50) : upper
+
+Templating languages, like Jinja or Django's templates, require that functions are explicitly
+declared as filters before they can be used in template code.
+In Hypertag, there are no such restrictions. Rather, all _callables_ (functions, methods,
+class constructors etc.) can be used in pipelines with no special preparation. 
+A pipeline is just another syntax for a function call, so every expression of the form:
+
+    EXPR : FUN(*args, **kwargs)
+
+gets translated internally to:
+
+    FUN(EXPR, *args, **kwarg)
+
+Obviously, pipeline operators can be chained together, such that `EXPR:FUN1:FUN2` is
+equivalent to `FUN2(FUN1(EXPR))`. A filter can be specified using a compound expression,
+so the use of `obj.fun` or similar constructs 
+(an atom followed by any number of "member access" or "indexing" tail operators) is possible.
+For example, the standard `str.upper` method can be used directly, instead of implementing 
+a custom `upper()` function:
+
+    | {'Hypertag' : str.upper : list : sorted(reverse=True)}
+
+output:
+
+    ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
+
+<!---
+Remember that all Python built-ins are available in Hypertag, that is why `str`, `list`,
+`sorted` etc. are accessible without an explicit import.
+--->
+
+If a filter function only takes one argument (the feed), this function can be used with 
+or without parentheses in a pipeline, and these two forms are equivalent:
+
+    EXPR : FUN
+    EXPR : FUN()
+
+Hypertag seamlessly integrates all of Django's [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
+They can be imported from `hypertag.django.filters` and either called as regular functions
+or used inside pipelines. The extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
+(the "human touch" to data) are also available. Django must be installed on the system.
+
+    from hypertag.django.filters import $slugify, $upper
+    from hypertag.django.filters import $truncatechars, $floatformat
+    from hypertag.django.filters import $apnumber, $ordinal
+
+    | { 'Hypertag rocks' : slugify : upper }
+    | { 'Hypertag rocks' : truncatechars(6) }
+    | { '123.45' : floatformat(4) }
+
+    # from django.contrib.humanize:
+    | "5" spelled out is "{ 5:apnumber }"
+    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
+    
+output:
+
+    HYPERTAG-ROCKS
+    Hyper…
+    123.4500
+
+    "5" spelled out is "five"
+    example ordinals 1st, 2nd, 5th
 
 
 ## Symbols
@@ -641,7 +738,7 @@ However, when a custom tag is implemented in Python as a subclass of
 `hypertag.core.tag.ExternalTag` ([external tag](#custom-tags)), it can accept the extended set
 of attribute names, including irregular ones.
 
-**Namespaces**
+### Namespaces
 
 There are two separate _namespaces_ in Hypertag: for tags and variables.
 Thanks to the separation, there is no risk of a name collission between local variables 
@@ -664,11 +761,11 @@ By convention, to avoid confusion and clearly indicate what namespace a given sy
 its name can be prepended in the documentation with `$` or `%`, to denote a variable (`$i`) 
 or a tag (`%i`).
 
-**Name scoping**
+### Name scoping
 
 The two global namespaces are internally arranged in a hierarchy that follows the structure 
 of the document (_hierarchical name scoping_). Every tagged block, 
-as well as a hypertag definition block, creates a new branch in the namespace:
+as well as a [hypertag definition](#custom-tags) block, creates a new branch in the namespace:
 new symbols are only added to this branch and are visible to sibling blocks 
 at the same depth and to their sub-blocks, but _not_ to other blocks in the outer scope.
 For example:
@@ -680,8 +777,8 @@ For example:
 
     # "x" cannot be accessed outside the paragraph
 
-Obviously, symbols defined at a higher level can be overwritten in another place
-down the document tree:
+Obviously, symbols defined at a higher level can be temporarily overwritten 
+in a narrower scope down the document tree:
 
     $ x = 1
     p:
@@ -773,7 +870,7 @@ of scripts from a DB instead of files, or from remote locations etc.
 Wildcard import is supported: `from PATH import *`.
 
 HyperHTML supports also a special import path "~" (tilde), which denotes 
-the _dynamic context_ of script execution: a dictionary of all variables that have
+the **dynamic context** of script execution: a dictionary of all variables that have
 been passed to the rendering method (`HyperHTML.render()`) as extra keyword arguments.
 These variables can only be accessed in the script after they
 have been _explicitly_ imported with `from ~ import ...`:
@@ -795,18 +892,28 @@ and the output is:
 
 ## Custom tags
 
+Hypertag allows programmers to define _custom tags_, either directly in Hypertag code
+(_native tags_), or as Python classes (_external tags_). Both cases are described below.
+
+**Native tags**
+
+One of the most distinctive features of Hypertag is the support for custom tag definitions
+right inside a Hypertag script. This type of custom tag is called a _native tag_ 
+or a _hypertag_, and is created using a _hypertag definition_ block (%):
+<!---
 One of the key features of Hypertag is the support for custom tags (_hypertags_)
 that can be defined directly in a Hypertag script using _hypertag definition_ blocks (%):
+--->
 
     % tableRow name price='UNKNOWN'
         tr        
             td | $name
             td | $price
 
-Here, `tableRow` is a custom tag that wraps up plain-text contents of table cells
+Here, `tableRow` is a newly defined tag that wraps up plain-text contents of table cells
 with appropriate `tr` & `td` tags to produce a listing of products.
-As you can see, a hypertag may accept attributes, and they can have default values,
-similar to Python functions. A hypertag can be used with named (keyword) or unnamed attributes:
+A hypertag may accept attributes, possibly with default values, similar to Python functions.
+In places of occurrence, hypertags accept positional (unnamed) and/or keyword (named) attributes:
 
     table
         tableRow 'Porsche'  '200,000'
@@ -814,9 +921,11 @@ similar to Python functions. A hypertag can be used with named (keyword) or unna
         tableRow 'Maserati' '300,000'
         tableRow name='Cybertruck'
 
-<!---What a clean piece of code it is compared to the always-cluttered HTML?---> 
+<!---What a clean piece of code it is compared to the always-cluttered HTML? 
 In raw HTML, and in many templating languages too, one would need much more typing
 to produce the same table:
+--->
+output:
 
 ```html
 <table>
@@ -841,31 +950,40 @@ to produce the same table:
 
 <!---No doubt which version is more readable and maintainable?--->
 
-Imagine that at some point you decided to add a CSS class to all cells in the price column?
-In HTML, you would have to walk through all the cells and manually modify 
+Custom native tags constitute a powerful instrument of code abstraction and deduplication
+along the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) principle.
+They enhance modularity and maintainability of presentation code to an unprecedented degree.
+
+Imagine that, in the example above, we wanted to add a CSS class to all cells of the price column.
+In HTML, we would have to walk through all the cells and manually modify 
 every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)),
 taking care not to modify `<td>` cells of another column accidentally.
-Hypertag, in contrast, provides powerful ways to deduplicate code, so it is enough to add
-`.style-price` in the hypertag definition, in one place, and voilà:
+With hypertags, in contrast, it is enough to add `.style-price` in a tag definition,
+in one place, and voilà:
+<!---
+Hypertag, in contrast, provides powerful ways to deduplicate and modularize code, 
+so it is enough to add `.style-price` in the hypertag definition, in one place, and voilà:
+--->
 
     % tableRow name price='UNKNOWN'
         tr        
             td | $name
             td .style-price | $price
 
-This definition can be moved out to a separate "utility" script,
-or stay in the same file where it is being used, for easy maintenance - 
+This definition can be moved out to a separate "utility" script and loaded with Python-like 
+[imports](#imports), or stay in the same file where it is being used, for easy maintenance - 
 the programmer can choose whatever location is best in a given case.
 In traditional templating languages, there are not so many choices:
-often the best you can do is separate out duplicated HTML code into a Python function,
-introducing code fragmentation along the way and spreading presentation code over 
+often the best we can do is separate out duplicated HTML code into a Python function
+(like a [custom tag](https://docs.djangoproject.com/en/3.1/howto/custom-template-tags/#writing-custom-template-tags)
+in Django), introducing code fragmentation along the way and spreading presentation code over 
 different types of files (views vs. models) and languages (HTML vs. Python) - 
 a very unclean and confusing approach.
 
-Needless to say, hypertags can refer to other hypertags.
-Even more, hypertag definitions can be nested: a hypertag can be defined inside another one,
+Not surprisingly, hypertags can refer to other hypertags. Moreover, hypertag definitions
+can be nested: a hypertag can be defined inside another one,
 such that it can only be used locally within the scope of the outer definition,
-like the `%row` and `%products` tags below:
+like the `%row` inside `%products`, below:
 
     % products items=[] maxlen=20
         % row name price
@@ -877,7 +995,7 @@ like the `%row` and `%products` tags below:
                 row item.name item.price
 
 Notice that the local tag `%row`, which is being used in a loop in the last line, 
-internally can access the `maxlen` attribute that is declared by the outer hypertag.
+can internally access attributes of the outer hypertag (here, `maxlen`).
 
 One more crucial element of the hypertag syntax is the _body attribute_.
 Imagine that in the example above, we wanted to add another column containing
@@ -953,82 +1071,15 @@ tags it enables cleaner separation between presentation logic (tags) and textual
 --->
 
 Like variables, tags can also be imported from other Hypertag scripts and Python modules.
-Due to separation of namespaces (variables vs. tags), all symbols must be 
+Due to separation of [namespaces](#namespaces) (variables vs. tags), all symbols must be 
 prepended with either `$` (denotes a variable) or `%` (a tag):
 
     from my.utils import $variable
     from my.utils import %tag
 
+**External tags**
 
-## Filters
-
-Hypertag defines a new operator not present in Python, the _pipeline_ (`:`), for use in expressions.
-It is applied in a similar way as pipes `|` in templating languages:
-to pass a result of an expression to a function (a _filter_) as its first argument,
-without putting the entire expression inside the function-call parentheses,
-as would normally be required. A typical example of filters in a templating language:
-
-    title | truncate(50) | upper
-
-this takes a `title` string, truncates it to no more than 50 characters and then converts 
-to upper case. In Hypertag, this expression will look the same, except the pipes are
-replaced with colons:
-
-    title : truncate(50) : upper
-
-Templating languages, like Jinja or Django's templates, require that functions are explicitly
-declared as filters before they can be used in template code.
-In Hypertag, there are _no_ such restrictions. Rather, all _callables_ (functions, methods,
-class instantiation etc.) can be used in pipelines without special preparation. 
-A pipeline is just another syntax for a function call, so every expression of the form:
-
-    EXPR : FUN(*args, **kwargs)
-
-gets translated internally to:
-
-    FUN(EXPR, *args, **kwarg)
-
-Obviously, pipeline operators can be chained together, so `EXPR:FUN1:FUN2` is
-equivalent to `FUN2(FUN1(EXPR))`. The function can be given as a compound expression,
-such that the use of `obj.fun` or similar constructs is possible. For example, the standard
-`str.upper` can be used instead of implementing a custom `upper()` function:
-
-    'Hypertag' : str.upper : list : sorted(reverse=True)
-
-output:
-
-    ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
-
-<!---
-Remember that all Python built-ins are available in Hypertag, that is why `str`, `list`,
-`sorted` etc. are accessible without an explicit import.
---->
-
-Hypertag seamlessly integrates all of Django's [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
-They can be imported from `hypertag.django.filters` and either called as regular functions
-or used inside pipelines. The extra filters from [django.contrib.humanize](https://docs.djangoproject.com/en/3.1/ref/contrib/humanize/)
-(the "human touch" to data) are also available. Django must be installed on the system.
-
-    from hypertag.django.filters import $slugify, $upper
-    from hypertag.django.filters import $truncatechars, $floatformat
-    from hypertag.django.filters import $apnumber, $ordinal
-
-    | { 'Hypertag rocks' : slugify : upper }
-    | { 'Hypertag rocks' : truncatechars(6) }
-    | { '123.45' : floatformat(4) }
-
-    # from django.contrib.humanize:
-    | "5" spelled out is "{ 5:apnumber }"
-    | example ordinals {1:ordinal}, {2:ordinal}, {5:ordinal}
-    
-output:
-
-    HYPERTAG-ROCKS
-    Hyper…
-    123.4500
-
-    "5" spelled out is "five"
-    example ordinals 1st, 2nd, 5th
+(TODO...)
 
 
 ## Control blocks
@@ -1199,6 +1250,80 @@ When passed `$products=[]`, the above code outputs:
 Qualifiers can be placed after all atomic expressions and embeddings, no space is allowed.
 
 
+## DOM
+
+(TODO...)
+
+
+## Runtime
+
+Execution of a Hypertag script is performed by a **runtime** object, which is an instance of 
+`hypertag.core.runtime.Runtime` . The execution constists of 3 phases:
+
+1. **parsing** a script to an Abstract Syntax Tree (AST), with syntactic and semantic analysis
+   of the tree;
+2. **translation** of the AST to a native Document Object Model (DOM) tree;
+   all _native_ hypertags get expanded during this operation, while all external tags
+   get converted to nodes of the DOM and can be manipulated upon later on;
+3. **rendering** of the DOM to a final document (a string) in a target language.
+
+Typically, the client code calls runtime's `render()` to perform all the above 
+steps at once. If the client wants to obtain a structured representation
+of the document - the DOM - instead of a flat string, the runtime's method `translate()` 
+should be called, followed by a call to  `render()` on the DOM tree. Between the calls,
+the DOM can be manipulated upon and modified according to the caller's needs.
+
+A runtime specifies the target language that scripts will be rendered to, and defines
+a list of built-in symbols (tags and/or variables, see `Runtime.DEFAULT`) 
+that will be automatically imported at the beginning of script execution.
+
+Additionally, a runtime specifies an escape function (`Runtime.escape`) that will be applied
+to all outputs of plain-text blocks in order to convert them to the target language.
+This function can perform simple character encoding, like entity encoding in the
+case of HTML, but it can also do any other more complex operation that is necessary to
+convert plain text to a valid string in the target language.
+
+
+### HyperHTML
+
+Hypertag's implementation has a standard runtime, `hypertag.HyperHTML`,
+for generation of HTML documents. This runtime implements HTML-specific tags and escape function.
+
+For every original HTML tag, HyperHTML provides two alternative Hypertag tags:
+written in lower case and upper case.
+For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags available.
+Their output differs by letter case of the HTML tag name produced, otherwise the behavior
+is the same. It is up to the programmer to decide what variant to use:
+
+    div class='content'
+        span | text
+
+    DIV class='content'
+        SPAN | text
+
+output:
+
+```html
+<div class="content">
+    <span>text</span>
+</div>
+
+<DIV class="content">
+    <SPAN>text</SPAN>
+</DIV>
+```
+
+Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
+to a script. They can also be imported explicitly from the `hypertag.html` module, 
+regardless of what runtime is currently being used (this allows inserting HTML markup
+in documents written in other target languages), e.g.:
+
+    from hypertag.html import %div, %DIV
+
+HyperHTML's escape function performs character encoding:
+`<`, `>`, `&` characters are replaced with corresponding HTML entities (`&lt;` `&gt;` `&amp;`).
+
+
 ## Built-ins
 
 When using HyperHTML runtime, all Python built-in symbols (`builtins.*`) are automatically
@@ -1218,6 +1343,8 @@ output:
     0, a
     1, c
     2, t
+
+Moreover, HyperHTML defines tags for 
 
 As mentioned earlier, Hypertag allows easy import of Django template filters to be used as
 standalone functions or inside pipelines.
