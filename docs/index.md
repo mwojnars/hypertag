@@ -1,3 +1,4 @@
+<!--
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -107,6 +108,7 @@
       color: #0594db;
     }
 </style>
+-->
 
 
 # Introduction
@@ -1411,7 +1413,6 @@ The details are described in the [Filters](#filters) section.
 
 ### HTML-specific symbols
 
-
 For every standard HTML5 tag, HyperHTML provides two corresponding Hypertag tags:
 written in lower case and upper case.
 For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags available.
@@ -1446,7 +1447,6 @@ in documents written in other target languages. For example:
 In addition to standard HTML tags, HyperHTML provides also a few extra tags:
 
 - **comment** - inserts an HTML comment to the output;
-- **javascript** - inserts a `<script type="text/javascript">...</script>` block to the output;
 
 Typically, these tags should be used with a _verbatim_ body (`!`), especially the "javascript" tag.
 Like all other predefined tags, they are implemented as external tags, 
@@ -1460,6 +1460,7 @@ which means they can label nodes of DOM trees and be used for DOM manipulation.
 - **resource** - marks a given part of a document as a listing of resources that should be
   uniquified across the entire document and moved to the `<head>` section.
   This tag should be used together with "resources".
+- **javascript** - inserts a `<script type="text/javascript">...</script>` block to the output;
 -->
 
 <!---

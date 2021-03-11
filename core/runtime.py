@@ -3,7 +3,7 @@ from six.moves import builtins
 
 from hypertag.core.errors import ImportErrorEx, ModuleNotFoundEx
 from hypertag.core.grammar import MARK_TAG, MARK_VAR, TAGS
-from hypertag.core.AST import HypertagAST
+from hypertag.core.ast import HypertagAST
 import hypertag.builtins
 
 

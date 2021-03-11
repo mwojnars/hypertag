@@ -429,7 +429,7 @@ class Slot:
 
         link = ctx.get(symbol)
         
-        from .AST import NODES
+        from .ast import NODES
         assert link is None or isinstance(link, (Slot, NODES.attribute, NODES.variable)), f'unrecognized type of slot: {type(link)}'
         
         # if link and link.depth == self.depth:

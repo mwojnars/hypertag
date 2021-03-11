@@ -1,5 +1,5 @@
 import re
-from hypertag.core.DOM import Sequence, get_indent, del_indent
+from hypertag.core.dom import Sequence, get_indent, del_indent
 from hypertag.core.tag import ExternalTag
 
 

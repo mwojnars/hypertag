@@ -1,6 +1,6 @@
 from xml.sax.saxutils import quoteattr
 from hypertag.core.errors import VoidTagEx, TypeErrorEx
-from hypertag.core.DOM import Sequence, HNode
+from hypertag.core.dom import Sequence, HNode
 
 
 ########################################################################################################################################################

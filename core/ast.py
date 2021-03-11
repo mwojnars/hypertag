@@ -17,7 +17,7 @@ from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, Missi
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
 from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
 from hypertag.core.structs import Context, State, Slot, ValueSlot
-from hypertag.core.DOM import del_indent, get_indent, Sequence, HText, HNode, HRoot
+from hypertag.core.dom import del_indent, get_indent, Sequence, HText, HNode, HRoot
 from hypertag.core.tag import Tag, NativeTag, ExternalTag, null_tag
 
 DEBUG = False
