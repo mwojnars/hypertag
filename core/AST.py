@@ -402,10 +402,13 @@ class NODES(object):
             indent = state.indentation
             state.indentation = ''
             
-            # in the headline, spaces are prepended to replace leading tag(s) and a marker character /|!
-            lead = self.column
+            lead = self.column          # horizontal position where the block's first line begins in the script
             try:
-                output = ' ' * lead + self._render_all(self.children, state)
+                body = self._render_all(self.children, state)
+                # if body.startswith('\n'):
+                #     output = body[1:]                   # no headline? drop the leading newline
+                # else:
+                output = ' ' * lead + body          # in the headline, spaces are prepended to replace leading tag(s) and a marker character /|!
             finally:
                 state.indentation = indent
 
@@ -419,7 +422,11 @@ class NODES(object):
                 drop = lead - len(sub_indent)
                 if output[drop:drop+1] == ' ': drop += 1
                 output = output[drop:]
-
+                
+            # # drop the 1st line (headline) if empty
+            # if output.split('\n', 1)[0].strip() == '':
+            #     output =
+                
             return output
 
     class xblock_markup(block_text): pass
@@ -1979,11 +1986,68 @@ if __name__ == '__main__':
     # TODO: dodać czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
     
     text = """
-    div class='content'
-        span | text
-
-    DIV class='content'
-        SPAN | text
+    from builtins import $list as LIST
+    
+    | $LIST((1,2,3))
+    
+    %JS @code
+        script type="text/javascript"
+          / <!--
+          ....
+              @code
+          / -->
+    
+    | abc
+    |
+      abc
+    
+    | ---
+    div |
+      Line 1
+      Line 2
+    div
+      | Line 1
+      | Line 2
+      
+    JS
+      | ala ma kota
+    
+    #javascript !
+    JS !
+        var sectionHeight = function() {
+          var total    = $(window).height(),
+              $section = $('section').css('height','auto');
+        
+          if ($section.outerHeight(true) < total) {
+            var margin = $section.outerHeight(true) - $section.height();
+            $section.height(total - margin - 20);
+          } else {
+            $section.css('height','auto');
+          }
+        }
+        
+        $(window).resize(sectionHeight);
+        
+        $(function() {
+          $("section h1, section h2, section h3").each(function(){
+            $("nav ul").append("<li class='tag-" + this.nodeName.toLowerCase() + "'><a href='#" + $(this).text().toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g,'') + "'>" + $(this).text() + "</a></li>");
+            $(this).attr("id",$(this).text().toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g,''));
+            $("nav ul li:first-child a").parent().addClass("active");
+          });
+        
+          $("nav ul li").on("click", "a", function(event) {
+            var position = $($(this).attr("href")).offset().top - 190;
+            $("html, body").animate({scrollTop: position}, 400);
+            $("nav ul li a").parent().removeClass("active");
+            $(this).parent().addClass("active");
+            event.preventDefault();
+          });
+        
+          sectionHeight();
+        
+          $('img').on('load', sectionHeight);
+        });
+       
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

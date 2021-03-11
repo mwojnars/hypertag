@@ -33,23 +33,30 @@ Filters:
                                 replacement for Django's {%regroup%}
 """
 
+def dedent(text, _re_indent = re.compile(r'(?m)^\s+')):
+    """Removes all indentation of the lines in `text`. The indentation may differ between lines."""
+    return _re_indent.sub('', text)
+
 class DedentTag(ExternalTag):
     text = True
-    def expand(self, text, full = True, _re_indent = re.compile(r'(?m)^\s+')):
-        if full: return _re_indent.sub('', text)
+    def expand(self, text, full = True):
+        if full: return dedent(text)
         return del_indent(text) #, get_indent(text))
         
 class JavascriptTag(ExternalTag):
     """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""
     text = True
 
-    _block = del_indent("""
+    _block = """
         <script type="text/javascript">
         <!--
         %s
         -->
         </script>
-    """.strip())
+    """
+    _block = dedent(_block).strip()
+    print('JavascriptTag._block')
+    print(_block)
     
     def expand(self, js_code):
         return self._block % js_code

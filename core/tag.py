@@ -21,6 +21,8 @@ class Tag:
     pure = True         # if True, the tag is assumed to always return the same result for the same arguments (no side effects),
                         # which potentially enables full compactification of a node tagged with this tag
     
+    term = False        # if True, the tag is treated as terminal (static), which means its expansion is delayed until DOM rendering
+    
     xml_names = False   # if True, all valid XML names are accepted for attributes, and named attributes are passed
                         # to expand() as a dict, rather than keywords; in such case, expand() must implement
                         # the following signature:
@@ -128,7 +130,8 @@ class MarkupTag(ExternalTag):
             assert isinstance(__body__, Sequence)
             body = __body__.render()
 
-            # if the block contains a headline, the closing tag is placed on the same line as __body__
+            # if the block contains a headline, the closing tag is placed on the same line as __body__;
+            # a newline is added at the end, otherwise
             nl = '\n' if body[:1] == '\n' else ''
             return f"<{tag}>" + body + nl + f"</{name}>"
 

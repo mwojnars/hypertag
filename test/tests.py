@@ -1008,6 +1008,20 @@ def test_022_builtins():
         </div>
     """
     assert render(src).strip() == out.strip()
+    # src = """
+    #     javascript
+    # """
+    # out = """
+    #     <div>
+    #     <p>
+    #     <i>
+    #     kot
+    #     </i>
+    #     </p>
+    #     </div>
+    # """
+    # assert render(src).strip() == out.strip()
+
 
 def test_023_import():
     src = """

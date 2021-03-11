@@ -1,3 +1,4 @@
+<!---
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -107,6 +108,7 @@
       color: #0594db;
     }
 </style>
+--->
 
 
 # Introduction
@@ -179,11 +181,41 @@ output:
 ```
 
 During parsing, blocks are first **translated** into Hypertag's native Document Object Model (**DOM**),
-and then the DOM undergoes **rendering** to produce a document string in a target language. 
-Typically, the target language is HTML (produced by `hypertag.HyperHTML` standard runtime)
-or XHTML, although any other language can be supported if an appropriate subclass 
-of `hypertag.core.runtime.Runtime` is implemented to provide language-specific 
-built-ins and configuration.
+and then the DOM undergoes **rendering** to generate a document string in a target language. 
+Typically, the target language is HTML or XHTML, although any other language can be supported 
+if an appropriate [runtime](#runtime) is implemented to provide language-specific 
+built-ins and configuration. For HTML generation, the `HyperHTML` standard runtime can be used.
+For example, run the following Python 3 code:
+
+```python
+from hypertag import HyperHTML
+
+script = \
+"""
+    ul
+        li 
+            | This is the first item of a "ul" list.
+        li
+            | This is the second item. 
+"""
+
+html = HyperHTML().render(script)
+print(html)
+```
+The following result of `script` rendering will be printed:
+
+```html
+<ul>
+    <li>
+        This is the first item of a "ul" list.
+    </li>
+    <li>
+        This is the second item.
+    </li>
+</ul>
+```
+
+See the [Runtime](#runtime) section for details about runtimes and script execution.
 
 ### Text blocks
 
@@ -414,7 +446,7 @@ output:
   </p></div>
 ```
 
-Without a colon, all content is interpreted as _multiline_ text:
+Without a colon, all content is interpreted as multiline text (_fulltext body_):
 
     div |
       Line 1
@@ -895,7 +927,7 @@ and the output is:
 Hypertag allows programmers to define _custom tags_, either directly in Hypertag code
 (_native tags_), or as Python classes (_external tags_). Both cases are described below.
 
-**Native tags**
+### Native tags
 
 One of the most distinctive features of Hypertag is the support for custom tag definitions
 right inside a Hypertag script. This type of custom tag is called a _native tag_ 
@@ -1077,7 +1109,7 @@ prepended with either `$` (denotes a variable) or `%` (a tag):
     from my.utils import $variable
     from my.utils import %tag
 
-**External tags**
+### External tags
 
 (TODO...)
 
@@ -1258,7 +1290,7 @@ Qualifiers can be placed after all atomic expressions and embeddings, no space i
 ## Runtime
 
 Execution of a Hypertag script is performed by a **runtime** object, which is an instance of 
-`hypertag.core.runtime.Runtime` . The execution constists of 3 phases:
+`hypertag.core.runtime.Runtime`. The execution constists of 3 phases:
 
 1. **parsing** a script to an Abstract Syntax Tree (AST), with syntactic and semantic analysis
    of the tree;
@@ -1267,11 +1299,11 @@ Execution of a Hypertag script is performed by a **runtime** object, which is an
    get converted to nodes of the DOM and can be manipulated upon later on;
 3. **rendering** of the DOM to a final document (a string) in a target language.
 
-Typically, the client code calls runtime's `render()` to perform all the above 
-steps at once. If the client wants to obtain a structured representation
-of the document - the DOM - instead of a flat string, the runtime's method `translate()` 
-should be called, followed by a call to  `render()` on the DOM tree. Between the calls,
-the DOM can be manipulated upon and modified according to the caller's needs.
+Typically, client code calls runtime's `render()` to perform all the above 
+steps at once. If a client wants to obtain a structured representation
+of the document - the DOM - rather than a flat string, the runtime's method `translate()` 
+should be called instead, followed by a call to  `render()` on the DOM tree. Between the calls,
+the DOM can be manipulated and modified according to the caller's needs.
 
 A runtime specifies the target language that scripts will be rendered to, and defines
 a list of built-in symbols (tags and/or variables, see `Runtime.DEFAULT`) 
@@ -1286,8 +1318,20 @@ convert plain text to a valid string in the target language.
 
 ### HyperHTML
 
-Hypertag's implementation has a standard runtime, `hypertag.HyperHTML`,
-for generation of HTML documents. This runtime implements HTML-specific tags and escape function.
+Hypertag implementation provides a standard runtime, `hypertag.HyperHTML`,
+for generation of HTML documents. This runtime implements HTML-specific tags 
+and escape function.
+
+The escape function performs character encoding: `<`, `>`, `&` characters are replaced 
+with corresponding HTML entities (`&lt;` `&gt;` `&amp;`).
+
+The built-in symbols imported by HyperHTML automatically upon startup include:
+
+1. [Python built-ins](#python-built-ins).
+1. Hypertag's general-purpose tags & functions.
+1. Functions & filters.
+1. HTML-specific tags.
+
 
 For every original HTML tag, HyperHTML provides two alternative Hypertag tags:
 written in lower case and upper case.
@@ -1295,41 +1339,44 @@ For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags ava
 Their output differs by letter case of the HTML tag name produced, otherwise the behavior
 is the same. It is up to the programmer to decide what variant to use:
 
-    div class='content'
+    div class='main'
         span | text
 
-    DIV class='content'
+    DIV class='main'
         SPAN | text
 
 output:
 
 ```html
-<div class="content">
+<div class="main">
     <span>text</span>
 </div>
 
-<DIV class="content">
+<DIV class="main">
     <SPAN>text</SPAN>
 </DIV>
 ```
 
 Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
 to a script. They can also be imported explicitly from the `hypertag.html` module, 
-regardless of what runtime is currently being used (this allows inserting HTML markup
-in documents written in other target languages), e.g.:
+regardless of what runtime is currently being used - this allows inserting HTML markup
+in documents written in other target languages. For example:
 
     from hypertag.html import %div, %DIV
 
-HyperHTML's escape function performs character encoding:
-`<`, `>`, `&` characters are replaced with corresponding HTML entities (`&lt;` `&gt;` `&amp;`).
 
+## Standard library
 
-## Built-ins
+Hypertag defines a number of standard symbols: tags and variables (functions, filters)
+that can be used in scripts. Some of them are declared as built-ins and automatically
+imported by the standard runtime (HyperHTML), while others can be imported manually
+using [import blocks](#imports).
 
-When using HyperHTML runtime, all Python built-in symbols (`builtins.*`) are automatically
-imported as variables at the beginning of script rendering, so all commonly used Python
-types and functions: `list`, `set`, `dict`, `int`, `min`, `max`, `enumerate`, `sorted` etc., 
-are available to a script.
+### Python built-ins
+
+The HyperHTML's list of built-in symbols include all of Python's built-ins (`builtins.*`),
+therefore all the commonly used types and functions: `list`, `set`, `dict`, `int`, `min`, `max`, 
+`enumerate`, `sorted` etc., are available to a Hypertag script.
 
     | $len('cat'), $list('cat')
     | $int('123'), $min(4,5,6)
@@ -1344,26 +1391,56 @@ output:
     1, c
     2, t
 
-Moreover, HyperHTML defines tags for 
+Python built-ins can also be imported explicitly from the usual path.
+Remember to prepend every name with the variable marker (`$`):
 
-As mentioned earlier, Hypertag allows easy import of Django template filters to be used as
-standalone functions or inside pipelines.
+    from builtins import $list as LIST
+    | $LIST((1,2,3))
 
-Additionally, Hypertag provides a number of predefined tags and functions:
+output:
 
-1. General-purpose tags.
-2. Functions & filters.
-3. HTML-specific tags.
+    [1, 2, 3]
 
-All of the above are automatically imported as built-in symbols by HyperHTML runtime.
+
+### Common symbols
+
+Hypertag defines a number of general-purpose tags and functions (filters)
+that can be commonly used with different target languages.
+
+Tags:
+- dedent
+- inline
+- unique
+- lower
+- upper
+
+Functions (filters):
+- cycle / alternate
+- findchange
 
 (TODO...)
+
+All the symbols listed above are declared as HyperHTML's built-ins and
+automatically imported whenever this runtime is used.
+
+
+### Foreign symbols
+
+Hypertag allows easy import of Django template filters that can be used subsequently 
+as standalone functions or as filters in pipeline expressions.
+The details are described in the [Filters](#filters) section.
+
+
+### HTML-specific symbols
+
+- HTML tags
+- comment
+- javascript
 
 <!---
 ## Final remarks
 
 There is a number of additional elements of Hypertag that have not been mentioned so far.
-These include:
 
 There are some _gotcha!_ you need to keep in mind when coding with Hypertag:
 - So far, Hypertag hasn't been yet optimized for performance.
