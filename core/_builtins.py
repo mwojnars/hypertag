@@ -13,7 +13,7 @@ def dedent(text, _re_indent = re.compile(r'(?m)^\s+')):
     return _re_indent.sub('', text)
 
 class DedentTag(ExternalTag):
-    text = True
+    flat = True
     
     def expand(self, body, attrs, kwattrs):
         return self._expand(body, *attrs, **kwattrs)
@@ -25,7 +25,7 @@ class DedentTag(ExternalTag):
         
 class JavascriptTag(ExternalTag):
     """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""
-    text = True
+    flat = True
     
     _block = """
         <script type="text/javascript">

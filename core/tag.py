@@ -17,7 +17,7 @@ class Tag:
     name = None         # tag name that can be searched for (selected) when post-processing a DOM through Sequence class
     
     void = False        # if True, passing non-empty body to expand() is forbidden and the parser should rather raise an exception
-    text = False        # if True, body will be provided as plain text (rendered DOM) to expand(); allows better compactification of constant subtrees of the AST (TODO)
+    flat = False        # if True, body will be provided as plain text (rendered DOM) to expand(); allows better compactification of constant subtrees of the AST (TODO)
     pure = True         # if True, the tag is assumed to always return the same result for the same arguments (no side effects),
                         # which potentially enables full compactification of a node tagged with this tag
     
@@ -55,8 +55,8 @@ class ExternalTag(Tag):
         Subclasses should NOT append trailing \n nor add extra indentation during tag expansion
         - both things are added by the parser later on, if desired so by programmer.
         
-        :param body: DOM of a translated body of tag occurrence, if self.text is true, or a rendered string otherwise;
-                     if a tag is void (doesn't accept body), it should raise VoidTagEx if the body is not empty
+        :param body: DOM of a translated body of tag occurrence, if self.flat is true, or a rendered string otherwise;
+                     if a tag is void (doesn't accept body), it should check if the body is empty and raise VoidTagEx if not
         :param attrs: list/tuple of positional attributes
         :param kwattrs: dict of keyword attributes; attributes are guaranteed to have valid XML names, but NOT necessarily valid Python names
         :return: string
@@ -97,8 +97,8 @@ class MarkupTag(ExternalTag):
     """
     
     name = None         # tag <name> to be printed into markup; may differ from the Hypertag name used inside a script (!)
-    void = False        # if True, __body__ is expected to be empty and the returned element is self-closing
-    text = True         # markup tags don't do any DOM manipulation internally, so `body` can be passed in as a string
+    void = False        # if True, body is expected to be empty in expand() and the returned element is self-closing
+    flat = True         # markup tags don't do any DOM manipulation internally, so `body` can be passed in as a string
     mode = 'HTML'       # (X)HMTL compatibility mode: either 'HTML' or 'XHTML'
     
     def __init__(self, name, void = False, mode = 'HTML'):
@@ -121,13 +121,7 @@ class MarkupTag(ExternalTag):
             if body: raise VoidTagEx(f"non-empty body passed to a void markup tag '{name}'")
             return f"<{tag} />"
         else:
-            # if self.text:
-            #     text = body
-            # else:
-            #     assert isinstance(body, Sequence)
-            #     text = body.render()
-
-            # if the block contains a headline, the closing tag is placed on the same line as __body__;
+            # if the block contains a headline, the closing tag is placed on the same line as body;
             # a newline is added at the end, otherwise
             nl = '\n' if body[:1] == '\n' else ''
             return f"<{tag}>" + body + nl + f"</{name}>"

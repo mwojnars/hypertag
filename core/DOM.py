@@ -202,7 +202,7 @@ class HNode:
         if self.tag.void:
             if self.body: raise VoidTagEx(f"body must be empty for a void tag {self.tag}")
             body = None
-        elif self.tag.text:
+        elif self.tag.flat:
             body = self.body.render()
         else:
             body = self.body
