@@ -4,14 +4,22 @@ from hypertag.core.errors import VoidTagEx, TypeErrorEx
 
 ########################################################################################################################################################
 #####
-#####  SDK
+#####  BASE CLASSES
 #####
 
 class Tag:
     """
-    Base class for all tags:
+    Common base class for two major types of tags:
     - ExternalTag - a tag implemented as a python function
     - NativeTag - a tag implemented inside Hypertag code
+    """
+
+########################################################################################################################################################
+
+class ExternalTag(Tag):
+    """
+    A custom tag defined as a Python function.
+    Instances of ExternalTag can be imported to a Hypertag script and used as tags.
     """
     name = None         # tag name that can be used in selectors when manipulating a DOM
     
@@ -30,13 +38,6 @@ class Tag:
     #                     #
     #                     # It is recommended that xml_names are set to False whenever possible.
     
-
-class ExternalTag(Tag):
-    """
-    A custom tag defined as a Python function.
-    Instances of ExternalTag can be imported to a Hypertag script and used as tags.
-    """
-
     def expand(self, body, attrs, kwattrs):
         """
         Subclasses should NOT append trailing \n nor add extra indentation during tag expansion
@@ -50,17 +51,8 @@ class ExternalTag(Tag):
         """
         raise NotImplementedError
 
-class NativeTag(Tag):
-    """Base class for a native tag: a tag implemented inside Hypertag code."""
 
-    def dom_expand(self, state, body, attrs, kwattrs, caller):
-        """Native tags are expanded in a different way than external tags. They produce DOM during expansion, not a flat string."""
-        raise NotImplementedError
-
-    
-class SpecialTag(ExternalTag): pass
-
-class NullTag(SpecialTag):
+class NullTag(ExternalTag):
     """Null tag '.' is represented in the DOM tree. Its expand() passes the body unchanged."""
     
     name = '.'
@@ -70,6 +62,18 @@ class NullTag(SpecialTag):
     
 null_tag = NullTag()
 
+
+########################################################################################################################################################
+
+class NativeTag(Tag):
+    """Base class for native tags, i.e., tags implemented inside Hypertag code."""
+
+    def dom_expand(self, state, body, attrs, kwattrs, caller):
+        """
+        Native tags are expanded in a different way than external tags: they produce DOM during expansion, not a flat string,
+        hence a different method to be called by the parser.
+        """
+        raise NotImplementedError
 
 
 ########################################################################################################################################################

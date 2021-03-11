@@ -110,7 +110,7 @@ class DOM:
             elif isinstance(n, DOM.Node):
                 result.append(n)
             else:
-                raise TypeErrorEx(f"found {type(n)} as an element of DOM, expected DOM.Node")
+                raise TypeErrorEx(f"found {type(n)} in a DOM, expected DOM.Node")
         return result
         
     def set_indent(self, indent):
