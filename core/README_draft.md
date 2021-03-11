@@ -559,7 +559,7 @@ DOM = Document Object Model
 
 ### DOM manipulation
 
-Selectors as methods of Sequence ...
+Selectors as methods of DOM ...
 
 ### Selectors (??)
 
@@ -599,8 +599,7 @@ dictionary can be imported as tags (%NAME) into a Hypertag script.
 ## SDK ??
 
 - class Tag, ExternalTag, MarkupTag -- for implementing custom tags
-- class HNode
-- class Sequence
+- class DOM and inner classes (Node, Root, Text)
 - class Runtime
 
 ## Questions & Answers

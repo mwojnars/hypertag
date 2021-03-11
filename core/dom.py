@@ -63,10 +63,12 @@ def get_indent(text):
 
 class DOM:
     """
-    List of HNodes that comprise (a part of) a body of a parent HNode, or was produced as an intermediate
+    List of DOM.Nodes that comprise (a part of) a body of a parent Node, or was produced as an intermediate
     collection of nodes during DOM manipulation.
     Provides methods for traversing a DOM tree and selecting nodes,
     as well as flattening and cleaning up the list during node construction.
+    
+    All DOM node classes: Node, Root, Text - are defined as inner classes of this one.
     """
     nodes = None
     
@@ -89,10 +91,10 @@ class DOM:
             if n is None: continue
             if isinstance(n, (list, DOM, GeneratorType)):
                 result += DOM._flatten(n)
-            elif isinstance(n, HNode):
+            elif isinstance(n, DOM.Node):
                 result.append(n)
             else:
-                raise TypeErrorEx(f"found {type(n)} instead of an HNode as an element of DOM")
+                raise TypeErrorEx(f"found {type(n)} as an element of DOM, expected DOM.Node")
         return result
         
     def set_indent(self, indent):
@@ -113,140 +115,140 @@ class DOM:
         """
 
 
-########################################################################################################################################################
-#####
-#####  DOM nodes
-#####
-
-class HNode:
-    """"""
+    ####################################################################################################################
+    #####
+    #####  DOM nodes
+    #####
     
-    tag     = None      # Tag instance whose expand() will be called to post-process the body, in a non-terminal node
-    attrs   = None      # list of unnamed attributes to be passed to tag.expand() during rendering
-    kwattrs = None      # dict of named attributes to be passed to tag.expand()
-    
-    body    = None      # Sequence (possibly empty) of all child nodes, in a non-terminal node; None in HText
-    
-    outline = False     # True/False denotes an "outline" block or an "inline" node; adds a leading newline during rendering if True
-    indent  = None      # indentation string of this block: absolute (when starts with \n) or relative
-                        # to its parent (otherwise); None means this is an inline (headline) block, no indentation
-
-    def __init__(self, body = None, indent = None, **params):
+    class Node:
+        """"""
         
-        # assign secondary parameters
-        for name, value in params.items():
-            setattr(self, name, value)
+        tag     = None      # Tag instance whose expand() will be called to post-process the body, in a non-terminal node
+        attrs   = None      # list of unnamed attributes to be passed to tag.expand() during rendering
+        kwattrs = None      # dict of named attributes to be passed to tag.expand()
+        
+        body    = None      # DOM (possibly empty) containing child nodes of a non-terminal node; None in DOM.Text
+        
+        outline = False     # True/False denotes an "outline" block or an "inline" node; adds a leading newline during rendering if True
+        indent  = None      # indentation string of this block: absolute (when starts with \n) or relative
+                            # to its parent (otherwise); None means this is an inline (headline) block, no indentation
+    
+        def __init__(self, body = None, indent = None, **params):
             
-        # assign a list of body nodes, with flattening of nested lists and filtering of None's
-        self.body = DOM(body)
-        
-        # assign indentation, with proper handling of absolute (in parent) vs. relative (in children) indentations
-        self.set_indent(indent)
-        
-        # assert not self.tag or isinstance(self.tag, Tag)
-        
-    def set_outline(self):
-        self.outline = True
-
-    def set_indent(self, indent):
-        """
-        Sets absolute indentation on self. This calls relative_indent() on all children
-        to make their indentations relative to the parent's.
-        """
-        self.indent = indent
-        if self.indent:
-            for child in self.body:
-                child.relative_indent(self.indent)
-
-    def relative_indent(self, parent_indent):
-        """
-        Convert self.indent from absolute to relative by subtracting `parent_indent`.
-        If this node is inline (indent=None), the method is called recursively on child nodes.
-        """
-        if self.indent is None:
-            for child in self.body: child.relative_indent(parent_indent)
-        elif self.indent[:1] == '\n':
-            assert self.indent.startswith(parent_indent)
-            self.indent = self.indent[len(parent_indent):]
-        else:
-            pass        # self.indent is relative already
+            # assign secondary parameters
+            for name, value in params.items():
+                setattr(self, name, value)
+                
+            # assign a list of body nodes, with flattening of nested lists and filtering of None's
+            self.body = DOM(body)
             
-    def render(self):
-        
-        text = self.outline * '\n' + self._render_body()
-        
-        # if self.outline and self.indent:
-        if self.indent:
-            assert self.indent[:1] != '\n'                      # self.indent must have been converted already to relative
-            text = add_indent(text, self.indent)                # indentation is only added where \n is present, the 1st line is left untouched!
-            # text = text.replace('\n', '\n' + self.indent)
+            # assign indentation, with proper handling of absolute (in parent) vs. relative (in children) indentations
+            self.set_indent(indent)
             
-        return text
-    
-    def _render_body(self):
-        if not self.tag:
-            return self.body.render()
-        
-        if self.tag.void:
-            if self.body: raise VoidTagEx(f"body must be empty for a void tag {self.tag}")
-            body = None
-        elif self.tag.flat:
-            body = self.body.render()
-        else:
-            body = self.body
+            # assert not self.tag or isinstance(self.tag, Tag)
             
-        return self.tag.expand(body, self.attrs or (), self.kwattrs or {})
-        # return self.tag.expand(body, *(self.attrs or ()), **(self.kwattrs or {}))
+        def set_outline(self):
+            self.outline = True
+    
+        def set_indent(self, indent):
+            """
+            Sets absolute indentation on self. This calls relative_indent() on all children
+            to make their indentations relative to the parent's.
+            """
+            self.indent = indent
+            if self.indent:
+                for child in self.body:
+                    child.relative_indent(self.indent)
+    
+        def relative_indent(self, parent_indent):
+            """
+            Convert self.indent from absolute to relative by subtracting `parent_indent`.
+            If this node is inline (indent=None), the method is called recursively on child nodes.
+            """
+            if self.indent is None:
+                for child in self.body: child.relative_indent(parent_indent)
+            elif self.indent[:1] == '\n':
+                assert self.indent.startswith(parent_indent)
+                self.indent = self.indent[len(parent_indent):]
+            else:
+                pass        # self.indent is relative already
+                
+        def render(self):
+            
+            text = self.outline * '\n' + self._render_body()
+            
+            # if self.outline and self.indent:
+            if self.indent:
+                assert self.indent[:1] != '\n'                      # self.indent must have been converted already to relative
+                text = add_indent(text, self.indent)                # indentation is only added where \n is present, the 1st line is left untouched!
+                # text = text.replace('\n', '\n' + self.indent)
+                
+            return text
         
-class HRoot(HNode):
-    """Root node of a Hypertag DOM tree."""
-
-    def render(self, drop_line = True):
-        """
-        If this HRoot represents an entire translated document that was originally fed to a Hypertag parser,
-        an extra empty line have been prepended by the parser in Grammar.preprocess() and should be removed now
-        - set drop_line=True (default) to perform this correction or drop_line=False to skip it.
-        """
-        output = super(HRoot, self).render()
-        return output[1:] if drop_line and output.startswith('\n') else output
-        # if not output or not drop_line: return output
-        # assert output[0] == '\n'
-        # return output[1:]
+        def _render_body(self):
+            if not self.tag:
+                return self.body.render()
+            
+            if self.tag.void:
+                if self.body: raise VoidTagEx(f"body must be empty for a void tag {self.tag}")
+                body = None
+            elif self.tag.flat:
+                body = self.body.render()
+            else:
+                body = self.body
+                
+            return self.tag.expand(body, self.attrs or (), self.kwattrs or {})
+            # return self.tag.expand(body, *(self.attrs or ()), **(self.kwattrs or {}))
+            
+    class Root(Node):
+        """Root node of a Hypertag DOM tree."""
+    
+        def render(self, drop_line = True):
+            """
+            If this Root node represents an entire translated document that was originally fed to a Hypertag parser,
+            an extra empty line have been prepended by the parser in Grammar.preprocess() and should be removed now
+            - set drop_line=True (default) to perform this correction or drop_line=False to skip it.
+            """
+            output = super(DOM.Root, self).render()
+            return output[1:] if drop_line and output.startswith('\n') else output
+            # if not output or not drop_line: return output
+            # assert output[0] == '\n'
+            # return output[1:]
+            
+    
+    class Text(Node):
+        """A leaf node containing plain text."""
         
-
-class HText(HNode):
-    """A leaf node containing plain text."""
-    
-    text = None         # text of this node, either plain text or markup after preprocessing; consists of two parts:
-                        #  1) headline (head) - 1st line of `text`, without trailing newline
-                        #  2) tailtext (tail) - all lines after the 1st one including the leading newline (!);
-                        #     tailtext may contain trailing newline(s), but this is not obligatory
-    
-    def __init__(self, text = '', **kwargs):
-        super(HText, self).__init__(text = text, **kwargs)
-    
-    def __str__(self):
-        return self.text
+        text = None         # text of this node, either plain text or markup after preprocessing; consists of two parts:
+                            #  1) headline (head) - 1st line of `text`, without trailing newline
+                            #  2) tailtext (tail) - all lines after the 1st one including the leading newline (!);
+                            #     tailtext may contain trailing newline(s), but this is not obligatory
         
-    def set_indent(self, indent):
-        self.indent = indent
-
-    def _render_body(self):
-        return self.text
-
-    # def indent(self, spaces = 1, gap = 0, re_lines = re.compile(r'^(\s*\n)+|\s+$')):
-    #     """
-    #     Like self.text, but with leading/trailing empty lines removed and indentation fixed at a given number of `spaces`.
-    #     Optionally, a fixed number (`gap`) of empty lines are added at the beginning.
-    #     """
-    #     text = self.text
-    #     text = re_lines.sub('', text)           # strip leading and trailing empty lines
-    #
-    #     # replace current indentation with a `spaces` number of spaces; existing tabs treated like a single space
-    #     lines  = text.splitlines()
-    #     indent = ' ' * spaces
-    #     offset = min(len(line) - len(line.lstrip()) for line in lines if line.strip())
-    #     text   = '\n'.join(indent + line[offset:] for line in lines)
-    #     return gap * '\n' + text
+        def __init__(self, text = '', **kwargs):
+            super(DOM.Text, self).__init__(text = text, **kwargs)
+        
+        def __str__(self):
+            return self.text
+            
+        def set_indent(self, indent):
+            self.indent = indent
     
+        def _render_body(self):
+            return self.text
     
+        # def indent(self, spaces = 1, gap = 0, re_lines = re.compile(r'^(\s*\n)+|\s+$')):
+        #     """
+        #     Like self.text, but with leading/trailing empty lines removed and indentation fixed at a given number of `spaces`.
+        #     Optionally, a fixed number (`gap`) of empty lines are added at the beginning.
+        #     """
+        #     text = self.text
+        #     text = re_lines.sub('', text)           # strip leading and trailing empty lines
+        #
+        #     # replace current indentation with a `spaces` number of spaces; existing tabs treated like a single space
+        #     lines  = text.splitlines()
+        #     indent = ' ' * spaces
+        #     offset = min(len(line) - len(line.lstrip()) for line in lines if line.strip())
+        #     text   = '\n'.join(indent + line[offset:] for line in lines)
+        #     return gap * '\n' + text
+        
+        

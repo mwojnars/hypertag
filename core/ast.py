@@ -17,7 +17,7 @@ from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, Missi
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
 from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
 from hypertag.core.structs import Context, State, Slot, ValueSlot
-from hypertag.core.dom import del_indent, get_indent, DOM, HText, HNode, HRoot
+from hypertag.core.dom import del_indent, get_indent, DOM
 from hypertag.core.tag import Tag, NativeTag, ExternalTag, null_tag
 
 DEBUG = False
@@ -299,7 +299,7 @@ class NODES(object):
         
         def setup(self):            self.value = self.text()
         def analyse(self, ctx):     pass
-        def translate(self, state): return DOM(HText(self.value) if self.value else None)
+        def translate(self, state): return DOM(DOM.Text(self.value) if self.value else None)
         def render(self, state):    return self.value
         def __str__(self):          return self.value
         
@@ -339,7 +339,7 @@ class NODES(object):
         def translate(self, state):
             """
             Because <xdocument> is the root of every AST, its translate() is unusual, in that it returns a triple:
-            - HRoot node of the final DOM generated as a result of translation of the entire AST
+            - DOM.Root node of the final DOM generated as a result of translation of the entire AST
             - dict of top-level symbols indexed by their names: {symbol_name: value}
             - dict of top-level symbols indexed by slots: {slot: value}, for use as an initial state
               in case some hypertags get imported by other Hypertag documents and need to be expanded
@@ -347,7 +347,7 @@ class NODES(object):
             """
             for slot in self.slots_in.values(): slot.set_value(state)
             nodes = [c.translate(state) for c in self.children]
-            hroot = HRoot(body = nodes, indent = '\n')
+            hroot = DOM.Root(body = nodes, indent = '\n')
             hroot.indent = ''       # fix indent to '' instead of '\n' after all child indents have been relativized
             
             # pull actual values of top-level output symbols
@@ -371,7 +371,7 @@ class NODES(object):
     ###  BLOCKS  ###
 
     class xblock(node):
-        """Wrapper around all specific types of blocks that adds top margin and marks "outline" mode for the first returned HNode."""
+        """Wrapper around all specific types of blocks: adds top margin and marks "outline" mode for the first returned DOM node."""
         modifier = None         # optional modifier of layout  ("<", "...") that preceeds the block
         
         def setup(self):
@@ -394,7 +394,7 @@ class NODES(object):
     class block_text(node):
 
         def translate(self, state):
-            node = HText(self.render(state), indent = state.indentation)
+            node = DOM.Text(self.render(state), indent = state.indentation)
             return DOM(node)
             
         def render(self, state):
@@ -452,11 +452,11 @@ class NODES(object):
         
         def _as_sequence(self, body):
             if isinstance(body, DOM): return body
-            if isinstance(body, HNode):    return DOM(body)
+            if isinstance(body, DOM.Node): return DOM(body)
             try:
                 body = list(body)
             except Exception as ex:
-                raise TypeErrorEx(f"embedded @-expression evaluates to {type(body)} instead of a DOM element (HNode, DOM, an iterable of HNodes)", self)
+                raise TypeErrorEx(f"embedded @-expression evaluates to {type(body)} instead of a DOM or DOM.Node or an iterable of DOM.Node)", self)
             return DOM(*body)
 
     class xblock_struct(node):
@@ -921,7 +921,7 @@ class NODES(object):
 
     class line(node):
         def translate(self, state):
-            node = HText(self.render_inline(state))
+            node = DOM.Text(self.render_inline(state))
             return DOM(node)
         def render(self, state):
             return state.indentation + self.render_inline(state)
@@ -1013,7 +1013,7 @@ class NODES(object):
             tag = self.tag.get(state)
 
             if isinstance(tag, ExternalTag):
-                return DOM(HNode(body, tag = tag, attrs = attrs, kwattrs = kwattrs))
+                return DOM(DOM.Node(body, tag = tag, attrs = attrs, kwattrs = kwattrs))
             
             elif isinstance(tag, NativeTag):
                 return tag.dom_expand(state, body, attrs, kwattrs, self)
@@ -1039,7 +1039,7 @@ class NODES(object):
             
     class xnull_tag(node):
         def translate_tag(self, state, body):
-            return DOM(HNode(body, tag = null_tag))
+            return DOM(DOM.Node(body, tag = null_tag))
             # return null_tag.translate_tag(state, body, None, None, self)
         
     class xpass_tag(node):
@@ -1861,7 +1861,7 @@ class HypertagAST(BaseTree):
     def translate(self):
         # below, NODES.xdocument.translate() is being called - see there for detailed description of returned objects
         dom, symbols, state = self.root.translate(State())
-        assert isinstance(dom, HRoot)
+        assert isinstance(dom, DOM.Root)
         # print(f'top-level symbols: {symbols}')
         return dom, symbols, state
 

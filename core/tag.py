@@ -33,12 +33,8 @@ class Tag:
 
 class ExternalTag(Tag):
     """
-    External tag, i.e., a (hyper)tag defined as a python function.
-    Every tag behaves like a function, with a few extensions:
-    - it accepts body as the 1st positional argument, passed in as a Sequence of HNodes, or plain text;
-      some tags may expect body to be empty
-    - it may accept any number of custom arguments, positional or keyword; the latter can have XML names (not valid as Python identifiers)
-    - it should return either a Sequence of nodes, or plain text, or None
+    A custom tag defined as a Python function.
+    Instances of ExternalTag can be imported to a Hypertag script and used as tags.
     """
 
     def expand(self, body, attrs, kwattrs):
@@ -46,7 +42,7 @@ class ExternalTag(Tag):
         Subclasses should NOT append trailing \n nor add extra indentation during tag expansion
         - both things are added by the parser later on, if desired so by programmer.
         
-        :param body: DOM of a translated body of tag occurrence, if self.flat is true, or a rendered string otherwise;
+        :param body: DOM of a translated body of tag occurrence, if self.flat is false, or a rendered string otherwise;
                      if a tag is void (doesn't accept body), it should check if the body is empty and raise VoidTagEx if not
         :param attrs: list/tuple of positional attributes
         :param kwattrs: dict of keyword attributes; attributes are guaranteed to have valid XML names, but NOT necessarily valid Python names
