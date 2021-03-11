@@ -84,6 +84,22 @@ class DOM:
         return self.nodes[pos]
     
     @staticmethod
+    def node(*args, **kwargs):
+        """
+        Create a DOM consisting of a single DOM.Node instance initialized with given arguments.
+        A shortcut for DOM(DOM.Node(...)).
+        """
+        return DOM(DOM.Node(*args, **kwargs))
+    
+    @staticmethod
+    def text(*args, **kwargs):
+        """
+        Create a DOM consisting of a single DOM.Text instance initialized with given arguments.
+        A shortcut for DOM(DOM.Text(...)).
+        """
+        return DOM(DOM.Text(*args, **kwargs))
+    
+    @staticmethod
     def _flatten(nodes):
         """Flatten nested lists of nodes by concatenating them into the top-level list; drop None's."""
         result = []

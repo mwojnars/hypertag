@@ -299,7 +299,7 @@ class NODES(object):
         
         def setup(self):            self.value = self.text()
         def analyse(self, ctx):     pass
-        def translate(self, state): return DOM(DOM.Text(self.value) if self.value else None)
+        def translate(self, state): return DOM.text(self.value) if self.value else DOM()
         def render(self, state):    return self.value
         def __str__(self):          return self.value
         
@@ -394,8 +394,7 @@ class NODES(object):
     class block_text(node):
 
         def translate(self, state):
-            node = DOM.Text(self.render(state), indent = state.indentation)
-            return DOM(node)
+            return DOM.text(self.render(state), indent = state.indentation)
             
         def render(self, state):
 
@@ -456,7 +455,7 @@ class NODES(object):
             try:
                 body = list(body)
             except Exception as ex:
-                raise TypeErrorEx(f"embedded @-expression evaluates to {type(body)} instead of a DOM or DOM.Node or an iterable of DOM.Node)", self)
+                raise TypeErrorEx(f"embedded @-expression evaluates to {type(body)} instead of a DOM or DOM.Node or an iterable of DOM.Node's)", self)
             return DOM(*body)
 
     class xblock_struct(node):
@@ -921,8 +920,7 @@ class NODES(object):
 
     class line(node):
         def translate(self, state):
-            node = DOM.Text(self.render_inline(state))
-            return DOM(node)
+            return DOM.text(self.render_inline(state))
         def render(self, state):
             return state.indentation + self.render_inline(state)
         def render_inline(self, state):
@@ -1013,7 +1011,7 @@ class NODES(object):
             tag = self.tag.get(state)
 
             if isinstance(tag, ExternalTag):
-                return DOM(DOM.Node(body, tag = tag, attrs = attrs, kwattrs = kwattrs))
+                return DOM.node(body, tag = tag, attrs = attrs, kwattrs = kwattrs)
             
             elif isinstance(tag, NativeTag):
                 return tag.dom_expand(state, body, attrs, kwattrs, self)
@@ -1039,7 +1037,7 @@ class NODES(object):
             
     class xnull_tag(node):
         def translate_tag(self, state, body):
-            return DOM(DOM.Node(body, tag = null_tag))
+            return DOM.node(body, tag = null_tag)
             # return null_tag.translate_tag(state, body, None, None, self)
         
     class xpass_tag(node):
