@@ -1,6 +1,5 @@
 from xml.sax.saxutils import quoteattr
 from hypertag.core.errors import VoidTagEx, TypeErrorEx
-from hypertag.core.dom import Sequence, HNode
 
 
 ########################################################################################################################################################
@@ -31,10 +30,6 @@ class Tag:
     #                     #
     #                     # It is recommended that xml_names are set to False whenever possible.
     
-    # def translate_tag(self, state, body, attrs, kwattrs, caller):
-    #     """For use by Hypertag parser only, to translate an occurence of this tag to a DOM."""
-    #     raise NotImplementedError
-
 
 class ExternalTag(Tag):
     """
@@ -45,10 +40,6 @@ class ExternalTag(Tag):
     - it may accept any number of custom arguments, positional or keyword; the latter can have XML names (not valid as Python identifiers)
     - it should return either a Sequence of nodes, or plain text, or None
     """
-
-    # def translate_tag(self, state, body, attrs, kwattrs, caller):
-    #     """External tag doesn't depend on a state of script execution, hence `state` is ignored."""
-    #     return Sequence(HNode(body, tag = self, attrs = attrs, kwattrs = kwattrs))
 
     def expand(self, body, attrs, kwattrs):
         """
@@ -78,10 +69,6 @@ class NullTag(SpecialTag):
     
     name = '.'
     
-    # def translate_tag(self, state, body, attrs, kwattrs, caller):
-    #     assert not attrs and not kwattrs
-    #     return Sequence(HNode(body, tag = self))
-
     def expand(self, body, attrs, kwattrs):
         return body
     

@@ -1,5 +1,5 @@
 import re
-from hypertag.core.dom import Sequence, get_indent, del_indent
+from hypertag.core.dom import DOM, del_indent
 from hypertag.core.tag import ExternalTag
 
 
@@ -20,7 +20,7 @@ class DedentTag(ExternalTag):
     @staticmethod
     def _expand(text, full = True):
         if full: return dedent(text)
-        return del_indent(text) #, get_indent(text))
+        return del_indent(text)
         
 class JavascriptTag(ExternalTag):
     """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""

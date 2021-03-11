@@ -17,7 +17,7 @@ from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, Missi
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
 from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
 from hypertag.core.structs import Context, State, Slot, ValueSlot
-from hypertag.core.dom import del_indent, get_indent, Sequence, HText, HNode, HRoot
+from hypertag.core.dom import del_indent, get_indent, DOM, HText, HNode, HRoot
 from hypertag.core.tag import Tag, NativeTag, ExternalTag, null_tag
 
 DEBUG = False
@@ -274,7 +274,7 @@ class NODES(object):
             
         # @staticmethod
         # def _translate_all(nodes, state):
-        #     return Sequence(n.translate(state) for n in nodes)
+        #     return DOM(n.translate(state) for n in nodes)
 
         # def render(self, state):
         #     """
@@ -299,7 +299,7 @@ class NODES(object):
         
         def setup(self):            self.value = self.text()
         def analyse(self, ctx):     pass
-        def translate(self, state): return Sequence(HText(self.value) if self.value else None)
+        def translate(self, state): return DOM(HText(self.value) if self.value else None)
         def render(self, state):    return self.value
         def __str__(self):          return self.value
         
@@ -389,13 +389,13 @@ class NODES(object):
                 block[0].set_outline()            # mark the 1st node of the block as being "outline" not "inline"
             if dedent:
                 block.set_indent('')
-            return Sequence(margin, block)
+            return DOM(margin, block)
             
     class block_text(node):
 
         def translate(self, state):
             node = HText(self.render(state), indent = state.indentation)
-            return Sequence(node)
+            return DOM(node)
             
         def render(self, state):
 
@@ -434,7 +434,7 @@ class NODES(object):
     class xblock_normal(block_text): pass
     class xblock_verbat(block_text): pass
     class xblock_comment(block_text):
-        def translate(self, state): return Sequence()
+        def translate(self, state): return DOM()
         def render(self, state):    return ""
     
     class xblock_embed(node):
@@ -451,13 +451,13 @@ class NODES(object):
             return body
         
         def _as_sequence(self, body):
-            if isinstance(body, Sequence): return body
-            if isinstance(body, HNode):    return Sequence(body)
+            if isinstance(body, DOM): return body
+            if isinstance(body, HNode):    return DOM(body)
             try:
                 body = list(body)
             except Exception as ex:
-                raise TypeErrorEx(f"embedded @-expression evaluates to {type(body)} instead of a DOM element (HNode, Sequence, an iterable of HNodes)", self)
-            return Sequence(*body)
+                raise TypeErrorEx(f"embedded @-expression evaluates to {type(body)} instead of a DOM element (HNode, DOM, an iterable of HNodes)", self)
+            return DOM(*body)
 
     class xblock_struct(node):
         tags = None         # <tags_expand> node
@@ -611,7 +611,7 @@ class NODES(object):
 
         def translate(self, state):
             for item in self.items: item.translate(state)
-            return Sequence()
+            return DOM()
 
     class xwild_import(node):
         path    = None      # path string as specified in the "from" clause
@@ -756,7 +756,7 @@ class NODES(object):
                     return branch.translate(state), i
                 except Exception as ex:
                     pass
-            return Sequence(), -1
+            return DOM(), -1
     
     class xblock_if(control_block):
         clauses  = None         # list of 1+ <clause_if> nodes
@@ -775,7 +775,7 @@ class NODES(object):
                     return clause.translate(state), i
             if self.elsebody:
                 return self.elsebody.translate(state), -2
-            return Sequence(), -1
+            return DOM(), -1
         
     class xclause_if(node):
         test = None             # <expression> node containing a test to be performed
@@ -785,7 +785,7 @@ class NODES(object):
             self.test = self.children[0]
             self.body = self.children[1] if len(self.children) == 2 else None
         def translate(self, state):
-            return self.body.translate(state) if self.body else Sequence()
+            return self.body.translate(state) if self.body else DOM()
         # def render(self, state):
         #     return self.body.render(state)
         
@@ -798,8 +798,8 @@ class NODES(object):
             while clause.test.evaluate(state):
                 body = clause.translate(state)
                 out += body.nodes
-            # return Sequence(*out), 0
-            out = Sequence(*out)
+            # return DOM(*out), 0
+            out = DOM(*out)
             out.set_indent(state.indentation)
             return out
         
@@ -829,7 +829,7 @@ class NODES(object):
                     body = self.body.translate(state)
                     out += body.nodes
                 
-            out = Sequence(*out)
+            out = DOM(*out)
             out.set_indent(state.indentation)
             return out
 
@@ -913,7 +913,7 @@ class NODES(object):
 
     class body(node):
         def translate(self, state):
-            return Sequence(n.translate(state) for n in self.children)
+            return DOM(n.translate(state) for n in self.children)
             # return self._translate_all(self.children, state)
     
     class xbody_control(body): pass
@@ -922,7 +922,7 @@ class NODES(object):
     class line(node):
         def translate(self, state):
             node = HText(self.render_inline(state))
-            return Sequence(node)
+            return DOM(node)
         def render(self, state):
             return state.indentation + self.render_inline(state)
         def render_inline(self, state):
@@ -1013,7 +1013,7 @@ class NODES(object):
             tag = self.tag.get(state)
 
             if isinstance(tag, ExternalTag):
-                return Sequence(HNode(body, tag = tag, attrs = attrs, kwattrs = kwattrs))
+                return DOM(HNode(body, tag = tag, attrs = attrs, kwattrs = kwattrs))
             
             elif isinstance(tag, NativeTag):
                 return tag.dom_expand(state, body, attrs, kwattrs, self)
@@ -1039,12 +1039,12 @@ class NODES(object):
             
     class xnull_tag(node):
         def translate_tag(self, state, body):
-            return Sequence(HNode(body, tag = null_tag))
+            return DOM(HNode(body, tag = null_tag))
             # return null_tag.translate_tag(state, body, None, None, self)
         
     class xpass_tag(node):
         def translate(self, state):
-            return Sequence()
+            return DOM()
         
 
     ###  ATTRIBUTES & ARGUMENTS  ###

@@ -1442,6 +1442,8 @@ in documents written in other target languages. For example:
 
     from hypertag.html import %div, %DIV
 
+<!--
+
 In addition to standard HTML tags, HyperHTML provides also a few extra tags:
 
 - **comment** - inserts an HTML comment to the output;
@@ -1450,7 +1452,6 @@ Typically, these tags should be used with a _verbatim_ body (`!`), especially th
 Like all other predefined tags, they are implemented as external tags, 
 which means they can label nodes of DOM trees and be used for DOM manipulation.
 
-<!--
 - **document** - inserts `<!DOCTYPE html>` at the beginning of a document;
   takes the DOM of an entire document and rearranges parts of the content:
   finds all nodes marked as _resource_, concatenates them, performs uniquification,
@@ -1460,6 +1461,8 @@ which means they can label nodes of DOM trees and be used for DOM manipulation.
   This tag should be used together with "resources".
 - **javascript** - inserts a `<script type="text/javascript">...</script>` block to the output;
 -->
+
+
 
 <!---
 ## Final remarks

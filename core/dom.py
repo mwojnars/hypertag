@@ -58,10 +58,10 @@ def get_indent(text):
 
 ########################################################################################################################################################
 #####
-#####  SEQUENCE OF NODES
+#####  DOCUMENT OBJECT MODEL (DOM)
 #####
 
-class Sequence:
+class DOM:
     """
     List of HNodes that comprise (a part of) a body of a parent HNode, or was produced as an intermediate
     collection of nodes during DOM manipulation.
@@ -78,7 +78,7 @@ class Sequence:
     def __iter__(self):             return iter(self.nodes)
     def __getitem__(self, pos):
         if isinstance(pos, slice):
-            return Sequence(self.nodes[pos], _strict = False)
+            return DOM(self.nodes[pos], _strict = False)
         return self.nodes[pos]
     
     @staticmethod
@@ -87,8 +87,8 @@ class Sequence:
         result = []
         for n in nodes:
             if n is None: continue
-            if isinstance(n, (list, Sequence, GeneratorType)):
-                result += Sequence._flatten(n)
+            if isinstance(n, (list, DOM, GeneratorType)):
+                result += DOM._flatten(n)
             elif isinstance(n, HNode):
                 result.append(n)
             else:
@@ -115,7 +115,7 @@ class Sequence:
 
 ########################################################################################################################################################
 #####
-#####  DOCUMENT OBJECT MODEL
+#####  DOM nodes
 #####
 
 class HNode:
@@ -131,22 +131,6 @@ class HNode:
     indent  = None      # indentation string of this block: absolute (when starts with \n) or relative
                         # to its parent (otherwise); None means this is an inline (headline) block, no indentation
 
-    # @property
-    # def headtail(self):
-    #     return self.head, self.tail
-    #
-    # @property
-    # def head(self):
-    #     if self.body and self.body[0].is_headline():
-    #         return self.body[0]
-    #
-    # @property
-    # def tail(self):
-    #     if self.body and self.body[0].is_headline():
-    #         return self.body[1:]
-    #     else:
-    #         return self.body
-
     def __init__(self, body = None, indent = None, **params):
         
         # assign secondary parameters
@@ -154,7 +138,7 @@ class HNode:
             setattr(self, name, value)
             
         # assign a list of body nodes, with flattening of nested lists and filtering of None's
-        self.body = Sequence(body)
+        self.body = DOM(body)
         
         # assign indentation, with proper handling of absolute (in parent) vs. relative (in children) indentations
         self.set_indent(indent)
@@ -237,20 +221,6 @@ class HText(HNode):
                         #  1) headline (head) - 1st line of `text`, without trailing newline
                         #  2) tailtext (tail) - all lines after the 1st one including the leading newline (!);
                         #     tailtext may contain trailing newline(s), but this is not obligatory
-    
-    # @property
-    # def headtail(self):
-    #     assert not self.body
-    #     split = self.text.find('\n')
-    #     if split < 0: split = len(self.text)
-    #     return self.text[:split], self.text[split:]
-    #
-    # @property
-    # def head(self): return self.headtail[0]
-    #
-    # @property
-    # def tail(self): return self.headtail[1]
-
     
     def __init__(self, text = '', **kwargs):
         super(HText, self).__init__(text = text, **kwargs)
