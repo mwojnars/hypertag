@@ -18,7 +18,7 @@ from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, Missi
 from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
 from hypertag.core.structs import Context, State, Slot, ValueSlot
 from hypertag.core.DOM import del_indent, get_indent, Sequence, HText, HNode, HRoot
-from hypertag.core.tag import Tag, NativeTag, null_tag
+from hypertag.core.tag import Tag, NativeTag, ExternalTag, null_tag
 
 DEBUG = False
 
@@ -39,7 +39,7 @@ def STR(value, node = None, msg = "expression to be embedded in markup text eval
     if value is None: raise NoneStringEx(msg, node)
     return text_type(value)
 
-class ImportedTag(Tag):
+class ImportedTag(NativeTag):
     """
     Wrapper around an imported NativeTag instance. Stores the global state of the imported module,
     so that it can replace the state of the importing module when translate_tag() of the imported hypertag is called.
@@ -50,10 +50,11 @@ class ImportedTag(Tag):
         self.native_tag = native_tag
         self.module_symbols = module_symbols
         
-    def translate_tag(self, state, *args, **kwargs):
+    def dom_expand(self, state, *args, **kwargs):
         
         module_state = State(self.module_symbols)
-        return self.native_tag.translate_tag(module_state, *args, **kwargs)
+        return self.native_tag.dom_expand(module_state, *args, **kwargs)
+        # return self.native_tag.translate_tag(module_state, *args, **kwargs)
 
 def partial(func, *args, **kwargs):
     """
@@ -538,17 +539,17 @@ class NODES(object):
             self.slot.set_value(state)
             return None                 # hypertag produces NO output in the place of its definition (only in places of occurrence)
 
-        def expand(self, state, body, attrs, kwattrs, caller):
+        def dom_expand(self, state, body, attrs, kwattrs, caller):
             """
             Translate the formal self.body in a given `state`, insert the actual `body` wherever necessary,
-            and return as a DOM (not a string!) for possible further manipulation in other nodes of this AST.
+            and return as a DOM (not a string!) for possible further manipulation in other hypertags.
             """
             self._append_attrs(state, body, attrs, kwattrs, caller)         # extend `state` with actual values of tag attributes
             output = self.body.translate(state)
             output.set_indent(state.indentation)
             return output
 
-        translate_tag = expand          # unlike external tags, a native tag gets expanded already during translate_tag()
+        # translate_tag = expand          # unlike external tags, a native tag gets expanded already during translate_tag()
         
         def _append_attrs(self, state, body, attrs, kwattrs, caller):
             """Extend `state` with actual values of tag attributes."""
@@ -1006,17 +1007,20 @@ class NODES(object):
         def translate_tag(self, state, body):
             """The actual `body` is already translated and has a form of a DOM."""
     
+            attrs, kwattrs = self._eval_attrs(state)                        # calculate actual values of attributes
+            
             assert isinstance(self.tag, Slot)
             tag = self.tag.get(state)
+
+            if isinstance(tag, ExternalTag):
+                return Sequence(HNode(body, tag = tag, attrs = attrs, kwattrs = kwattrs))
             
-            # if isinstance(self.tag, ExternalTag):
-            #     return Sequence(HNode(body, tag = self.tag, attrs = attrs, kwattrs = kwattrs))
-            # elif isinstance(self.tag, NODES.xblock_def):
-            #     return self.tag.translate_tag(state, body, attrs, kwattrs)
+            elif isinstance(tag, NativeTag):
+                return tag.dom_expand(state, body, attrs, kwattrs, self)
             
-            if isinstance(tag, Tag):
-                attrs, kwattrs = self._eval_attrs(state)                        # calculate actual values of attributes
-                return tag.translate_tag(state, body, attrs, kwattrs, self)
+            # if isinstance(tag, Tag):
+            #     return tag.translate_tag(state, body, attrs, kwattrs, self)
+            
             else:
                 raise NotATagEx(f"Not a tag: '{self.name}' ({tag.__class__})", self)
             
@@ -1035,7 +1039,8 @@ class NODES(object):
             
     class xnull_tag(node):
         def translate_tag(self, state, body):
-            return null_tag.translate_tag(state, body, None, None, self)
+            return Sequence(HNode(body, tag = null_tag))
+            # return null_tag.translate_tag(state, body, None, None, self)
         
     class xpass_tag(node):
         def translate(self, state):

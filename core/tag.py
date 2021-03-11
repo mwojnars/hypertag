@@ -17,7 +17,7 @@ class Tag:
     name = None         # tag name that can be searched for (selected) when post-processing a DOM through Sequence class
     
     void = False        # if True, passing non-empty body to expand() is forbidden and the parser should rather raise an exception
-    flat = False        # if True, body will be provided as plain text (rendered DOM) to expand(); allows better compactification of constant subtrees of the AST (TODO)
+    flat = True         # if True, body is passed as plain text (rendered DOM) to expand(), which allows better compactification of constant subtrees of the AST (TODO)
     pure = True         # if True, the tag is assumed to always return the same result for the same arguments (no side effects),
                         # which potentially enables full compactification of a node tagged with this tag
     
@@ -31,9 +31,9 @@ class Tag:
     #                     #
     #                     # It is recommended that xml_names are set to False whenever possible.
     
-    def translate_tag(self, state, body, attrs, kwattrs, caller):
-        """For use by Hypertag parser only, to translate an occurence of this tag to a DOM."""
-        raise NotImplementedError
+    # def translate_tag(self, state, body, attrs, kwattrs, caller):
+    #     """For use by Hypertag parser only, to translate an occurence of this tag to a DOM."""
+    #     raise NotImplementedError
 
 
 class ExternalTag(Tag):
@@ -46,9 +46,9 @@ class ExternalTag(Tag):
     - it should return either a Sequence of nodes, or plain text, or None
     """
 
-    def translate_tag(self, state, body, attrs, kwattrs, caller):
-        """External tag doesn't depend on a state of script execution, hence `state` is ignored."""
-        return Sequence(HNode(body, tag = self, attrs = attrs, kwattrs = kwattrs))
+    # def translate_tag(self, state, body, attrs, kwattrs, caller):
+    #     """External tag doesn't depend on a state of script execution, hence `state` is ignored."""
+    #     return Sequence(HNode(body, tag = self, attrs = attrs, kwattrs = kwattrs))
 
     def expand(self, body, attrs, kwattrs):
         """
@@ -65,20 +65,25 @@ class ExternalTag(Tag):
 
 class NativeTag(Tag):
     """Base class for a native tag: a tag implemented inside Hypertag code."""
+
+    def dom_expand(self, state, body, attrs, kwattrs, caller):
+        """Native tags are expanded in a different way than external tags. They produce DOM during expansion, not a flat string."""
+        raise NotImplementedError
+
     
-class SpecialTag(Tag): pass
+class SpecialTag(ExternalTag): pass
 
 class NullTag(SpecialTag):
     """Null tag '.' is represented in the DOM tree. Its expand() passes the body unchanged."""
     
     name = '.'
     
-    def translate_tag(self, state, body, attrs, kwattrs, caller):
-        assert not attrs and not kwattrs
-        return Sequence(HNode(body, tag = self))
+    # def translate_tag(self, state, body, attrs, kwattrs, caller):
+    #     assert not attrs and not kwattrs
+    #     return Sequence(HNode(body, tag = self))
 
     def expand(self, body, attrs, kwattrs):
-        return body.render()
+        return body
     
 null_tag = NullTag()
 
