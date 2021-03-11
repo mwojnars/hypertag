@@ -10,7 +10,7 @@
 ## Introduction
 
 Hypertag is a modern language for front-end development that allows
-writing (X)HTML documents in a way similar to writing Python scripts,
+writing HTML5 documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
 and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;

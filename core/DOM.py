@@ -1,6 +1,6 @@
 """
-Classes that represent Hypertag's native DOM tree (Document Object Model) that is produced as an output
-of script "translation". The DOM can subsequently undergo "rendering" to a document in a target language.
+Classes that represent Hypertag's native DOM (Document Object Model) that is produced as an output
+of translation of the AST. The DOM can subsequently undergo "rendering" to a document in a target language.
 
 @author:  Marcin Wojnarski
 """
@@ -207,7 +207,8 @@ class HNode:
         else:
             body = self.body
             
-        return self.tag.expand(body, *(self.attrs or ()), **(self.kwattrs or {}))
+        return self.tag.expand(body, self.attrs or (), self.kwattrs or {})
+        # return self.tag.expand(body, *(self.attrs or ()), **(self.kwattrs or {}))
         
 class HRoot(HNode):
     """Root node of a Hypertag DOM tree."""

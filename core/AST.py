@@ -539,6 +539,10 @@ class NODES(object):
             return None                 # hypertag produces NO output in the place of its definition (only in places of occurrence)
 
         def expand(self, state, body, attrs, kwattrs, caller):
+            """
+            Translate the formal self.body in a given `state`, insert the actual `body` wherever necessary,
+            and return as a DOM (not a string!) for possible further manipulation in other nodes of this AST.
+            """
             self._append_attrs(state, body, attrs, kwattrs, caller)         # extend `state` with actual values of tag attributes
             output = self.body.translate(state)
             output.set_indent(state.indentation)
@@ -949,7 +953,7 @@ class NODES(object):
     class xtags_expand(node):
         """List of tag_expand nodes."""
         def apply_tags(self, state, body):
-            """Wrap up `body` in subsequent tags processed in reverse order."""
+            """Wrap up the translated `body` (a DOM, not AST) with subsequent tags processed (expanded) in reverse order."""
             for tag in reversed(self.children):
                 body = tag.translate_tag(state, body)
             return body
@@ -1000,6 +1004,7 @@ class NODES(object):
             if self.tag is None: raise UndefinedTagEx(f"undefined tag '{self.name}'", self)
             
         def translate_tag(self, state, body):
+            """The actual `body` is already translated and has a form of a DOM."""
     
             assert isinstance(self.tag, Slot)
             tag = self.tag.get(state)

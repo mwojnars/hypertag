@@ -8,6 +8,57 @@ from hypertag.core.tag import ExternalTag
 #####  BUILT-IN functional hypertags
 #####
 
+def dedent(text, _re_indent = re.compile(r'(?m)^\s+')):
+    """Remove all line indentation in `text`. The indentation may differ between lines and it still gets fully removed."""
+    return _re_indent.sub('', text)
+
+class DedentTag(ExternalTag):
+    text = True
+    
+    def expand(self, body, attrs, kwattrs):
+        return self._expand(body, *attrs, **kwattrs)
+        
+    @staticmethod
+    def _expand(text, full = True):
+        if full: return dedent(text)
+        return del_indent(text) #, get_indent(text))
+        
+class JavascriptTag(ExternalTag):
+    """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""
+    text = True
+    
+    _block = """
+        <script type="text/javascript">
+        %s
+        </script>
+    """
+    _block = dedent(_block).strip()
+    print('JavascriptTag._block')
+    print(_block)
+    
+    def expand(self, body, attrs, kwattrs):
+        return self._expand(body)
+
+    def _expand(self, js_code):
+        return self._block % js_code
+        
+
+def _unique():
+    pass
+
+BUILTIN_TAGS = {
+    'dedent':       DedentTag,
+    'javascript':   JavascriptTag,
+}
+
+# instantiate tag classes
+for name, tag in BUILTIN_TAGS.items():
+    if isinstance(tag, type):
+        BUILTIN_TAGS[name] = tag()
+        
+
+########################################################################################################################################################
+
 """
 TODO
 - dedent full=True    -- remove leading indentation of a block, either at the top level only (full=False), or at all nested levels (full=True)
@@ -32,47 +83,4 @@ Filters:
                                 each group is a list of records; `key` can be a tuple of key names, names can refer to related objects "x.y.z";
                                 replacement for Django's {%regroup%}
 """
-
-def dedent(text, _re_indent = re.compile(r'(?m)^\s+')):
-    """Removes all indentation of the lines in `text`. The indentation may differ between lines."""
-    return _re_indent.sub('', text)
-
-class DedentTag(ExternalTag):
-    text = True
-    def expand(self, text, full = True):
-        if full: return dedent(text)
-        return del_indent(text) #, get_indent(text))
-        
-class JavascriptTag(ExternalTag):
-    """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""
-    text = True
-
-    _block = """
-        <script type="text/javascript">
-        <!--
-        %s
-        -->
-        </script>
-    """
-    _block = dedent(_block).strip()
-    print('JavascriptTag._block')
-    print(_block)
-    
-    def expand(self, js_code):
-        return self._block % js_code
-        
-
-def _unique():
-    pass
-
-BUILTIN_TAGS = {
-    'dedent':       DedentTag,
-    'javascript':   JavascriptTag,
-}
-
-# instantiate tag classes
-for name, tag in BUILTIN_TAGS.items():
-    if isinstance(tag, type):
-        BUILTIN_TAGS[name] = tag()
-        
 
