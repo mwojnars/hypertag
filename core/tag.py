@@ -14,7 +14,7 @@ class Tag:
     - ExternalTag - a tag implemented as a python function
     - NativeTag - a tag implemented inside Hypertag code
     """
-    name = None         # tag name that can be searched for (selected) when post-processing a DOM through Sequence class
+    name = None         # tag name that can be used in selectors when manipulating a DOM
     
     void = False        # if True, passing non-empty body to expand() is forbidden and the parser should rather raise an exception
     flat = True         # if True, body is passed as plain text (rendered DOM) to expand(), which allows better compactification of constant subtrees of the AST (TODO)

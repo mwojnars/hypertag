@@ -2,6 +2,10 @@
 Classes that represent Hypertag's native DOM (Document Object Model) that is produced as an output
 of translation of the AST. The DOM can subsequently undergo "rendering" to a document in a target language.
 
+DOM manipulation methods:
+- find(path): generate a sequence of all (sub)nodes that match a given path.
+- remove(path): remove from the DOM and return all (sub)nodes that match a given path;
+
 @author:  Marcin Wojnarski
 """
 
@@ -59,9 +63,9 @@ def get_indent(text):
 
 class Sequence:
     """
-    List of HNodes that comprise (a part of) a body of an HNode, or was produced as an intermediate
-    collection of nodes during nodes filtering.
-    Provides methods for traversing a Hypertag tree and filtering of nodes,
+    List of HNodes that comprise (a part of) a body of a parent HNode, or was produced as an intermediate
+    collection of nodes during DOM manipulation.
+    Provides methods for traversing a DOM tree and selecting nodes,
     as well as flattening and cleaning up the list during node construction.
     """
     nodes = None

@@ -1,4 +1,3 @@
-<!---
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -108,7 +107,6 @@
       color: #0594db;
     }
 </style>
---->
 
 
 # Introduction
@@ -1329,42 +1327,13 @@ and escape function.
 The escape function performs character encoding: `<`, `>`, `&` characters are replaced 
 with corresponding HTML entities (`&lt;` `&gt;` `&amp;`).
 
-The built-in symbols imported by HyperHTML upon startup include:
+The symbols imported by HyperHTML as built-ins upon startup include:
 
 1. [Python built-ins](#python-built-ins).
-1. General-purpose tags & functions (see the [Standard library](#standard-library) for details).
-1. HTML-specific tags.
+1. [General-purpose](#general-purpose-symbols) tags & functions.
+1. [HTML-specific](#html-specific-symbols) tags.
 
-For every original HTML5 tag, HyperHTML provides two alternative Hypertag tags:
-written in lower case and upper case.
-For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags available.
-Their output differs by letter case of the HTML tag name produced, otherwise the behavior
-is the same. It is up to the programmer to decide what variant to use:
-
-    div class='search'
-        span | text
-
-    DIV class='search'
-        SPAN | text
-
-output:
-
-```html
-<div class="search">
-    <span>text</span>
-</div>
-
-<DIV class="search">
-    <SPAN>text</SPAN>
-</DIV>
-```
-
-Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
-to a script. They can also be imported explicitly from the `hypertag.html` module, 
-regardless of what runtime is currently being used - this allows inserting HTML markup
-in documents written in other target languages. For example:
-
-    from hypertag.html import %div, %DIV
+See the [Standard library](#standard-library) section for details.
 
 
 ## Standard library
@@ -1411,10 +1380,10 @@ output:
     [1, 2, 3]
 
 
-### Common symbols
+### General-purpose symbols
 
 Hypertag defines a number of its own general-purpose tags and functions (filters)
-that can be used with different target languages.
+that can be used with various target languages.
 
 Tags:
 - %dedent tag and $dedent function/filter
@@ -1423,7 +1392,7 @@ Tags:
 - %lower
 - %upper
 
-Functions (filters):
+Functions:
 - cycle / alternate
 - findchange
 
@@ -1442,9 +1411,56 @@ The details are described in the [Filters](#filters) section.
 
 ### HTML-specific symbols
 
-- HTML tags
-- comment
-- javascript
+
+For every standard HTML5 tag, HyperHTML provides two corresponding Hypertag tags:
+written in lower case and upper case.
+For example, for the HTML tag `<div>`, there are `%div` and `%DIV` hypertags available.
+Their output differs by letter case of the HTML tag name produced, otherwise the behavior
+is the same. It is up to the programmer to decide what variant to use:
+
+    div class='search'
+        span | text
+
+    DIV class='search'
+        SPAN | text
+
+output:
+
+```html
+<div class="search">
+    <span>text</span>
+</div>
+
+<DIV class="search">
+    <SPAN>text</SPAN>
+</DIV>
+```
+
+Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
+to a script. They can also be imported explicitly from the `hypertag.html` module, 
+regardless of what runtime is currently being used - this allows inserting HTML markup
+in documents written in other target languages. For example:
+
+    from hypertag.html import %div, %DIV
+
+In addition to standard HTML tags, HyperHTML provides also a few extra tags:
+
+- **comment** - inserts an HTML comment to the output;
+- **javascript** - inserts a `<script type="text/javascript">...</script>` block to the output;
+
+Typically, these tags should be used with a _verbatim_ body (`!`), especially the "javascript" tag.
+Like all other predefined tags, they are implemented as external tags, 
+which means they can label nodes of DOM trees and be used for DOM manipulation.
+
+<!--
+- **document** - inserts `<!DOCTYPE html>` at the beginning of a document;
+  takes the DOM of an entire document and rearranges parts of the content:
+  finds all nodes marked as _resource_, concatenates them, performs uniquification,
+  and appends to the `<head>` section of the document;
+- **resource** - marks a given part of a document as a listing of resources that should be
+  uniquified across the entire document and moved to the `<head>` section.
+  This tag should be used together with "resources".
+-->
 
 <!---
 ## Final remarks
