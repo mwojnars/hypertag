@@ -9,6 +9,7 @@
 
 from hypertag.std.builtins import register
 
-__tags__ = register.tags
+__tags__ = register.tags                # make all tags available for import
+globals().update(register.vars)         # make all variables available for import
 
 del globals()['register']
