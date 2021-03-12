@@ -46,9 +46,6 @@ for tag in _HTML_TAGS_NONVOID:  _create(tag, False)
 for tag in _HTML_TAGS_VOID:     _create(tag, True)
     
 
-BUILTIN_HTML = register.tags
-
-
 ########################################################################################################################################################
 #####
 #####  HYPERTAG'S CUSTOM tags & functions (HTML-specific)

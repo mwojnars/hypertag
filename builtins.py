@@ -7,5 +7,8 @@
 #
 
 
-from hypertag.std.builtins import BUILTIN_TAGS as __tags__
+from hypertag.std.builtins import register
 
+__tags__ = register.tags
+
+del globals()['register']

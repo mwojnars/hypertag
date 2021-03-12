@@ -6,6 +6,8 @@
 #    from hypertag.html import %div
 #
 
+from hypertag.std.html import register
 
-from hypertag.std.html import BUILTIN_HTML as __tags__
+__tags__ = register.tags
 
+del globals()['register']
