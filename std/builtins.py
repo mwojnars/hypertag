@@ -30,39 +30,9 @@ def unique_lines(text, strip = True):
     return '\n'.join(uniq)
 
 
-# class DedentTag(ExternalTag):
-#
-#     def expand(self, body, attrs, kwattrs):
-#         return self._expand(body, *attrs, **kwattrs)
-#
-#     @staticmethod
-#     def _expand(text, full = True):
-#         if full: return dedent(text)
-#         return del_indent(text)
-        
-# class JavascriptTag(ExternalTag):
-#     """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""
-#
-#     _block = """
-#         <script type="text/javascript">
-#         %s
-#         </script>
-#     """
-#     _block = dedent(_block).strip()
-#     print('JavascriptTag._block')
-#     print(_block)
-#
-#     def expand(self, body, attrs, kwattrs):
-#         return self._expand(body)
-#
-#     def _expand(self, js_code):
-#         return self._block % js_code
-        
-
 BUILTIN_TAGS = {
     'dedent':           TagFunction(dedent),
     'unique_lines':     TagFunction(unique_lines),
-    # 'javascript':   JavascriptTag,
 }
 
 
@@ -78,8 +48,7 @@ for name, tag in BUILTIN_TAGS.items():
 TODO
 - unique_blocks
 - inline merge=True   -- convert block to "inline" (no margin, no indent); merge newlines and spaces to a single space if merge=True
-- css                 -- marks its content as a CSS script that shall be moved to a <style> section of the document
-- js                  -- JavaScript code to be put into a <script> section
+- resource            -- terminal tag that marks a given block as a resource that shall be moved to HTML's <meta> section
 - error               -- inserts a standard error message in a place of occurrence; root document node might collect all <error> nodes and produce a combined (hidden) error message
 ? lower, upper        -- convert rendered body to all lower/upper case; will convert tag names and attrs too if applied to an html-tagged block
 

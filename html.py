@@ -7,5 +7,5 @@
 #
 
 
-from hypertag.core._html import BUILTIN_HTML as __tags__
+from hypertag.std.html import BUILTIN_HTML as __tags__
 

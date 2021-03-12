@@ -7,5 +7,5 @@
 #
 
 
-from hypertag.core._builtins import BUILTIN_TAGS as __tags__
+from hypertag.std.builtins import BUILTIN_TAGS as __tags__
 

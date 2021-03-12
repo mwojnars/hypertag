@@ -1,5 +1,5 @@
-from hypertag.core._html import html_escape
 from hypertag.core.runtime import Runtime, _read_module
+from hypertag.std.html import html_escape
 import hypertag.html
 
 
