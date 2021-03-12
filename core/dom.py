@@ -122,14 +122,23 @@ class DOM:
 
     ### SELECTORS API
     
-    def select(self, tag = None, id = None, class_ = None, **attrs):
-        """
-        Select all nodes (including descendants) that match given search criteria.
-        :param tag: desired tag name (<str>) or Tag instance that should be present in a matching node
-        :param id: desired value of "id" attribute (<str>)
-        :param class_: desired class name to be present inside the "class" attribute (<str>), possibly among other names
-        """
-
+    # def find(self, name = None, attr = None, value = DEFINED):
+    #     """
+    #     Find all nodes with a given tag name. If two different tags have the same Tag.name, both will be detected.
+    #     Returns a new DOM containing the nodes found.
+    #     """
+    #
+    # def select(self, tag = None, id = None, class_ = None, **attrs):
+    #     """
+    #     Select all nodes (including descendants) that match given search criteria.
+    #     :param tag: desired tag name (<str>) or Tag instance that should be present in a matching node
+    #     :param id: desired value of "id" attribute (<str>)
+    #     :param class_: desired class name to be present inside the "class" attribute (<str>), possibly among other names
+    #     """
+        
+    # Selectors TODO:
+    # - https://github.com/scrapy/cssselect (Scrapy converts all CSS selectors to XPath)
+    
 
     ####################################################################################################################
     #####

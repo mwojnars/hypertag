@@ -1009,7 +1009,7 @@ def test_022_builtins():
     """
     assert render(src).strip() == out.strip()
     src = """
-        unique_lines
+        unique
             | Ala ma kota
             | Ala ma kota
             div

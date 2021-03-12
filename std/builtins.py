@@ -1,8 +1,9 @@
 import re
-from nifty.util import unique
+from nifty.util import unique as unique_list
+from hypertag.core.registry import Registry
 
-from hypertag.core.dom import DOM, del_indent
-from hypertag.core.tag import ExternalTag, TagFunction
+
+register = Registry()
 
 
 ########################################################################################################################################################
@@ -12,13 +13,15 @@ from hypertag.core.tag import ExternalTag, TagFunction
 
 _re_dedent = re.compile(r'(?m)^\s+')
 
+@register.tag
 def dedent(text):
     """Remove all line indentation in `text`. The indentation may differ between lines and it still gets fully removed."""
     return _re_dedent.sub('', text)
     # if full: return _re_indent.sub('', text)
     # return del_indent(text)
 
-def unique_lines(text, strip = True):
+@register.tag
+def unique(text, strip = True):
     """
     Remove duplicate lines in `text`. The order of remaining lines is preserved.
     If strip=True (default), the lines are stripped of leading & trailing whitespace before comparison,
@@ -26,21 +29,23 @@ def unique_lines(text, strip = True):
     """
     lines = text.splitlines()
     if strip: lines = list(filter(None, map(str.strip, lines)))
-    uniq  = unique(lines)
+    uniq = unique_list(lines)
     return '\n'.join(uniq)
 
 
-BUILTIN_TAGS = {
-    'dedent':           TagFunction(dedent),
-    'unique_lines':     TagFunction(unique_lines),
-}
-
-
-# instantiate tag classes
-for name, tag in BUILTIN_TAGS.items():
-    if isinstance(tag, type):
-        BUILTIN_TAGS[name] = tag()
+# BUILTIN_TAGS = {
+#     'dedent':       TagFunction(dedent),
+#     'unique':       TagFunction(unique),
+# }
+#
+# # instantiate tag classes
+# for name, tag in BUILTIN_TAGS.items():
+#     if isinstance(tag, type):
+#         BUILTIN_TAGS[name] = tag()
         
+
+BUILTIN_TAGS = register.tags
+
 
 ########################################################################################################################################################
 
