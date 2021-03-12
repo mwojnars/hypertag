@@ -97,8 +97,8 @@ class MarkupTag(ExternalTag):
     flat = True         # markup tags don't do any DOM manipulation internally, so `body` can be passed in as a string
     mode = 'HTML'       # (X)HMTL compatibility mode: either 'HTML' or 'XHTML'
     
-    def __init__(self, name, void = False, mode = 'HTML'):
-        self.name = name
+    def __init__(self, name = None, void = False, mode = 'HTML'):
+        if name: self.name = name
         self.void = void
         self.mode = mode
     

@@ -182,18 +182,12 @@ if __name__ == '__main__':
        
     """
     text = """
-        unique_lines
-            | Ala ma kota
-            | Ala ma kota
-            div
-                p
-                p
-            div
-                i |   pies
-                i | pies
-                |   pies
-                | pies
-            | Ala ma kota
+        | Ala ma kota
+        comment !  $ { } x y z
+        comment !
+            this is an outline comment | $ {}
+        comment
+            ! this is an outline comment | $ {}
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

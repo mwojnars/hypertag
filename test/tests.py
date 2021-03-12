@@ -1032,6 +1032,23 @@ def test_022_builtins():
         pies
     """
     assert render(src).strip() == out.strip()
+    src = """
+        comment !  $ { } x y z
+        comment !
+            this is an outline comment | $ {}
+        comment
+            ! this is an outline comment | $ {}
+    """
+    out = """
+        <!-- $ { } x y z-->
+        <!--
+        this is an outline comment | $ {}
+        -->
+        <!--
+            this is an outline comment | $ {}
+        -->
+    """
+    assert render(src).strip() == out.strip()
 
 
 def test_023_import():

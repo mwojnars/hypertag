@@ -1,3 +1,4 @@
+from hypertag.core.errors import TypeErrorEx
 from hypertag.core.tag import MarkupTag
 from hypertag.std.registry import Registry
 
@@ -51,3 +52,19 @@ for tag in _HTML_TAGS_VOID:     _create(tag, True)
 #####  HYPERTAG'S CUSTOM tags & functions (HTML-specific)
 #####
 
+@register.tag
+class comment(MarkupTag):
+    
+    name = "comment"
+    
+    def expand(self, body, attrs, kwattrs):
+        
+        if attrs or kwattrs: raise TypeErrorEx(f"'comment' tag does not accept attributes")
+        
+        # if the block contains a headline, the closing tag is placed on the same line as body;
+        # a newline is added at the end, otherwise
+        nl = '\n' if body[:1] == '\n' else ''
+        return f"<!--" + body + nl + f"-->"
+    
+
+    
