@@ -1,4 +1,8 @@
 from hypertag.core.tag import MarkupTag
+from hypertag.std.registry import Registry
+
+
+register = Registry()
 
 
 ########################################################################################################################################################
@@ -21,8 +25,6 @@ def html_escape(text):
 #####  compatible with both HTML5 and XHTML5.
 #####
 
-BUILTIN_HTML  = {}
-
 _HTML_TAGS_VOID    = "area base br col command embed hr img input link meta param source track wbr".split()
 _HTML_TAGS_NONVOID = "a abbr acronym address applet article aside audio b basefont bdi bdo big blockquote body " \
                      "button canvas caption center cite code colgroup data datalist dd del details dfn dialog dir " \
@@ -32,23 +34,19 @@ _HTML_TAGS_NONVOID = "a abbr acronym address applet article aside audio b basefo
                      "select small span strike strong style sub summary sup svg table tbody td template textarea " \
                      "tfoot th thead time title tr tt u ul var video".split()
 
-def _create_tag_triple(name_, void_):
-    lname, uname = name_.lower(), name_.upper()
-    #BUILTIN_XHTML[lname] = MarkupTag(lname, void_, 'XHTML')         # XHTML only permits lowercase tag names
-    BUILTIN_HTML[lname]  = MarkupTag(lname, void_, 'HTML')
-    BUILTIN_HTML[uname]  = MarkupTag(uname, void_, 'HTML')
+def _create(name, void):
+    # register.tag(MarkupTag(name.lower(), void, 'XHTML'))         # XHTML only permits lowercase tag names
+    register.tag(MarkupTag(name.lower(), void, 'HTML'))
+    register.tag(MarkupTag(name.upper(), void, 'HTML'))
 
-def _create_all_tags():
-    # HTML tags
-    for tag in _HTML_TAGS_NONVOID:
-        _create_tag_triple(tag, False)
-    for tag in _HTML_TAGS_VOID:
-        _create_tag_triple(tag, True)
-    
-    
-###  append all (X)HTML tags to BUILTIN_HTML
 
-_create_all_tags()
+### create tags
+
+for tag in _HTML_TAGS_NONVOID:  _create(tag, False)
+for tag in _HTML_TAGS_VOID:     _create(tag, True)
+    
+
+BUILTIN_HTML = register.tags
 
 
 ########################################################################################################################################################

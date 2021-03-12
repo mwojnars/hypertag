@@ -1,6 +1,6 @@
 import re
 from nifty.util import unique as unique_list
-from hypertag.core.registry import Registry
+from hypertag.std.registry import Registry
 
 
 register = Registry()
@@ -8,7 +8,7 @@ register = Registry()
 
 ########################################################################################################################################################
 #####
-#####  GENERAL-PURPOSE tags
+#####  GENERAL PURPOSE tags
 #####
 
 _re_dedent = re.compile(r'(?m)^\s+')
@@ -33,16 +33,6 @@ def unique(text, strip = True):
     return '\n'.join(uniq)
 
 
-# BUILTIN_TAGS = {
-#     'dedent':       TagFunction(dedent),
-#     'unique':       TagFunction(unique),
-# }
-#
-# # instantiate tag classes
-# for name, tag in BUILTIN_TAGS.items():
-#     if isinstance(tag, type):
-#         BUILTIN_TAGS[name] = tag()
-        
 
 BUILTIN_TAGS = register.tags
 
