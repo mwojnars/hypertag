@@ -214,7 +214,6 @@ class DOM:
                 body = self.body
                 
             return self.tag.expand(body, self.attrs or (), self.kwattrs or {})
-            # return self.tag.expand(body, *(self.attrs or ()), **(self.kwattrs or {}))
             
     class Root(Node):
         """Root node of a Hypertag DOM tree."""

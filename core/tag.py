@@ -55,7 +55,7 @@ class ExternalTag(Tag):
 class NullTag(ExternalTag):
     """Null tag '.' is represented in the DOM tree. Its expand() passes the body unchanged."""
     
-    name = '.'
+    name = 'null'
     
     def expand(self, body, attrs, kwattrs):
         return body
@@ -63,12 +63,23 @@ class NullTag(ExternalTag):
 null_tag = NullTag()
 
 
+class TagFunction(ExternalTag):
+    """A wrapper that creates an ExternalTag instance from a given function."""
+    
+    def __init__(self, fun):
+        self.fun  = fun
+        self.name = fun.__name__
+    
+    def expand(self, body, attrs, kwattrs):
+        return self.fun(body, *attrs, **kwattrs)
+        
+
 ########################################################################################################################################################
 
 class NativeTag(Tag):
     """Base class for native tags, i.e., tags implemented inside Hypertag code."""
 
-    def dom_expand(self, state, body, attrs, kwattrs, caller):
+    def dom_expand(self, body, attrs, kwattrs, state, caller):
         """
         Native tags are expanded in a different way than external tags: they produce DOM during expansion, not a flat string,
         hence a different method to be called by the parser.

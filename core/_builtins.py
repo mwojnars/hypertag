@@ -1,53 +1,70 @@
 import re
+from nifty.util import unique
+
 from hypertag.core.dom import DOM, del_indent
-from hypertag.core.tag import ExternalTag
+from hypertag.core.tag import ExternalTag, TagFunction
 
 
 ########################################################################################################################################################
 #####
-#####  BUILT-IN functional hypertags
+#####  GENERAL-PURPOSE tags
 #####
 
-def dedent(text, _re_indent = re.compile(r'(?m)^\s+')):
+_re_dedent = re.compile(r'(?m)^\s+')
+
+def dedent(text):
     """Remove all line indentation in `text`. The indentation may differ between lines and it still gets fully removed."""
-    return _re_indent.sub('', text)
+    return _re_dedent.sub('', text)
+    # if full: return _re_indent.sub('', text)
+    # return del_indent(text)
 
-class DedentTag(ExternalTag):
-    
-    def expand(self, body, attrs, kwattrs):
-        return self._expand(body, *attrs, **kwattrs)
-        
-    @staticmethod
-    def _expand(text, full = True):
-        if full: return dedent(text)
-        return del_indent(text)
-        
-class JavascriptTag(ExternalTag):
-    """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""
-    
-    _block = """
-        <script type="text/javascript">
-        %s
-        </script>
+def unique_lines(text, strip = True):
     """
-    _block = dedent(_block).strip()
-    print('JavascriptTag._block')
-    print(_block)
-    
-    def expand(self, body, attrs, kwattrs):
-        return self._expand(body)
+    Remove duplicate lines in `text`. The order of remaining lines is preserved.
+    If strip=True (default), the lines are stripped of leading & trailing whitespace before comparison,
+    and all empty lines are removed.
+    """
+    lines = text.splitlines()
+    if strip: lines = list(filter(None, map(str.strip, lines)))
+    uniq  = unique(lines)
+    return '\n'.join(uniq)
 
-    def _expand(self, js_code):
-        return self._block % js_code
+
+# class DedentTag(ExternalTag):
+#
+#     def expand(self, body, attrs, kwattrs):
+#         return self._expand(body, *attrs, **kwattrs)
+#
+#     @staticmethod
+#     def _expand(text, full = True):
+#         if full: return dedent(text)
+#         return del_indent(text)
         
-
-def _unique():
-    pass
+# class JavascriptTag(ExternalTag):
+#     """Typically, a `javascript` tag should be used with verbatim (!...) contents inside."""
+#
+#     _block = """
+#         <script type="text/javascript">
+#         %s
+#         </script>
+#     """
+#     _block = dedent(_block).strip()
+#     print('JavascriptTag._block')
+#     print(_block)
+#
+#     def expand(self, body, attrs, kwattrs):
+#         return self._expand(body)
+#
+#     def _expand(self, js_code):
+#         return self._block % js_code
+        
 
 BUILTIN_TAGS = {
-    'dedent':       DedentTag,
-    'javascript':   JavascriptTag,
+    'dedent':           TagFunction(dedent),
+    'unique_lines':     TagFunction(unique_lines),
+    # 'javascript':   JavascriptTag,
 }
+
 
 # instantiate tag classes
 for name, tag in BUILTIN_TAGS.items():
@@ -59,9 +76,6 @@ for name, tag in BUILTIN_TAGS.items():
 
 """
 TODO
-- dedent full=True    -- remove leading indentation of a block, either at the top level only (full=False), or at all nested levels (full=True)
-- unique strip=True   -- render body to text and remove duplicate lines (or blocks?)
-- unique_lines
 - unique_blocks
 - inline merge=True   -- convert block to "inline" (no margin, no indent); merge newlines and spaces to a single space if merge=True
 - css                 -- marks its content as a CSS script that shall be moved to a <style> section of the document

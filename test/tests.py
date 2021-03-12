@@ -1008,19 +1008,30 @@ def test_022_builtins():
         </div>
     """
     assert render(src).strip() == out.strip()
-    # src = """
-    #     javascript
-    # """
-    # out = """
-    #     <div>
-    #     <p>
-    #     <i>
-    #     kot
-    #     </i>
-    #     </p>
-    #     </div>
-    # """
-    # assert render(src).strip() == out.strip()
+    src = """
+        unique_lines
+            | Ala ma kota
+            | Ala ma kota
+            div
+                p
+                p
+            div
+                i |   pies
+                i | pies
+                |   pies
+                | pies
+            | Ala ma kota
+    """
+    out = """
+        Ala ma kota
+        <div>
+        <p></p>
+        </div>
+        <i>  pies</i>
+        <i>pies</i>
+        pies
+    """
+    assert render(src).strip() == out.strip()
 
 
 def test_023_import():

@@ -929,7 +929,7 @@ Hypertag allows programmers to define _custom tags_, either directly in Hypertag
 
 One of the most distinctive features of Hypertag is the support for custom tag definitions
 right inside a Hypertag script. This type of custom tag is called a _native tag_ 
-or a _hypertag_, and is created using a _hypertag definition_ block (%):
+or a _hypertag_, and is created with a _hypertag definition_ block (%):
 <!---
 One of the key features of Hypertag is the support for custom tags (_hypertags_)
 that can be defined directly in a Hypertag script using _hypertag definition_ blocks (%):
@@ -980,16 +980,15 @@ output:
 
 <!---No doubt which version is more readable and maintainable?--->
 
-Custom native tags constitute a powerful instrument of code abstraction and deduplication
-along the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) principle.
-They enhance modularity and maintainability of presentation code to an unprecedented degree.
+Custom native tags constitute a powerful instrument of code abstraction and deduplication.
+They enhance modularity and maintainability of presentation code,
+and let programmers fully adhere to the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) principle.
 
 Imagine that, in the example above, we wanted to add a CSS class to all cells of the price column.
 In HTML, we would have to walk through all the cells and manually modify 
 every single occurrence (HTML is notorious for [code duplication](https://en.wikipedia.org/wiki/Duplicate_code)),
 taking care not to modify `<td>` cells of another column accidentally.
-With hypertags, in contrast, it is enough to add `.style-price` in a tag definition,
-in one place, and voilà:
+With hypertags, it is enough to add `.style-price` in a tag definition, and voilà:
 <!---
 Hypertag, in contrast, provides powerful ways to deduplicate and modularize code, 
 so it is enough to add `.style-price` in the hypertag definition, in one place, and voilà:
