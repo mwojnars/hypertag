@@ -757,11 +757,11 @@ output:
 <div 更車-賈滑=""></div>
 ```
 
-A name that satisfies the broader, XML-inspired rule of naming attributes, 
+A name that satisfies the broader, XML-like rule of naming attributes, 
 but not the previous one for regular identifiers, is called _irregular_.
 
 In hypertag definition blocks, names of formal attributes must be regular. Otherwise,
-it would be impossible to refer and make use of such attributes inside hypertag's
+it would be impossible to refer to and make use of such attributes inside hypertag's
 definition body.
 
 However, when a tag is implemented in Python, as an ([external tag](#external-tags)),
@@ -859,6 +859,10 @@ output:
 
     this is a formatted string with an embedded expression: 5
     this is a raw string, so the expression is left unparsed: {2+3}
+
+Inside formatted strings (but not raw strings), Python's _escape sequences_ 
+(`\n`, `\t`, `\xNN`, `\uNNNN`, `\\` etc.) are recognized and converted to 
+corresponding characters.
 
 Hypertag syntax allows for creation of standard Python collections: 
 _lists_, _tuples_, _sets_, _dictionaries_.
@@ -1126,8 +1130,10 @@ The blocks are:
 
 The semantics of "if", "for", "while" blocks is analogous to what it is in Python.
 Both inline and outline body is supported, although the former comes with restrictions:
-the preceeding expression (a condition in "if/while", a collection in "for") may need to be
-enclosed in (...) or {...}. Trailing colons in clause headlines are optional.
+the leading expression (a condition in "if/while", a collection in "for") may need to be
+enclosed in `(...)` or `{...}` to avoid ambiguity of special symbols `|/!`,
+which can be interpreted both as operators inside the expressions, and as markers of inline body.
+Trailing colons in clause headlines are optional.
 
 An example "if" block with outline body:
 
@@ -1143,7 +1149,7 @@ output:
 
     medium size
 
-The same code as above, but with inline body, notice the parentheses around expressions:
+The same code as above, but with inline body; notice the parentheses around expressions:
 
     $size = 5
     if (size > 10)    | large size
@@ -1184,8 +1190,8 @@ Empty string is rendered if all clauses fail.
 
 Exceptions are checked only after semantic analysis, so if there are any syntactical 
 or name resolution errors (e.g., an undefined variable in a clause), they are still being raised.
-Also, note that the semantics of "else" is _opposite_ to what it is in Python,
-where the "else" clause of a "try-else" statement only gets executed if _no_ exceptions occured.
+Also, note that the semantics of "else" is _opposite_ to what it is in Python, where the "else"
+clause of a "try-else" statement only gets executed if _no_ exception has occured.
 
 Example:
 
@@ -1213,8 +1219,8 @@ output:
     Neither Opel nor Seat is available.
     Let's stick with a Ford: 60000.
 
-There is a shortcut version "?" of the "try" syntax which
-can only be used without "else" clauses, to suppress exceptions:
+There is a shortcut version "?" of the "try" syntax which can only be used without "else" 
+clauses, in order to suppress exceptions:
 
     ? | Price of Opel is $cars['opel'].
 
@@ -1385,13 +1391,20 @@ output:
 
 Hypertag defines a number of its own general-purpose tags and functions (filters)
 that can be used with various target languages.
+Each of the names below refer both to a tag, and a same-named function:
 
-Tags:
-- %dedent tag and $dedent function/filter
-- %inline
-- %unique
-- %lower
-- %upper
+- **dedent**: removes all line indentation in a given text;
+- **inline**: strips leading/trailing whitespace, replaces newlines and tabs with spaces, 
+  merges adjacent spaces; similar to normalize-space() in XPath;
+- **unique**: removes duplicate lines, the order of remaining lines is preserved;
+  if the attribute `strip=True` (default), the lines are stripped of leading & trailing whitespace 
+  before comparison, and all empty lines are removed; 
+- **lower**: converts a given string or block of text to lower-case;
+- **upper**: converts a given string or block of text to upper-case;
+
+For example:
+
+.....
 
 Functions:
 - cycle / alternate

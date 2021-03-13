@@ -3,7 +3,7 @@
 @author:  Marcin Wojnarski
 """
 
-import sys, re, operator
+import sys, re, codecs, operator
 from collections import OrderedDict
 from six import reraise, text_type
 
@@ -27,6 +27,26 @@ DEBUG = False
 #####
 #####  UTILITIES
 #####
+
+_re_decode_escapes = re.compile(r'''
+    ( \\U........               # 8-digit hex escapes
+    | \\u....                   # 4-digit hex escapes
+    | \\x..                     # 2-digit hex escapes
+    | \\[0-7]{1,3}              # Octal escapes
+    | \\N\{[^}]+\}              # Unicode characters by name
+    | \\[\\'"abfnrtv]           # Single-character escapes including "\\"
+    )''', re.UNICODE | re.VERBOSE)
+
+def decode_escapes(s):
+    r"""
+    Decoding of escape characters (\n \t \\ \x.. etc.) inside a string `s`. Handles Unicode correctly.
+    Based on: https://stackoverflow.com/a/24519338/1202674
+    """
+    def decode_match(match):
+        return codecs.decode(match.group(0), 'unicode-escape')
+    
+    return _re_decode_escapes.sub(decode_match, s)
+
 
 def duplicate(seq):
     """Any duplicate in a sequence `seq`; or None if no duplicates are present."""
@@ -1586,10 +1606,16 @@ class NODES(object):
     class xname_id(static):     pass
     class xname_xml(static):    pass
 
+    class xtext_quot(static):
+        r"""In `text_quot1` and `text_quot2` productions, Python's escape characters (\n \t \x.. etc.) must be decoded."""
+        def setup(self):
+            self.value = decode_escapes(self.text())
+        
+    class xtext_quot1(xtext_quot): pass
+    class xtext_quot2(xtext_quot): pass
+
     class xnl(static):          pass
     class xtext(static):        pass
-    class xtext_quot1(static):  pass
-    class xtext_quot2(static):  pass
     class xdedent(static):      pass
     class xappend(static):      pass
     class xmargin(static):      pass

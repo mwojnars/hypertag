@@ -1,5 +1,5 @@
 import re
-from nifty.util import unique as unique_list
+from nifty.util import unique as unique_list, merge_spaces
 from hypertag.std.registry import Registry
 
 
@@ -12,8 +12,11 @@ register = Registry()
 #####
 
 _re_dedent = re.compile(r'(?m)^\s+')
+_re_inline = re.compile(r'\s+')
+
 
 @register.tag
+@register.var
 def dedent(text):
     """Remove all line indentation in `text`. The indentation may differ between lines and it still gets fully removed."""
     return _re_dedent.sub('', text)
@@ -21,6 +24,7 @@ def dedent(text):
     # return del_indent(text)
 
 @register.tag
+@register.var
 def unique(text, strip = True):
     """
     Remove duplicate lines in `text`. The order of remaining lines is preserved.
@@ -32,6 +36,14 @@ def unique(text, strip = True):
     uniq = unique_list(lines)
     return '\n'.join(uniq)
 
+@register.tag
+@register.var
+def inline(text):
+    """
+    Strip leading/trailing whitespace in `text`, replace newlines and tabs with spaces, merge multiple adjacent spaces.
+    Similar to normalize-space() in XPath.
+    """
+    return _re_inline.sub(' ', text).strip()
 
 
 ########################################################################################################################################################
@@ -39,7 +51,6 @@ def unique(text, strip = True):
 """
 TODO
 - unique_blocks
-- inline merge=True   -- convert block to "inline" (no margin, no indent); merge newlines and spaces to a single space if merge=True
 - resource            -- terminal tag that marks a given block as a resource that shall be moved to HTML's <meta> section
 - error               -- inserts a standard error message in a place of occurrence; root document node might collect all <error> nodes and produce a combined (hidden) error message
 ? lower, upper        -- convert rendered body to all lower/upper case; will convert tag names and attrs too if applied to an html-tagged block

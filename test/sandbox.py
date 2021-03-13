@@ -181,10 +181,12 @@ if __name__ == '__main__':
         });
        
     """
-    text = """
-    div |
-       text
-       text
+    text = r"""
+        | {'abc' + '\n\x55\t' + 'def'}
+        inline
+           | text1
+           | {'text2 \n text3' : inline}
+       
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
