@@ -182,7 +182,9 @@ if __name__ == '__main__':
        
     """
     text = """
-    comment ! This is an HTML comment.
+    div |
+       text
+       text
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

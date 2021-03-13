@@ -684,14 +684,14 @@ gets translated internally to:
 
 Obviously, pipeline operators can be chained together, such that `EXPR:FUN1:FUN2` is
 equivalent to `FUN2(FUN1(EXPR))`. A filter can be specified using a compound expression,
-so the use of `obj.fun` or similar constructs 
-(an atom followed by any number of "member access" or "indexing" tail operators) is possible.
+like `obj.fun` or similar constructs (an atom followed by any number of "member access" 
+or "indexing" tail operators).
 For example, the standard `str.upper` method can be used directly, instead of implementing 
-a custom `upper()` function:
+a custom `upper()`. Below, a pipeline is put inside a text block:
 
     | {'Hypertag' : str.upper : list : sorted(reverse=True)}
 
-output:
+that renders:
 
     ['Y', 'T', 'R', 'P', 'H', 'G', 'E', 'A']
 
@@ -735,16 +735,16 @@ output:
 
 ## Symbols
 
-All identifiers in Hypertag - of variables, tags, attributes - are case-sensitive.
+All identifiers in Hypertag - variables, tags, attributes - are case-sensitive.
 
 Names of tags and variables must match the following regular expression:
-`[a-zA-Z_][a-zA-Z0-9_]*` - a name that matches this pattern is called _regular_.
+`[a-zA-Z_][a-zA-Z0-9_]*` - every name that matches this pattern is called _regular_.
 
 Inside names of tag attributes in a tagged block (but not hypertag definition),
-a much broader set of characters is allowed.
+a broader set of characters is allowed.
 Basically, Hypertag supports the same format as defined for attributes in the XML
 (see the [_Name_](https://www.w3.org/TR/REC-xml/#NT-NameStartChar) production in the XML grammar),
-with the restriction that a colon `:` must not occur as the first nor the last character.
+with the restriction that a colon `:` must _not_ occur as the first nor the last character.
 For example, the following code is valid:
 
     div ąłę_źó:1-x = ''
@@ -757,16 +757,15 @@ output:
 <div 更車-賈滑=""></div>
 ```
 
-A name that satisfies the above rule of naming attributes, but not the previous one 
-of naming regular identifiers, is called _irregular_.
+A name that satisfies the broader, XML-inspired rule of naming attributes, 
+but not the previous one for regular identifiers, is called _irregular_.
 
-In hypertag definition blocks, names of all attributes must be regular. Otherwise,
+In hypertag definition blocks, names of formal attributes must be regular. Otherwise,
 it would be impossible to refer and make use of such attributes inside hypertag's
 definition body.
 
-However, when a custom tag is implemented in Python as a subclass of 
-`hypertag.core.tag.ExternalTag` ([external tag](#custom-tags)), it can accept the extended set
-of attribute names, including irregular ones.
+However, when a tag is implemented in Python, as an ([external tag](#external-tags)),
+it can accept the extended set of attribute names, including irregular ones.
 
 ### Namespaces
 
@@ -1107,6 +1106,9 @@ prepended with either `$` (denotes a variable) or `%` (a tag):
     from my.utils import %tag
 
 ### External tags
+
+
+`hypertag.core.tag.ExternalTag`
 
 (TODO...)
 
