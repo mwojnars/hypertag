@@ -1434,15 +1434,8 @@ output:
 </DIV>
 ```
 
-Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
-to a script. They can also be imported explicitly from the `hypertag.html` module, 
-regardless of what runtime is currently being used - this allows inserting HTML markup
-in documents written in other target languages. For example:
-
-    from hypertag.html import %div, %DIV
-
 In addition to standard HTML tags, HyperHTML provides also the **comment** tag
-which inserts an HTML comment to the output. Typically, this tag is used 
+that inserts an HTML comment to the output. Typically, this tag is used 
 with a _verbatim_ body (`!`):
 
     comment ! This is an HTML comment
@@ -1451,21 +1444,29 @@ output:
 
     <!--This is an HTML comment-->
 
+Whenever HyperHTML runtime is used, all built-in HTML tags are automatically imported
+to a script. They can also be imported explicitly from the `hypertag.html` module:
+
+    from hypertag.html import %div, %DIV
+
+An explicit import can be used, for example, when a script is being rendered with a
+non-HTML runtime, and the target document is mostly written in a different language,
+but some HTML markup still needs to be inserted.
+
 <!--
 In addition to standard HTML tags, HyperHTML provides also a few extra tags:
-
-- **comment** - inserts an HTML comment to the output;
 
 Like all other predefined tags, they are implemented as external tags, 
 which means they can label nodes of DOM trees and be used for DOM manipulation.
 
 - **document** - inserts `<!DOCTYPE html>` at the beginning of a document;
   takes the DOM of an entire document and rearranges parts of the content:
-  finds all nodes marked as _resource_, concatenates them, performs uniquification,
+  finds all nodes marked as "resource", concatenates them, performs uniquification,
   and appends to the `<head>` section of the document;
 - **resource** - marks a given part of a document as a listing of resources that should be
   uniquified across the entire document and moved to the `<head>` section.
-  This tag should be used together with "resources".
+- **TOC** @document - collects all h1,h2,h3 elements of a @document and creates a list
+  of anchors linking to corresponding headings (each heading should have an "id" for linking)
 
 
 ## Final remarks
