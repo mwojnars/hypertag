@@ -1442,8 +1442,14 @@ in documents written in other target languages. For example:
     from hypertag.html import %div, %DIV
 
 In addition to standard HTML tags, HyperHTML provides also the **comment** tag
-which inserts an HTML comment `<!-- ... -->` to the output.
-Typically, this tag should be used with a _verbatim_ body (`!`).
+which inserts an HTML comment to the output. Typically, this tag is used 
+with a _verbatim_ body (`!`):
+
+    comment ! This is an HTML comment
+
+output:
+
+    <!--This is an HTML comment-->
 
 <!--
 In addition to standard HTML tags, HyperHTML provides also a few extra tags:

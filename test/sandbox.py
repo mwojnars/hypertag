@@ -182,12 +182,7 @@ if __name__ == '__main__':
        
     """
     text = """
-        | Ala ma kota
-        comment !  $ { } x y z
-        comment !
-            this is an outline comment | $ {}
-        comment
-            ! this is an outline comment | $ {}
+    comment ! This is an HTML comment.
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
