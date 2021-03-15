@@ -182,11 +182,8 @@ if __name__ == '__main__':
        
     """
     text = r"""
-        | {'abc' + '\n\x55\t' + 'def'}
-        inline
-           | text1
-           | {'text2 \n text3' : inline}
-       
+    from builtins import $sorted, $list as LIST
+    | $sorted(LIST((3,2,1)))
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

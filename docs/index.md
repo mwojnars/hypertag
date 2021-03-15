@@ -356,9 +356,9 @@ output:
 </div>
 ```    
 
-There is also a built-in tag called _dedent_. When used without parameters, or with `full=True`,
-this tag removes all (multi-level) output indentation of the inner blocks,
-up to its own indentation:
+There is also a [built-in](#hypertag-built-ins) tag called _dedent_. 
+When used without parameters, or with `full=True`, this tag removes all (multi-level) output
+indentation of the inner blocks, up to its own indentation:
 
     div
       dedent
@@ -700,11 +700,13 @@ Remember that all Python built-ins are available in Hypertag, that is why `str`,
 `sorted` etc. are accessible without an explicit import.
 --->
 
-If a filter function only takes one argument (the feed), this function can be used with 
-or without parentheses in a pipeline, and these two forms are equivalent:
+If a filter function only takes one argument (the feed), it can be used with or without
+parentheses in a pipeline. These two forms are equivalent:
 
     EXPR : FUN
     EXPR : FUN()
+
+### Django filters
 
 Hypertag seamlessly integrates all of Django's [template filters](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#built-in-filter-reference).
 They can be imported from `hypertag.django.filters` and either called as regular functions
@@ -757,7 +759,7 @@ output:
 <div 更車-賈滑=""></div>
 ```
 
-A name that satisfies the broader, XML-like rule of naming attributes, 
+A name that satisfies the broader XML-like rule of naming attributes, 
 but not the previous one for regular identifiers, is called _irregular_.
 
 In hypertag definition blocks, names of formal attributes must be regular. Otherwise,
@@ -860,7 +862,7 @@ output:
     this is a formatted string with an embedded expression: 5
     this is a raw string, so the expression is left unparsed: {2+3}
 
-Inside formatted strings (but not raw strings), Python's _escape sequences_ 
+Inside formatted strings (but not in raw strings), Python's _escape sequences_ 
 (`\n`, `\t`, `\xNN`, `\uNNNN`, `\\` etc.) are recognized and converted to 
 corresponding characters.
 
@@ -1337,7 +1339,7 @@ with corresponding HTML entities (`&lt;` `&gt;` `&amp;`).
 The symbols imported by HyperHTML as built-ins upon startup include:
 
 1. [Python built-ins](#python-built-ins).
-1. [General-purpose](#general-purpose-symbols) tags & functions.
+1. [General-purpose](#hypertag-built-ins) tags & functions.
 1. [HTML-specific](#html-specific-symbols) tags.
 
 See the [Standard library](#standard-library) section for details.
@@ -1379,21 +1381,22 @@ output:
 Python built-ins can also be imported explicitly from the usual path.
 Remember to prepend every name with the variable marker (`$`):
 
-    from builtins import $list as LIST
-    | $LIST((1,2,3))
+    from builtins import $sorted, $list as LIST
+    | $sorted(LIST((3,2,1)))
 
 output:
 
     [1, 2, 3]
 
 
-### General-purpose symbols
+### Hypertag built-ins
 
 Hypertag defines a number of its own general-purpose tags and functions (filters)
-that can be used with various target languages.
-Each of the names below refer both to a tag, and a same-named function:
+that can be used with different runtimes and target languages.
+Each of the names below refer both to a tag (e.g., `%dedent`), and a same-named 
+function (`$dedent`):
 
-- **dedent**: removes all line indentation in a given text;
+- **dedent**: removes all line indentation in a given text or body;
 - **inline**: strips leading/trailing whitespace, replaces newlines and tabs with spaces, 
   merges adjacent spaces; similar to normalize-space() in XPath;
 - **unique**: removes duplicate lines, the order of remaining lines is preserved;
@@ -1402,25 +1405,62 @@ Each of the names below refer both to a tag, and a same-named function:
 - **lower**: converts a given string or block of text to lower-case;
 - **upper**: converts a given string or block of text to upper-case;
 
-For example:
+In HyperHTML, all the above symbols are declared as built-ins and imported automatically: 
 
-.....
+    unique
+        inline |
+            Hypertag
+            rocks !!!
+        | { upper('  hyperTAGS   rock   ') : lower : inline }
+        | Hypertag rocks !!!
 
-Functions:
-- cycle / alternate
-- findchange
+output:
 
-(TODO...)
+    Hypertag rocks !!!
+    hypertags rock
 
-In HyperHTML, all the above symbols are declared as built-ins and automatically imported 
-whenever this particular runtime is used.
+The following symbols are only available as functions. They are declared as built-ins in HyperHTML:
+
+- **changes** (sequence, first = True):
+  iterates over a given sequence and yields `(value,change)` pairs, where `value` is the next
+  element of `seq`, and `change` is True if the value differs from the previous one, 
+  False otherwise. In the first tuple, `change` equals `first` (True by default).
+  This generator can be used in loops as an equivalent of Django's
+  [_ifchanged_ tag](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#ifchanged).
+
+- **cycle** (*sequences, stop = 'first'):
+  a generator that cycles through each of the iterables in parallel and yields tuples
+  containing consecutive elements, one per iterable - like `zip()` - but the cycling runs 
+  indefinitely (if stop=False), or until the first iterable gets exhausted (stop='first', default),
+  or until the longest iterable gets exhausted (stop='longest'). 
+  This function is inspired by Django's [_cycle_ tag](https://docs.djangoproject.com/en/3.1/ref/templates/builtins/#cycle),
+  yet it differs from this tag in that it does not require maintaining a hidden state,
+  which enhances code readability.
+  `cycle()` can be used, for instance, to alternate colors of columns/rows in a table:
+  
+      for item, color in cycle([1,2,3,4], ['blue','grey']):
+          td class=$color | $item
+  
+  output:
+  
+      <td class="blue">1</td>
+      <td class="grey">2</td>
+      <td class="blue">3</td>
+      <td class="grey">4</td>
+  
+If needed, all the symbols listed above can be imported explictly from the 
+`hypertag.builtins` path:
+
+    from hypertag.builtins import %inline, $inline, $cycle
+
+<!--Note that `%inline` (tag) and `$inline` (function) are two different objects.-->
 
 
 ### Foreign symbols
 
-If Django is installed, you can use all of its template filters inside Hypertag:
-as standalone functions, or as filters in pipeline expressions.
-The details are described in the [Filters](#filters) section.
+If Django is installed, you can use all of its template filters inside Hypertag,
+either as standalone functions, or filters in pipeline expressions.
+The details are described in the [Filters](#django-filters) section.
 
 
 ### HTML-specific symbols

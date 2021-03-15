@@ -1008,6 +1008,15 @@ def test_022_builtins():
         </div>
     """
     assert render(src).strip() == out.strip()
+    src = r"""
+        inline
+           | text1
+           | {'text2 \n text3' : inline}
+    """
+    out = """
+        text1 text2 text3
+    """
+    assert render(src).strip() == out.strip()
     src = """
         unique
             | Ala ma kota
@@ -1047,6 +1056,60 @@ def test_022_builtins():
         <!--
             this is an outline comment | $ {}
         -->
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        for a, b, c in cycle((-1,-2), 'abcdefg', [1,2,3], stop='longest'):
+            | $a, $b, $c
+    """
+    out = """
+        -1, a, 1
+        -2, b, 2
+        -1, c, 3
+        -2, d, 1
+        -1, e, 2
+        -2, f, 3
+        -1, g, 1
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        for a, b in cycle('abcdefg', [1,2,3]):
+            | $a, $b
+    """
+    out = """
+        a, 1
+        b, 2
+        c, 3
+        d, 1
+        e, 2
+        f, 3
+        g, 1
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        for v, change in changes([1,1,2,2,3,3]):
+            | $v, $change
+    """
+    out = """
+        1, True
+        1, False
+        2, True
+        2, False
+        3, True
+        3, False
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        for v, change in changes([1,1,2,2,3,3], first = False):
+            | $v, $change
+    """
+    out = """
+        1, False
+        1, False
+        2, True
+        2, False
+        3, True
+        3, False
     """
     assert render(src).strip() == out.strip()
 
