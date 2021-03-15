@@ -120,6 +120,11 @@ class DOM:
     def render(self):
         return ''.join(node.render() for node in self.nodes)
 
+    def tree(self, indent = '', step = '  '):
+        r"""Return a multiline \n-terminated string that presents this DOM's structure as a list of trees."""
+        return ''.join(n.tree(indent, step) for n in self.nodes)
+        
+
     ### SELECTORS API
     
     # def find(self, name = None, attr = None, value = DEFINED):
@@ -135,6 +140,8 @@ class DOM:
     #     :param id: desired value of "id" attribute (<str>)
     #     :param class_: desired class name to be present inside the "class" attribute (<str>), possibly among other names
     #     """
+    # def skip(self, tag = None, id = None, class_ = None, **attrs):
+    #     """Return a copy of `self`, but with the nodes matching the provided criteria removed."""
         
     # Selectors TODO:
     # - https://github.com/scrapy/cssselect (Scrapy converts all CSS selectors to XPath)
@@ -149,8 +156,8 @@ class DOM:
         """"""
         
         tag     = None      # Tag instance whose expand() will be called to post-process the body, in a non-terminal node
-        attrs   = None      # list of unnamed attributes to be passed to tag.expand() during rendering
-        kwattrs = None      # dict of named attributes to be passed to tag.expand()
+        attrs   = None      # list of positional (unnamed) attributes to be passed to tag.expand() during rendering
+        kwattrs = None      # dict of keyword (named) attributes to be passed to tag.expand()
         
         body    = None      # DOM (possibly empty) containing child nodes of a non-terminal node; None in DOM.Text
         
@@ -172,8 +179,8 @@ class DOM:
             
             # assert not self.tag or isinstance(self.tag, Tag)
             
-        def set_outline(self):
-            self.outline = True
+        def set_outline(self, outline = True):
+            self.outline = outline
     
         def set_indent(self, indent):
             """
@@ -181,7 +188,7 @@ class DOM:
             to make their indentations relative to the parent's.
             """
             self.indent = indent
-            if self.indent:
+            if self.indent is not None:
                 for child in self.body:
                     child.relative_indent(self.indent)
     
@@ -203,7 +210,7 @@ class DOM:
             text = self.outline * '\n' + self._render_body()
             
             # if self.outline and self.indent:
-            if self.indent:
+            if self.indent is not None:
                 assert self.indent[:1] != '\n'                      # self.indent must have been converted already to relative
                 text = add_indent(text, self.indent)                # indentation is only added where \n is present, the 1st line is left untouched!
                 # text = text.replace('\n', '\n' + self.indent)
@@ -223,6 +230,20 @@ class DOM:
                 body = self.body
                 
             return self.tag.expand(body, self.attrs or (), self.kwattrs or {})
+            
+        def tree(self, indent = '', step = '  '):
+            r"""Return a multiline \n-terminated string that presents this node's structure as a tree."""
+            
+            name = self.tag.name if self.tag else f"<{self.__class__.__name__}>"
+            heading = f"{name}"
+            
+            for attr in self.attrs or []:
+                heading += f" {attr}"
+            for key, attr in (self.kwattrs or {}).items():
+                heading += f" {key}={attr}"
+                
+            return indent + heading + '\n' + self.body.tree(indent + step, step)
+
             
     class Root(Node):
         """Root node of a Hypertag DOM tree."""

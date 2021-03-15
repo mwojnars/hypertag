@@ -182,8 +182,14 @@ if __name__ == '__main__':
        
     """
     text = r"""
-    from builtins import $sorted, $list as LIST
-    | $sorted(LIST((3,2,1)))
+        %G x
+            | $x
+            | $x
+        G 0
+        G 1
+        div .wide
+            p #par1
+                b : i | bleble
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
@@ -204,8 +210,14 @@ if __name__ == '__main__':
     # print(tree)
     print()
     
+    print("===== After translation =====")
+    dom, _, _ = tree.translate()
+    print('DOM:')
+    print(dom.tree('  '))
+    print()
+
     print("===== After rendering =====")
-    print(tree.render(), end = "=====\n")
+    print(dom.render(), end = "=====\n")
     # print(tree.A())
     
     # import inspect, importlib

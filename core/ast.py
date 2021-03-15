@@ -401,10 +401,12 @@ class NODES(object):
             
         def translate(self, state):
             margin, block = (c.translate(state) for c in self.children)
+            if not block: return margin
+            
             append = (self.modifier == '...')
             dedent = (self.modifier == '<')
             
-            if block and not append:
+            if not append:
                 block[0].set_outline()            # mark the 1st node of the block as being "outline" not "inline"
             if dedent:
                 block.set_indent('')
@@ -502,6 +504,8 @@ class NODES(object):
     class xblock_def(node, NativeTag):
         """Definition of a native hypertag."""
         name       = None
+        void       = False          # even a hypertag that does NOT accept actual body may produce a body in DOM (resulting from formal body)
+        
         attrs      = None           # all attributes as a list of children nodes, including @body
         attr_body  = None           # the @body node if present, otherwise None
         attr_names = None           # names of all attributes, including @body, as a dict {name: node}
@@ -562,12 +566,19 @@ class NODES(object):
             Translate the formal self.body in a given `state`, insert the actual `body` wherever necessary,
             and return as a DOM (not a string!) for possible further manipulation in other hypertags.
             """
-            self._append_attrs(body, attrs, kwattrs, state, caller)         # extend `state` with actual values of tag attributes
+            dom_attrs = self._append_attrs(body, attrs, kwattrs, state, caller)         # extend `state` with actual values of tag attributes
             output = self.body.translate(state)
             output.set_indent(state.indentation)
-            return output
+            # return output
+            
+            if output: output[0].set_outline(False)         # `outline` will be set for the root node up in xblock.translate()
+            root = DOM.node(output, state.indentation, tag = self, kwattrs = dom_attrs)
+            return root
 
         # translate_tag = expand          # unlike external tags, a native tag gets expanded already during translate_tag()
+        
+        def expand(self, body, attrs, kwattrs):
+            return body
         
         def _append_attrs(self, body, attrs, kwattrs, state, caller):
             """Extend `state` with actual values of tag attributes."""
@@ -591,6 +602,8 @@ class NODES(object):
                 if attr in kwattrs: raise TypeErrorEx(f"hypertag '{self.name}' got multiple values for attribute '{attr.name}'", caller)
                 kwattrs[attr] = value
                 
+            dom_attrs = {attr.name: value for attr, value in kwattrs.items()}
+            
             # impute missing values with defaults
             for attr in self.attr_regul:
                 if attr not in kwattrs:
@@ -608,6 +621,8 @@ class NODES(object):
                 # state[self.attr_body] = body
             elif body:
                 raise VoidTagEx(f"non-empty body passed to a void tag '{self.name}'", caller)
+            
+            return dom_attrs
             
     class xblock_import(node):
         """"""

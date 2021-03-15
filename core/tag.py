@@ -15,21 +15,12 @@ class Tag:
     """
     name = None         # [str] name that indentifies this tag in a DOM and can be used in DOM selectors
     
-
-########################################################################################################################################################
-
-class ExternalTag(Tag):
-    """
-    A custom tag defined as a Python function.
-    Instances of ExternalTag can be imported to a Hypertag script and used as tags.
-    """
     void = False        # if True, passing non-empty body to expand() is forbidden and the parser should rather raise an exception
     flat = True         # if True, body is passed as plain text (rendered DOM) to expand(), which allows better compactification of constant subtrees of the AST (TODO)
     pure = True         # if True, the tag is assumed to always return the same result for the same arguments (no side effects),
                         # which potentially enables full compactification of a node tagged with this tag
     
     # term = False        # if True, the tag is treated as terminal (static), which means its expansion is delayed until DOM rendering
-
     
     def expand(self, body, attrs, kwattrs):
         """
@@ -44,6 +35,14 @@ class ExternalTag(Tag):
         """
         raise NotImplementedError
 
+
+########################################################################################################################################################
+
+class ExternalTag(Tag):
+    """
+    A custom tag defined as a Python function.
+    Instances of ExternalTag can be imported to a Hypertag script and used as tags.
+    """
 
 class NullTag(ExternalTag):
     """Null tag '.' is represented in the DOM tree. Its expand() passes the body unchanged."""
