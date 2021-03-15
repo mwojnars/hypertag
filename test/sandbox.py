@@ -7,8 +7,8 @@ from hypertag.core.ast import HypertagAST
 #####
 
 if __name__ == '__main__':
-    
-    from hypertag.core.run_html import HyperHTML
+
+    from hypertag import HyperHTML
     DEBUG = True
 
     text = """
@@ -126,6 +126,20 @@ if __name__ == '__main__':
         div .wide
             p #par1
                 b : i | bleble
+    """
+    text = r"""
+    ul
+        li class='list-entry' | Item
+    p id='paragraph1'
+        b : i | Paragraph
+    
+    % hypertag @body x y=0
+        | Title $x $y
+        @ body
+    hypertag 1 y=2
+        p
+            b | Paragraph
+        
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)

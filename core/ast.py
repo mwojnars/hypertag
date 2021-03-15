@@ -595,14 +595,19 @@ class NODES(object):
             except KeyError as ex:
                 name = ex.args[0]
                 raise TypeErrorEx(f"hypertag '{self.name}' got an unexpected keyword attribute '{name}'", caller)
+
+            dom_attrs = {}
+            dom_kwattrs = {attr.name: value for attr, value in kwattrs.items()}
             
             # move positional attributes to `kwattrs`
             for pos, value in enumerate(attrs):
                 attr = self.attr_regul[pos]
                 if attr in kwattrs: raise TypeErrorEx(f"hypertag '{self.name}' got multiple values for attribute '{attr.name}'", caller)
                 kwattrs[attr] = value
-                
-            dom_attrs = {attr.name: value for attr, value in kwattrs.items()}
+                dom_attrs[attr.name] = value
+
+            dom_attrs.update(dom_kwattrs)
+            # dom_attrs = {attr.name: value for attr, value in kwattrs.items()}
             
             # impute missing values with defaults
             for attr in self.attr_regul:

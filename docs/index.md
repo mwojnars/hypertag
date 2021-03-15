@@ -1031,6 +1031,8 @@ like the `%row` inside `%products`, below:
 Notice that the local tag `%row`, which is being used in a loop in the last line, 
 can internally access attributes of the outer hypertag (here, `maxlen`).
 
+### "Body" attribute
+
 One more crucial element of the hypertag syntax is the _body attribute_.
 Imagine that in the example above, we wanted to add another column containing
 formatted (rich-text) information about a car model: funny quotes, pictures etc.
@@ -1291,10 +1293,65 @@ Qualifiers can be placed after all atomic expressions and embeddings, no space i
 
 ## DOM
 
+The execution of a Hypertag script consists of [multiple phases](#runtime). 
+Before a final document is generated, the script is first _translated_ to a native 
+Document Object Model (DOM) representation, where every tagged block is mapped to a node
+in the DOM tree, and:
+
+- all expressions are already _evaluated_ (converted to atomic result values); 
+- all control blocks are _executed_ (replaced with the DOM of inner blocks they produced);
+  and
+- all [native tags](#native-tags) are _expanded_ 
+(the actual body from the place of hypertag's occurrence is replaced with this hypertag's 
+definition body). 
+
+Importantly, the translation is performed _incrementally_, going from the bottom to the top
+of the script's syntax tree (AST). Whenever a hypertag declares a 
+[_body attribute_](#body-attribute) (`@`), this attribute's value
+(an actual body from the place of occurrence) is passed to the tag
+as an _already-translated_ DOM of a particular subtree. This gives hypertags an exceptional
+capability to actively _manipulate_ (analyze, truncate, rearrange) the provided subtree 
+before it gets merged into the formal body of the hypertag. 
+Possible applications include:
+
+- automated generation of a [Table of Contents](#example-toc-generation) of the document;
+- automated generation of a list of resources (CSS files, JS files etc.) that are required
+  by different HTML components used inside the document, with deduplication of the list 
+  and its placement in a predefined location (the `<meta>` section) of the final output;
+- automated calculation of (approximate) sizes of particular blocks of contents
+  (e.g., length of text), to adapt CSS styles of top-level HTML elements and provide better
+  user experience without the use of client-side Javascript.
+
+The details of the DOM [structure](#dom-structure) and [manipulation](#dom-manipulation)
+are discussed in next subsections. We also show how to generate a 
+[Table of Contents](#example-toc-generation) in just a few lines of Hypertag code. 
+
+
 ### DOM structure
+
 (TODO...)
 
+If you want to check what DOM tree is being produced from a given script, you should call
+`runtime.translate()` instead of `runtime.render()`, and then use the `tree()` method
+of the returned DOM to get its textual representation:
+
+    dom = runtime.translate(script)
+    print(dom.tree())
+
+For example, for the following script:
+
+    ul
+        li 
+            | An item.
+    p
+        b : i | A paragraph.
+    # A comment.
+    
+
 ### DOM manipulation
+(TODO...)
+
+### Example: ToC generation
 (TODO...)
 
 
@@ -1505,7 +1562,7 @@ to a script. They can also be imported explicitly from the `hypertag.html` modul
     from hypertag.html import %div, %DIV
 
 An explicit import can be used, for example, when a script is being rendered with a
-non-HTML runtime, and the target document is mostly written in a different language,
+non-HTML runtime and the target document is mostly written in a different language,
 but some HTML markup still needs to be inserted.
 
 <!--
