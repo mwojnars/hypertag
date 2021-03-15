@@ -1042,23 +1042,6 @@ def test_022_builtins():
     """
     assert render(src).strip() == out.strip()
     src = """
-        comment !  $ { } x y z
-        comment !
-            this is an outline comment | $ {}
-        comment
-            ! this is an outline comment | $ {}
-    """
-    out = """
-        <!-- $ { } x y z-->
-        <!--
-        this is an outline comment | $ {}
-        -->
-        <!--
-            this is an outline comment | $ {}
-        -->
-    """
-    assert render(src).strip() == out.strip()
-    src = """
         for a, b, c in cycle((-1,-2), 'abcdefg', [1,2,3], stop='longest'):
             | $a, $b, $c
     """
@@ -1113,8 +1096,114 @@ def test_022_builtins():
     """
     assert render(src).strip() == out.strip()
 
+def test_023_html():
+    src = """
+        comment !  $ { } x y z
+        comment !
+            this is an outline comment | $ {}
+        comment
+            ! this is an outline comment | $ {}
+    """
+    out = """
+        <!-- $ { } x y z-->
+        <!--
+        this is an outline comment | $ {}
+        -->
+        <!--
+            this is an outline comment | $ {}
+        -->
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        script type="text/javascript"
+          comment !
+              $(window).resize(sectionHeight);
+    """
+    out = """
+        <script type="text/javascript">
+          <!--
+          $(window).resize(sectionHeight);
+          -->
+        </script>
+    """
+    assert render(src).strip() == out.strip()
+    src = r"""
+        script !
+            var sectionHeight = function() {
+              var total    = $(window).height(),
+                  $section = $('section').css('height','auto');
+            
+              if ($section.outerHeight(true) < total) {
+                var margin = $section.outerHeight(true) - $section.height();
+                $section.height(total - margin - 20);
+              } else {
+                $section.css('height','auto');
+              }
+            }
+            
+            $(window).resize(sectionHeight);
+            
+            $(function() {
+              $("section h1, section h2, section h3").each(function(){
+                $("nav ul").append("<li class='tag-" + this.nodeName.toLowerCase() + "'><a href='#" + $(this).text().toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g,'') + "'>" + $(this).text() + "</a></li>");
+                $(this).attr("id",$(this).text().toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g,''));
+                $("nav ul li:first-child a").parent().addClass("active");
+              });
+            
+              $("nav ul li").on("click", "a", function(event) {
+                var position = $($(this).attr("href")).offset().top - 190;
+                $("html, body").animate({scrollTop: position}, 400);
+                $("nav ul li a").parent().removeClass("active");
+                $(this).parent().addClass("active");
+                event.preventDefault();
+              });
+            
+              sectionHeight();
+            
+              $('img').on('load', sectionHeight);
+            });
+    """
+    out = r"""
+        <script>
+        var sectionHeight = function() {
+          var total    = $(window).height(),
+              $section = $('section').css('height','auto');
 
-def test_023_import():
+          if ($section.outerHeight(true) < total) {
+            var margin = $section.outerHeight(true) - $section.height();
+            $section.height(total - margin - 20);
+          } else {
+            $section.css('height','auto');
+          }
+        }
+
+        $(window).resize(sectionHeight);
+
+        $(function() {
+          $("section h1, section h2, section h3").each(function(){
+            $("nav ul").append("<li class='tag-" + this.nodeName.toLowerCase() + "'><a href='#" + $(this).text().toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g,'') + "'>" + $(this).text() + "</a></li>");
+            $(this).attr("id",$(this).text().toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g,''));
+            $("nav ul li:first-child a").parent().addClass("active");
+          });
+
+          $("nav ul li").on("click", "a", function(event) {
+            var position = $($(this).attr("href")).offset().top - 190;
+            $("html, body").animate({scrollTop: position}, 400);
+            $("nav ul li a").parent().removeClass("active");
+            $(this).parent().addClass("active");
+            event.preventDefault();
+          });
+
+          sectionHeight();
+
+          $('img').on('load', sectionHeight);
+        });
+        </script>
+    """
+    assert render(src).strip() == out.strip()
+    
+
+def test_024_import():
     src = """
         import $x, $y
         | $x, $y
@@ -1175,7 +1264,7 @@ def test_023_import():
     """
     assert render(src).strip() == out.strip()
 
-def test_024_empty_control():
+def test_025_empty_control():
     """
     Empty control blocks (missing body) are considered by Hypertag as syntactically correct.
     This is necessary for detailed error reporting: method HypertagAST._locate_error() relies on the fact
@@ -1219,7 +1308,7 @@ def test_024_empty_control():
     """
     assert render(src).strip() == ""
 
-def test_025_attributes():
+def test_026_attributes():
     src = """
         %T a b c:
             | {a b c}
@@ -1230,7 +1319,7 @@ def test_025_attributes():
     """
     assert render(src).strip() == out.strip()
 
-def test_026_pipelines():
+def test_027_pipelines():
     
     src = """
         | { 'Hypertag' : str.upper : list : sorted(reverse=True) }
@@ -1241,7 +1330,7 @@ def test_026_pipelines():
     """
     assert render(src).strip() == "['A', 'E', 'G', 'H', 'P', 'R', 'T', 'Y']"
     
-def test_027_django_filters():
+def test_028_django_filters():
     
     from hypertag.django.filters import slugify
     assert slugify('Hypertag rocks') == 'hypertag-rocks'
@@ -1272,7 +1361,7 @@ def test_027_django_filters():
     """
     assert render(src).strip() == out.strip()
     
-def test_028_charset():
+def test_029_charset():
     src = """
         div ąłę_źó:1-x = ''
         div 更車-賈滑 = ''
