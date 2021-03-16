@@ -128,10 +128,15 @@ if __name__ == '__main__':
                 b : i | bleble
     """
     text = r"""
+    for i in [1,2,3]:
+        b class="row$i" | Row no. $i
+    
     ul
-        li class='list-entry' | Item
+        li class='list-entry'
+            | Item
     p id='paragraph1'
-        b : i | Paragraph
+        b : i
+            | Paragraph
     
     % hypertag @body x y=0
         | Title $x $y

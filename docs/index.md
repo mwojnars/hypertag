@@ -1294,7 +1294,7 @@ Qualifiers can be placed after all atomic expressions and embeddings, no space i
 ## DOM
 
 The execution of a Hypertag script consists of [multiple phases](#runtime). 
-Before a final document is generated, the script is first _translated_ to a native 
+Before a final document gets generated, the script is first _translated_ to a native 
 Document Object Model (DOM) representation, where every tagged block is mapped to a node
 in the DOM tree, and:
 
@@ -1338,15 +1338,31 @@ of the returned DOM to get its textual representation:
     dom = runtime.translate(script)
     print(dom.tree())
 
-For example, for the following script:
+For example, the following script:
 
     ul
         li 
-            | An item.
+            | Item
     p
-        b : i | A paragraph.
-    # A comment.
-    
+        b : i | Paragraph
+
+is translated to the DOM:
+
+    <Root>
+      <Text>
+      ul
+        li class=list-entry
+          <Text>
+      p id=paragraph1
+        b
+          i
+            <Text>
+      <Text>
+
+As you can notice, all text blocks are converted to `DOM.Text` nodes;
+there are some extra `Text` nodes present that encode whitespace between blocks;
+tags and their attributes are preserved.
+
 
 ### DOM manipulation
 (TODO...)
