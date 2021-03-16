@@ -1,3 +1,4 @@
+<!--
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -107,6 +108,7 @@
       color: #0594db;
     }
 </style>
+-->
 
 
 # Introduction
@@ -766,7 +768,7 @@ In hypertag definition blocks, names of formal attributes must be regular. Other
 it would be impossible to refer to and make use of such attributes inside hypertag's
 definition body.
 
-However, when a tag is implemented in Python, as an ([external tag](#external-tags)),
+However, when a tag is implemented in Python as an [external tag](#external-tags),
 it can accept the extended set of attribute names, including irregular ones.
 
 ### Namespaces
@@ -933,8 +935,8 @@ Hypertag allows programmers to define _custom tags_, either directly in Hypertag
 ### Native tags
 
 One of the most distinctive features of Hypertag is the support for custom tag definitions
-right inside a Hypertag script. This type of custom tag is called a _native tag_ 
-or a _hypertag_, and is created with a _hypertag definition_ block (%):
+right inside a Hypertag script. This type of custom tag is called a **native tag** 
+or a **hypertag**, and is created with a _hypertag definition block_ (`%`):
 <!---
 One of the key features of Hypertag is the support for custom tags (_hypertags_)
 that can be defined directly in a Hypertag script using _hypertag definition_ blocks (%):
@@ -1033,10 +1035,10 @@ can internally access attributes of the outer hypertag (here, `maxlen`).
 
 ### "Body" attribute
 
-One more crucial element of the hypertag syntax is the _body attribute_.
+One more crucial element of the hypertag syntax is the **body attribute**.
 Imagine that in the example above, we wanted to add another column containing
-formatted (rich-text) information about a car model: funny quotes, pictures etc.
-Passing it as a regular attribute is inconvenient, as we would have to somehow encode
+formatted (rich-text) information about a car model: pictures, funny quotes etc.
+Passing this as a regular attribute is inconvenient, as we would have to somehow encode
 the entire HTML structure of the description: paragraphs, styles, images.
 Instead, we can add a _body attribute_ (@) to the hypertag definition:
 
@@ -1048,7 +1050,7 @@ Instead, we can add a _body attribute_ (@) to the hypertag definition:
                @ info           # inline form can be used as well:  td @ info
 
 This special attribute will hold the _actual body_ of a hypertag's occurrence, 
-represented as a tree of nodes of Hypertag's native Document Object Model (DOM),
+represented as a tree of nodes of Hypertag's native [Document Object Model](#dom) (DOM),
 so that all rich contents and formatting are preserved:
 
     table
@@ -1094,14 +1096,35 @@ Output:
 </table>
 ```
 
-There can be at most one _body_ attribute in a hypertag; it must be the first one
+There can be at most one body attribute in a hypertag; it must be the first one
 on the list; it can be missing (then the tag is _void_ and its 
 occurrences must have empty body); and it can have arbitrary name: we suggest _@body_ 
-if there is no other meaningful alternative... 
+if there is no other meaningful alternative. 
+
+Together with the body attribute, Hypertag provides a new type of block:
+the _DOM insertion block_ (`@`) that allows embedding of a DOM represented by a body
+attribute into a formal body of a hypertag. This type of block was used in the example
+above when defining the `%tableRow` hypertag, in the fragment:
+
+    td
+       @ info
+
+This code inserts external information about a car (`info`) represented by a DOM
+into the `<td>` tag within the hypertag's output.
+Note that, similar to [text blocks](#text-blocks), DOM insertion blocks can also be used 
+as [inline](#anatomy-of-a-block) body of a structural block, so the fragment above can be 
+rewritten as:
+
+    td @ info
+
+The inline and outline forms may differ with respect to output indentation and 
+surrounding whitespace, otherwise they are, in most cases, equivalent 
+(although this may depend on a specific tag implementation).
+
+<!---
 Yes, associations with Python's `self` - the special argument to non-static methods -
 are intended and well justified.
 
-<!---
 As you can see, Hypertag is much more concise than raw HTML, and with the help of custom
 tags it enables cleaner separation between presentation logic (tags) and textual contents.
 --->
@@ -1294,14 +1317,14 @@ Qualifiers can be placed after all atomic expressions and embeddings, no space i
 ## DOM
 
 The execution of a Hypertag script consists of [multiple phases](#runtime). 
-Before the final document gets generated, the script is first _translated_ to a native 
-Document Object Model (DOM) representation, where every tagged block is mapped to a node
-in the DOM tree, and:
+Before the final document is generated, the script is first _translated_ to a native 
+Document Object Model (DOM), where every tagged block is mapped to a node in the DOM tree.
+During translation:
 
-- all expressions are already _evaluated_ (converted to atomic result values); 
-- all control blocks are _executed_ (replaced with the DOM of inner blocks they produced);
+- all expressions get _evaluated_ (converted to atomic result values); 
+- all control blocks get _executed_ (replaced with the DOM of appropriate inner blocks);
   and
-- all [native tags](#native-tags) are _expanded_ 
+- all [native tags](#native-tags) get _expanded_ 
 (the actual body from the place of hypertag's occurrence is replaced with this hypertag's 
 definition body). 
 
@@ -1322,8 +1345,7 @@ Possible applications include:
   (e.g., length of text), to adapt CSS styles of top-level HTML elements and provide better
   user experience without the use of client-side Javascript.
 
-All these things can be done directly in a Hypertag script, with no need to pull back
-to Python code.
+All these can be done directly in a Hypertag script, without falling back to Python code.
 
 The details of the [DOM structure](#dom-structure) and [manipulation](#dom-manipulation)
 are discussed in next subsections. We also show how to generate a 
