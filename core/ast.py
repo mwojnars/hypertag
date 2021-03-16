@@ -512,6 +512,7 @@ class NODES(object):
         attr_regul = None           # all regular (non-body) attributes, as a list of children
         body       = None
         slot       = None
+        native     = None           # a NativeTag that will be inserted into DOMs
         
         def setup(self):
             self.name  = self.children[0].value
@@ -533,6 +534,10 @@ class NODES(object):
                 self.attr_regul = self.attrs[1:]
             else:
                 self.attr_regul = self.attrs
+            
+            # create a NativeTag that will be inserted into DOMs
+            self.native = NativeTag()
+            self.native.name = self.name
             
         def analyse(self, ctx):
             if ctx.control_depth >= 1: raise SyntaxErrorEx(f'hypertag definition inside a control block is not allowed', self)
@@ -571,14 +576,14 @@ class NODES(object):
             output.set_indent(state.indentation)
             # return output
             
-            if output: output[0].set_outline(False)         # `outline` will be set for the root node up in xblock.translate()
-            root = DOM.node(output, state.indentation, tag = self, kwattrs = dom_attrs)
+            if output: output[0].set_outline(False)         # node's `outline` will be set for the root node up in xblock.translate()
+            root = DOM.node(output, state.indentation, tag = self.native, kwattrs = dom_attrs)
             return root
 
         # translate_tag = expand          # unlike external tags, a native tag gets expanded already during translate_tag()
         
-        def expand(self, body, attrs, kwattrs):
-            return body
+        # def expand(self, body, attrs, kwattrs):
+        #     return body
         
         def _append_attrs(self, body, attrs, kwattrs, state, caller):
             """Extend `state` with actual values of tag attributes."""
