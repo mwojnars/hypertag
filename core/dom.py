@@ -9,8 +9,9 @@ DOM manipulation methods:
 @author:  Marcin Wojnarski
 """
 
-import re
+import re, itertools
 from types import GeneratorType
+from nifty.util import Object
 
 from hypertag.core.errors import VoidTagEx, TypeErrorEx
 
@@ -19,6 +20,7 @@ from hypertag.core.errors import VoidTagEx, TypeErrorEx
 #####
 #####  UTILITIES
 #####
+
 
 def add_indent(text, indent, re_start = re.compile(r'\n(?=.)')):        # re.compile(r'(?m)^(?=.)')
     """
@@ -79,6 +81,9 @@ class DOM:
     def __len__(self):              return len(self.nodes)
     def __iter__(self):             return iter(self.nodes)
     def __getitem__(self, pos):
+        
+        if isinstance(pos, str):
+            return self.select(pos)
         if isinstance(pos, slice):
             return DOM(self.nodes[pos], _strict = False)
         return self.nodes[pos]
@@ -122,26 +127,55 @@ class DOM:
 
     def tree(self, indent = '', step = '  '):
         r"""Return a multiline \n-terminated string that presents this DOM's structure as a list of trees."""
-        return ''.join(n.tree(indent, step) for n in self.nodes)
+        return ''.join(node.tree(indent, step) for node in self.nodes)
         
 
     ### SELECTORS API
     
-    # def find(self, name = None, attr = None, value = DEFINED):
-    #     """
-    #     Find all nodes with a given tag name. If two different tags have the same Tag.name, both will be detected.
-    #     Returns a new DOM containing the nodes found.
-    #     """
-    #
-    # def select(self, tag = None, id = None, class_ = None, **attrs):
-    #     """
-    #     Select all nodes (including descendants) that match given search criteria.
-    #     :param tag: desired tag name (<str>) or Tag instance that should be present in a matching node
-    #     :param id: desired value of "id" attribute (<str>)
-    #     :param class_: desired class name to be present inside the "class" attribute (<str>), possibly among other names
-    #     """
-    # def skip(self, tag = None, id = None, class_ = None, **attrs):
-    #     """Return a copy of `self`, but with the nodes matching the provided criteria removed."""
+    def walk(self, order = 'preorder'):
+        """
+        Generator of all nodes inside this DOM: parent nodes and descendants.
+        Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
+        The set of nodes is NOT wrapper up in a DOM - use select() instead if you need a DOM.
+        """
+        # if order not in ('preorder', 'postorder'): raise TypeErrorEx(f"incorrect value of order ({order})")
+        return itertools.chain(*(node.walk(order) for node in self.nodes))
+
+    ATTR_DEFINED = Object(name = 'ATTR_DEFINED')
+
+    def select(self, tag = None, attr = None, value = ATTR_DEFINED, order = 'preorder', **attrs):
+        """
+        Select all nodes (including descendants) that match given search criteria and return as a new DOM instance.
+        :param tag: desired tag name (<str>) or Tag instance that should be present in a matching node
+        """
+        name = None
+        if tag:
+            if isinstance(tag, str):
+                name = tag
+                tag  = None
+        
+        if attr is not None:
+            attrs[attr] = value
+            
+        nodes = []
+        
+        for node in self.walk(order):
+            if tag  is not None and node.tag is not tag: continue
+            if name is not None and (node.tag is None or node.tag.name != name): continue
+            
+            stop = False
+            for a, v in attrs.items():
+                if a not in node.kwattrs: stop = True; break
+                if v is not DOM.ATTR_DEFINED and node.kwattrs[a] != v: stop = True; break
+            if stop: continue
+            
+            nodes.append(node)
+        
+        return DOM(*nodes, _strict = False)
+        
+        
+    def skip(self, tag = None, id = None, class_ = None, **attrs):
+        """Return a copy of `self`, but with the nodes matching the provided criteria removed."""
         
     # Selectors TODO:
     # - https://github.com/scrapy/cssselect (Scrapy converts all CSS selectors to XPath)
@@ -178,6 +212,14 @@ class DOM:
             self.set_indent(indent)
             
             # assert not self.tag or isinstance(self.tag, Tag)
+            
+        def __getitem__(self, attr):
+            """Return value of a keyword attribute `attr` if present. Raise an exception otherwise. Shortcut for self.kwattrs[attr]."""
+            return self.kwattrs[attr]
+            
+        def get(self, attr, default = None):
+            """Return value of a keyword attribute `attr` if present, or `default` otherwise. Shortcut for self.kwattrs.get(attr, default)."""
+            return self.kwattrs.get(attr, default) if self.kwattrs else default
             
         def set_outline(self, outline = True):
             self.outline = outline
@@ -244,7 +286,16 @@ class DOM:
                 
             return indent + heading + '\n' + self.body.tree(indent + step, step)
 
-            
+        def walk(self, order = 'preorder'):
+            """
+            Generator of all nodes inside the tree rooted at self: parent nodes and descendants.
+            Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
+            """
+            if order == 'preorder': yield self
+            if self.body:
+                for node in self.body.walk(order): yield node
+            if order == 'postorder': yield self
+
     class Root(Node):
         """Root node of a Hypertag DOM tree."""
     

@@ -1,3 +1,4 @@
+<!--
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -107,6 +108,7 @@
       color: #0594db;
     }
 </style>
+-->
 
 
 # Introduction
@@ -1294,7 +1296,7 @@ Qualifiers can be placed after all atomic expressions and embeddings, no space i
 ## DOM
 
 The execution of a Hypertag script consists of [multiple phases](#runtime). 
-Before a final document gets generated, the script is first _translated_ to a native 
+Before the final document gets generated, the script is first _translated_ to a native 
 Document Object Model (DOM) representation, where every tagged block is mapped to a node
 in the DOM tree, and:
 
@@ -1322,7 +1324,10 @@ Possible applications include:
   (e.g., length of text), to adapt CSS styles of top-level HTML elements and provide better
   user experience without the use of client-side Javascript.
 
-The details of the DOM [structure](#dom-structure) and [manipulation](#dom-manipulation)
+All these things can be done directly in a Hypertag script, with no need to pull back
+to Python code.
+
+The details of the [DOM structure](#dom-structure) and [manipulation](#dom-manipulation)
 are discussed in next subsections. We also show how to generate a 
 [Table of Contents](#example-toc-generation) in just a few lines of Hypertag code. 
 

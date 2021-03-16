@@ -745,12 +745,16 @@ All of the above are automatically imported as built-in symbols by HyperHTML run
 
 ### Further reading
 
-There are still many more features that Hypertag provides, that have not found a place 
-in the Quick Start. These include: block layout modifiers (_dedent_, _append_); 
-comments (`#` and `--`); the _pass_ keyword; raw (r-) vs. formatted (f-) strings; 
-concatenation operator (_space_); DOM tree manipulation etc. 
+There are still many features in Hypertag that have not been mentioned 
+in this Quick Start: [pipelines & filters](http://hypertag.io/#filters) (`:`); 
+block layout [modifiers](http://hypertag.io/#modifiers) (_dedent_, _append_); 
+[comments](http://hypertag.io/#comments) (`#` and `--`);
+[built-in](http://hypertag.io/#hypertag-built-ins) tags and functions;
+raw (r-) vs. formatted (f-) strings; 
+_pass_ keyword; concatenation operator; 
+[DOM manipulation](http://hypertag.io/#dom-manipulation); and more... 
 
-See the [Language Reference](http://hypertag.io/#language-reference) on hypertag.io for more details.
+See the [Language Reference](http://hypertag.io/#language-reference) for details.
 
 
 ## Cheat Sheet
@@ -780,9 +784,7 @@ See the [Language Reference](http://hypertag.io/#language-reference) on hypertag
 | "text"    | f-string (formatted string), may contain embedded expressions: $... and {...} |
 | r'text'   | r-string (raw string), expressions are left unparsed |
 | r"text"   | r-string (raw string), expressions are left unparsed |
-| $$        | escape string; renders $ in a plaintext/markup block and inside formatted strings |
-| {{        | escape string; renders { in a plaintext/markup block and inside formatted strings |
-| }}        | escape string; renders } in a plaintext/markup block and inside formatted strings |
+| $$ {{ }}  | escape strings; render $ or { or } in a plaintext/markup block and inside formatted strings |
 <!---
 | %TAG      | reference to a tag in an expression (_not implemented yet_) |
 --->

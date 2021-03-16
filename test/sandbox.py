@@ -141,10 +141,33 @@ if __name__ == '__main__':
     % hypertag @body x y=0
         | Title $x $y
         @ body
+        for node in list(body.walk('postorder')):
+            | node class $node.__class__.__name__ tag {node.tag.name if node.tag else 'None'}
     hypertag 1 y=2
         p
             b | Paragraph
         
+    """
+    text = """
+    %toc @document
+        for heading in document['h2']
+            $ id = heading.get('id', '')
+            a href = "#{id}" @ heading.body
+                
+    %with_toc @document
+        | Table of Contents:
+        toc @document
+        
+        | The document:
+        @document
+    
+    with_toc
+        h2 #first  | First heading
+        p  | Contents...
+        h2 #second | Second heading
+        p  | Contents...
+        h2 #third  | Third heading
+        p  | Contents...
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
@@ -190,4 +213,4 @@ if __name__ == '__main__':
 # TODO:
 # - czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
 # - selectors @body[...]
-# - builtin tags
+# - Python's "bitwise not" operator (~)
