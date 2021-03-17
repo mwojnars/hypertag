@@ -10,6 +10,7 @@ DOM manipulation methods:
 """
 
 import re, itertools
+from copy import copy
 from types import GeneratorType
 from nifty.util import Object
 
@@ -67,7 +68,7 @@ class DOM:
     """
     List of DOM.Nodes that comprise (a part of) a body of a parent Node, or was produced as an intermediate
     collection of nodes during DOM manipulation.
-    Provides methods for traversing a DOM tree and selecting nodes,
+    Provides methods for traversing DOM (sub)trees and selecting nodes,
     as well as flattening and cleaning up the list during node construction.
     
     All DOM node classes: Node, Root, Text - are defined as inner classes of this one.
@@ -76,7 +77,11 @@ class DOM:
     
     def __init__(self, *nodes, _strict = True):
         self.nodes = self._flatten(nodes) if _strict else list(nodes)
+        # self.set_nodes(nodes, _strict)
         
+    # def set_nodes(self, nodes, strict = True):
+    #     self.nodes = self._flatten(nodes) if strict else list(nodes)
+    
     def __bool__(self):             return bool(self.nodes)
     def __len__(self):              return len(self.nodes)
     def __iter__(self):             return iter(self.nodes)
@@ -129,19 +134,49 @@ class DOM:
         r"""Return a multiline \n-terminated string that presents this DOM's structure as a list of trees."""
         return ''.join(node.tree(indent, step) for node in self.nodes)
         
+    def copy(self):
+        """
+        Mostly deep copy of self, with an exception for nodes' attributes, which are shallow-copied, and their `tag` links (no copy).
+        """
+        dup = copy(self)
+        dup.nodes = [node.copy() for node in self.nodes]
+        return dup
+        
 
     ### SELECTORS API
     
-    def walk(self, order = 'preorder', reject = None):
+    def walk(self, order = 'preorder', visit = None):
         """
-        Generator of all nodes inside this DOM: parent nodes and descendants.
+        Generator of all nodes inside this DOM: parent nodes and descendants, traversed with depth-first search.
         Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
-        An optional argument `reject` is a function that takes a Node instance and returns True if the subtree
-        rooted at this node should be omitted.
+        An optional argument `visit` is a function that takes a Node instance and returns True if the subtree
+        rooted at this node should be visited, False otherwise.
         The stream of nodes returned is NOT wrapped up in a DOM - use select() instead if you need a DOM.
         """
         # if order not in ('preorder', 'postorder'): raise TypeErrorEx(f"incorrect value of order ({order})")
-        return itertools.chain(*(node.walk(order, reject) for node in self.nodes))
+        return itertools.chain(*(node.walk(order, visit) for node in self.nodes))
+
+    def alter(self, transform, order = 'preorder'):
+        """
+        Apply `transform` function to nodes in this DOM. The DOM is traversed with depth-first search.
+        In every node, a list of child nodes is replaced with a concatenated list of nodes returned by `transform`
+        when applied to each child separately. This is done before recursive calls to alter() on child nodes
+        (if order='preorder'), or after these calls if order='postorder'.
+        The `transform` function can be a generator, or a regular function that returns a list of nodes.
+        For each input node, `transform` can return any number of nodes: none, or one, or multiple;
+        the input node itself can also be returned.
+        """
+        if order == 'preorder':
+            for node in self.nodes: node.alter(transform, order)
+        
+        new_nodes  = itertools.chain(*(transform(node) for node in self.nodes))
+        self.nodes = self._flatten(new_nodes)
+        
+        if order == 'postorder':
+            for node in self.nodes: node.alter(transform, order)
+
+        return self
+        
 
     ATTR_DEFINED = Object(name = 'ATTR_DEFINED')
 
@@ -174,19 +209,18 @@ class DOM:
         
     def skip(self, tag = None, attr = None, value = ATTR_DEFINED, **attrs):
         """
-        Return a copy of `self` that has the same structure as self (nodes, relations, parents and descendants),
+        Return a copy of `self` that has the same structure (nodes, relations, parents and descendants),
         but the subtrees rooted at nodes matching the provided criteria are removed.
-        The original DOM (self) and its nodes are left unmodified.
+        The original DOM (self) and its nodes are left unmodified. All nodes in the returned DOM are copies
+        of nodes in self.
         """
         tag, name, attrs = self._constraint(tag, attr, value, attrs)
         dom = self.copy()
         
         def drop(node):
             """Drop subtrees whose root node satisfies the constraints."""
-            if self._test(node, tag, name, attrs):
-                return None
-            else:
-                return node.alter(drop)
+            if not self._test(node, tag, name, attrs):
+                yield node
         
         return dom.alter(drop)
 
@@ -318,19 +352,39 @@ class DOM:
                 heading += f" {key}={attr}"
                 
             return indent + heading + '\n' + self.body.tree(indent + step, step)
-
-        def walk(self, order = 'preorder', reject = None):
+        
+        def copy(self):
+            """Deep copy of self, with an exception for attributes, which are shallow-copied, and self.tag (no copy)."""
+            
+            dup = copy(self)
+            dup.attrs = copy(self.attrs)
+            dup.kwattrs = copy(self.kwattrs)
+            
+            if self.body is not None:
+                dup.body = self.body.copy()
+            
+            return dup
+            
+        
+        def walk(self, order = 'preorder', visit = None):
             """
             Generator of all nodes inside the tree rooted at self: parent nodes and descendants.
             Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
-            An optional argument `reject` is a function that takes a Node instance and returns True if the subtree
-            rooted at this node should be omitted.
+            An optional argument `visit` is a function that takes a Node instance and returns True if the subtree
+            rooted at this node should be visited, False otherwise.
             """
-            if reject is not None and reject(self): return
+            if visit is not None and not visit(self): return
             if order == 'preorder': yield self
             if self.body:
                 for node in self.body.walk(order): yield node
             if order == 'postorder': yield self
+
+        def alter(self, transform, order = 'preorder'):
+            """Transforms a list of child nodes by calling alter() on self.body. See DOM.alter() for details."""
+            
+            if self.body: self.body.alter(transform, order)
+            return self
+            
 
     class Root(Node):
         """Root node of a Hypertag DOM tree."""
