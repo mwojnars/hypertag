@@ -1331,7 +1331,7 @@ of the script's syntax tree (AST). Whenever a hypertag declares a
 [_body attribute_](#body-attribute) (`@`), this attribute's value
 (an actual body from the place of occurrence) is passed to the tag
 as an _already-translated_ DOM of a particular subtree. This gives hypertags an exceptional
-capability to actively _manipulate_ (analyze, truncate, rearrange) the provided subtree 
+capability to actively _manipulate_ (introspect, truncate, rearrange) the provided subtree 
 before it gets merged into the formal body of the hypertag. 
 Possible applications include:
 
@@ -1352,11 +1352,29 @@ are discussed in next subsections. We also show how to generate a
 
 ### DOM structure
 
-(TODO...)
+The following classes are used by Hypertag parser to represent the DOM:
 
-If you want to check what DOM tree is being produced from a given script, you should call
-`runtime.translate()` instead of `runtime.render()`, and then use the `tree()` method
-of the returned DOM to get its textual representation:
+- **DOM**: keeps a list (`nodes`) of top-level nodes, typically constituting a body of another
+  (parent) node; the list can be empty; all node classes are defined as inner classes of `DOM`;
+- **DOM.Node**: a regular (tagged) node, and a base class for other types of nodes;
+  contains a `body` represented as a `DOM` instance, a `tag` that refers to an instance of `Tag`,
+  attributes (`attrs`, `kwattrs`), and configuration of output layout (`indent`, `outline`);
+- **DOM.Text**: a text node; it has `text` string instead of a structural `body`, and no tag;
+- **DOM.Root**: a regular node that serves as the root of the entire document tree.
+
+The DOM class can be imported from Hypertag's root package:
+
+    from hypertag import DOM
+
+In hypertags (native tags), the [body attribute](#body-attribute) is always passed in
+as an instance of the DOM class. For [external tags](#external-tags), this works slightly 
+different: the `body` argument passed to `Tag.expand()` is an instance of the DOM
+when `self.flat` is false; otherwise, `body` contains rendered output (a string)
+of the corresponding DOM.
+
+If you want to check what DOM tree is being produced by a given script, you may call
+`runtime.translate()` instead of `runtime.render()`, and then `tree()` of the returned DOM
+to get its textual representation:
 
     dom = runtime.translate(script)
     print(dom.tree())
@@ -1383,7 +1401,7 @@ is translated to the DOM:
       <Text>
 
 As you can notice, all text blocks are converted to `DOM.Text` nodes;
-there are some extra `Text` nodes present that encode whitespace between blocks;
+there are some extra `Text` nodes that encode whitespace between blocks;
 tags and their attributes are preserved.
 
 

@@ -169,6 +169,9 @@ if __name__ == '__main__':
         h2 #third  | Third heading
         p  | Contents...
     """
+    text = """
+    input enabled=True
+    """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
     

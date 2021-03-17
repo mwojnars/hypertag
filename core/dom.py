@@ -263,15 +263,14 @@ class DOM:
             if not self.tag:
                 return self.body.render()
             
-            if self.tag.void:
-                if self.body: raise VoidTagEx(f"body must be empty for a void tag {self.tag}")
-                body = None
-            elif self.tag.flat:
-                body = self.body.render()
-            else:
-                body = self.body
+            # if self.tag.void and self.body: raise VoidTagEx(f"body must be empty for a void tag {self.tag}")
+            #     body = None
+            # # elif self.tag.flat:
+            # #     body = self.body.render()
+            # else:
+            #     body = self.body
                 
-            return self.tag.expand(body, self.attrs or (), self.kwattrs or {})
+            return self.tag.expand(self.body, self.attrs or (), self.kwattrs or {})
             
         def tree(self, indent = '', step = '  '):
             r"""Return a multiline \n-terminated string that presents this node's structure as a tree."""

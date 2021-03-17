@@ -75,13 +75,13 @@ def partial(func, *args, **kwargs):
 class Native(Tag):
     """
     An already-expanded tag created by NODES.xblock_def for insertion into a DOM. Expansion of native tags is done
-    before DOM creation, hence expand() - to be called after DOM creation - is implemented as an identity function.
+    before DOM creation, hence expand() - called after DOM creation - only performs body rendering and nothing else.
     """
     def __init__(self, name):
         self.name = name
         
     def expand(self, body, attrs, kwattrs):
-        return body
+        return body.render()
 
 
 class Hypertag:
@@ -645,7 +645,7 @@ class NODES(object):
                 self.attr_body.assign(state, body)
                 # state[self.attr_body] = body
             elif body:
-                raise VoidTagEx(f"non-empty body passed to a void tag '{self.name}'", caller)
+                raise VoidTagEx(f"non-empty body passed to a void hypertag '{self.name}'", caller)
             
             return dom_attrs
             

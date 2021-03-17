@@ -14,8 +14,9 @@ class Tag:
     """
     name = None         # [str] name that indentifies this tag in a DOM and can be used in DOM selectors
     
-    void = False        # if True, passing non-empty body to expand() is forbidden and the parser should rather raise an exception
-    flat = True         # if True, body is passed as plain text (rendered DOM) to expand(), which allows better compactification of constant subtrees of the AST (TODO)
+    # void = False        # if True, passing non-empty body to expand() is forbidden and the parser should rather raise an exception
+    # flat = True         # if True, body is passed as plain text (rendered DOM) to expand(); in the future, this will allow better
+    #                     # compactification of constant subtrees of the AST (TODO)
     pure = True         # if True, the tag is assumed to always return the same result for the same arguments (no side effects),
                         # which potentially enables full compactification of a node tagged with this tag
     
@@ -24,8 +25,8 @@ class Tag:
         Subclasses should NOT append trailing \n nor add extra indentation during tag expansion
         - both things are added by the parser later on, if desired so by programmer.
         
-        :param body: DOM of a translated body of tag occurrence, if self.flat is false, or a rendered string otherwise;
-                     if a tag is void (doesn't accept body), it should check if the body is empty and raise VoidTagEx if not
+        :param body: DOM of a translated body of tag occurrence, possibly empty; if a tag is void and does not expect a body,
+                     but a non-empty body was passed, the tag should raise VoidTagEx
         :param attrs: list/tuple of positional attributes
         :param kwattrs: dict of keyword attributes; attributes are guaranteed to have valid XML names, but NOT necessarily valid Python names
         :return: string
@@ -36,14 +37,14 @@ class Tag:
 ########################################################################################################################################################
 
 class TagFunction(Tag):
-    """A wrapper that creates a Tag instance from a given function."""
+    """A wrapper that creates a Tag instance from a function. The `body` attribute is passed as a string to the function."""
     
     def __init__(self, fun):
         self.fun  = fun
         self.name = fun.__name__
     
     def expand(self, body, attrs, kwattrs):
-        return self.fun(body, *attrs, **kwattrs)
+        return self.fun(body.render(), *attrs, **kwattrs)
         
 
 class Null(Tag):
@@ -52,7 +53,7 @@ class Null(Tag):
     name = 'null'
     
     def expand(self, body, attrs, kwattrs):
-        return body
+        return body.render()
     
 null = Null()
 
@@ -70,9 +71,9 @@ class Markup(Tag):
     """
     
     name = None         # tag <name> to be printed into markup; may differ from the Hypertag name used inside a script (!)
-    void = False        # if True, body is expected to be empty in expand() and the returned element is self-closing
-    flat = True         # markup tags don't do any DOM manipulation internally, so `body` can be passed in as a string
+    void = False        # if True, the `body` passed to expand() must be empty and the element is rendered as self-closing: <NAME />
     mode = 'HTML'       # (X)HMTL compatibility mode: either 'HTML' or 'XHTML'
+    #flat = True         # markup tags don't do any DOM manipulation internally, so `body` can be passed in as a string
     
     def __init__(self, name = None, void = False, mode = 'HTML'):
         if name: self.name = name
@@ -88,6 +89,8 @@ class Markup(Tag):
         # render attributes
         kwattrs = filter(None, map(self._render_attr, kwattrs.items()))
         tag = ' '.join([name] + list(kwattrs))
+
+        body = body.render()
         
         # render output
         if self.void:

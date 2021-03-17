@@ -60,6 +60,7 @@ class comment(Markup):
     def expand(self, body, attrs, kwattrs):
         
         if attrs or kwattrs: raise TypeErrorEx(f"'comment' tag does not accept attributes")
+        body = body.render()
         
         # if the block contains a headline, the closing tag is placed on the same line as body;
         # a newline is added at the end, otherwise
