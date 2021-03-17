@@ -68,13 +68,13 @@ rename           =  space 'as' space name_id
 
 block_struct     =  (tags_expand generic_struct) / body_text    # text block is a special case of a structural block (!), in this case block_struct gets
                                                                 # reduced after parsing to the underlying block_verbat/_normal/_markup
-tags_expand      =  null_tag / (tag_expand (ws mark_struct ws tag_expand)*)
+tags_expand      =  null / (tag_expand (ws mark_struct ws tag_expand)*)
 tag_expand       =  name_id attrs_val?
 
-special_tag      =  pass_tag ''   #/ break_tag / continue_tag
+special_tag      =  pass ''   #/ break_tag / continue_tag
 
-null_tag         =  '.'
-pass_tag         =  'pass'
+null             =  '.'
+pass             =  'pass'
 
 #break_tag       =  'break'
 #continue_tag    =  'continue'

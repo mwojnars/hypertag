@@ -1,4 +1,3 @@
-<!--
 <style type="text/css" rel="stylesheet">
     header h1 { text-transform: uppercase; }
 
@@ -108,7 +107,6 @@
       color: #0594db;
     }
 </style>
--->
 
 
 # Introduction
@@ -1139,7 +1137,7 @@ prepended with either `$` (denotes a variable) or `%` (a tag):
 ### External tags
 
 
-`hypertag.core.tag.ExternalTag`
+`hypertag.core.tag.Tag`
 
 (TODO...)
 

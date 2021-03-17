@@ -18,7 +18,7 @@ from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, Missi
 from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
 from hypertag.core.structs import Context, State, Slot, ValueSlot
 from hypertag.core.dom import del_indent, get_indent, DOM
-from hypertag.core.tag import Tag, null_tag
+from hypertag.core.tag import Tag, null
 
 DEBUG = False
 
@@ -75,7 +75,7 @@ def partial(func, *args, **kwargs):
 class Native(Tag):
     """
     An already-expanded tag created by NODES.xblock_def for insertion into a DOM. Expansion of native tags is done
-    before DOM creation, hence expand() is implemented as an identity function.
+    before DOM creation, hence expand() - to be called after DOM creation - is implemented as an identity function.
     """
     def __init__(self, name):
         self.name = name
@@ -96,7 +96,7 @@ class Hypertag:
 class Imported(Hypertag):
     """
     Wrapper around an imported hypertag. Stores the global state of the imported module,
-    so that it can replace the state of the importing module when translate_tag() of the imported hypertag is called.
+    so that it can replace the state of the importing module when expand() of the imported hypertag is called.
     """
     def __init__(self, hypertag, module_symbols):
         
@@ -680,7 +680,7 @@ class NODES(object):
             symbols, state = runtime.import_module(self.path, self)         # top-level symbols of the imported module
 
             # exclude private symbols AND wrap up all native tag definitions within Imported
-            # to preserve original runtime state of their module, for translate_tag()
+            # to preserve original runtime state of their module, for expand()
             symbols = {name: Imported(value, state) if (IS_TAG(name) and isinstance(value, Hypertag)) else value
                        for name, value in symbols.items() if name[1] != '_'}
             
@@ -1062,9 +1062,11 @@ class NODES(object):
             if self.tag is None: raise UndefinedTagEx(f"undefined tag '{self.name}'", self)
             
         def translate_tag(self, state, body):
-            """The actual `body` is already translated and has a form of a DOM."""
-    
-            attrs, kwattrs = self._eval_attrs(state)                        # calculate actual values of attributes
+            """
+            translate_tag() differs from a regular translate() in that it accepts `body` additionaly.
+            The actual `body` is already translated and has a form of a DOM.
+            """
+            attrs, kwattrs = self._eval_attrs(state)            # calculate actual values of attributes
             
             assert isinstance(self.tag, Slot)
             tag = self.tag.get(state)
@@ -1074,9 +1076,6 @@ class NODES(object):
             
             elif isinstance(tag, Tag):
                 return DOM.node(body, tag = tag, attrs = attrs, kwattrs = kwattrs)
-            
-            # if isinstance(tag, Tag):
-            #     return tag.translate_tag(state, body, attrs, kwattrs, self)
             
             else:
                 raise NotATagEx(f"Not a tag: '{self.name}' ({tag.__class__})", self)
@@ -1094,12 +1093,11 @@ class NODES(object):
                     
             return unnamed, named
             
-    class xnull_tag(node):
+    class xnull(node):
         def translate_tag(self, state, body):
-            return DOM.node(body, tag = null_tag)
-            # return null_tag.translate_tag(state, body, None, None, self)
+            return DOM.node(body, tag = null)
         
-    class xpass_tag(node):
+    class xpass(node):
         def translate(self, state):
             return DOM()
         

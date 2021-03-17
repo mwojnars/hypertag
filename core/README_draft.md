@@ -598,7 +598,7 @@ dictionary can be imported as tags (%NAME) into a Hypertag script.
 
 ## SDK ??
 
-- class Tag, ExternalTag, MarkupTag -- for implementing custom tags
+- class Tag, ExternalTag, Markup -- for implementing custom tags
 - class DOM and inner classes (Node, Root, Text)
 - class Runtime
 

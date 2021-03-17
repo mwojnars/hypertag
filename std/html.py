@@ -1,5 +1,5 @@
 from hypertag.core.errors import TypeErrorEx
-from hypertag.core.tag import MarkupTag
+from hypertag.core.tag import Markup
 from hypertag.std.registry import Registry
 
 
@@ -36,9 +36,9 @@ _HTML_TAGS_NONVOID = "a abbr acronym address applet article aside audio b basefo
                      "tfoot th thead time title tr tt u ul var video".split()
 
 def _create(name, void):
-    # register.tag(MarkupTag(name.lower(), void, 'XHTML'))         # XHTML only permits lowercase tag names
-    register.tag(MarkupTag(name.lower(), void, 'HTML'))
-    register.tag(MarkupTag(name.upper(), void, 'HTML'))
+    # register.tag(Markup(name.lower(), void, 'XHTML'))         # XHTML only permits lowercase tag names
+    register.tag(Markup(name.lower(), void, 'HTML'))
+    register.tag(Markup(name.upper(), void, 'HTML'))
 
 
 ### create tags
@@ -53,7 +53,7 @@ for tag in _HTML_TAGS_VOID:     _create(tag, True)
 #####
 
 @register.tag
-class comment(MarkupTag):
+class comment(Markup):
     
     name = "comment"
     

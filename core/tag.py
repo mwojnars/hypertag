@@ -4,7 +4,7 @@ from hypertag.core.errors import VoidTagEx, TypeErrorEx
 
 ########################################################################################################################################################
 #####
-#####  BASE CLASSES
+#####  TAG
 #####
 
 class Tag:
@@ -35,25 +35,8 @@ class Tag:
 
 ########################################################################################################################################################
 
-# class ExternalTag(Tag):
-#     """
-#     A custom tag defined as a Python function.
-#     Instances of ExternalTag can be imported to a Hypertag script and used as tags.
-#     """
-
-class NullTag(Tag):
-    """Null tag '.' is represented in the DOM tree. Its expand() passes the body unchanged."""
-    
-    name = 'null'
-    
-    def expand(self, body, attrs, kwattrs):
-        return body
-    
-null_tag = NullTag()
-
-
 class TagFunction(Tag):
-    """A wrapper that creates an ExternalTag instance from a given function."""
+    """A wrapper that creates a Tag instance from a given function."""
     
     def __init__(self, fun):
         self.fun  = fun
@@ -63,28 +46,23 @@ class TagFunction(Tag):
         return self.fun(body, *attrs, **kwattrs)
         
 
-########################################################################################################################################################
-
-# class NativeTag(Tag):
-#     """Base class for native tags, i.e., tags implemented inside Hypertag code."""
-#
-#     def dom_expand(self, body, attrs, kwattrs, state, caller):
-#         """
-#         Native tags are expanded in a different way than external tags: they produce DOM during expansion, not a flat string,
-#         hence a different method to be called by the parser.
-#         """
-#         raise NotImplementedError
-#
-#     def expand(self, body, attrs, kwattrs):
-#         return body
+class Null(Tag):
+    """Null tag '.' is represented in the DOM tree. Its expand() passes the body unchanged."""
     
+    name = 'null'
+    
+    def expand(self, body, attrs, kwattrs):
+        return body
+    
+null = Null()
+
 
 ########################################################################################################################################################
 #####
 #####  STANDARD MARKUP TAG
 #####
 
-class MarkupTag(Tag):
+class Markup(Tag):
     """
     A hypertag whose expand() outputs the body unchanged, surrounded by <name>...</name> strings, with proper handling
     of void tags <name /> and HTML/XHTML format differences for boolean attributes.
