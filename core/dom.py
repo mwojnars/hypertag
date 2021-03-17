@@ -132,50 +132,90 @@ class DOM:
 
     ### SELECTORS API
     
-    def walk(self, order = 'preorder'):
+    def walk(self, order = 'preorder', reject = None):
         """
         Generator of all nodes inside this DOM: parent nodes and descendants.
         Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
-        The set of nodes is NOT wrapper up in a DOM - use select() instead if you need a DOM.
+        An optional argument `reject` is a function that takes a Node instance and returns True if the subtree
+        rooted at this node should be omitted.
+        The stream of nodes returned is NOT wrapped up in a DOM - use select() instead if you need a DOM.
         """
         # if order not in ('preorder', 'postorder'): raise TypeErrorEx(f"incorrect value of order ({order})")
-        return itertools.chain(*(node.walk(order) for node in self.nodes))
+        return itertools.chain(*(node.walk(order, reject) for node in self.nodes))
 
     ATTR_DEFINED = Object(name = 'ATTR_DEFINED')
 
     def select(self, tag = None, attr = None, value = ATTR_DEFINED, order = 'preorder', **attrs):
         """
-        Select all nodes (including descendants) that match given search criteria and return as a new DOM instance.
+        Build a list of all nodes (including descendants) that match the search criteria and return it wrapped up in a new DOM instance.
+        Some of the nodes can be related, i.e., an ancestor and its descendant can be returned together,
+        with the ancestor still linking to its children and (directly or indirectly) to this descendant.
+        When a non-matching node gets removed, its subtree is NOT removed and descendants can still be included in the result.
         :param tag: desired tag name (<str>) or Tag instance that should be present in a matching node
         """
+        tag, name, attrs = self._constraint(tag, attr, value, attrs)
+        nodes = [node for node in self.walk(order) if self._test(node, tag, name, attrs)]
+        
+        # nodes = []
+        # for node in self.walk(order):
+        #     if tag  is not None and node.tag is not tag: continue
+        #     if name is not None and (node.tag is None or node.tag.name != name): continue
+        #
+        #     stop = False
+        #     for a, v in attrs.items():
+        #         if a not in node.kwattrs: stop = True; break
+        #         if v is not DOM.ATTR_DEFINED and node.kwattrs[a] != v: stop = True; break
+        #     if stop: continue
+        #
+        #     nodes.append(node)
+        
+        return DOM(*nodes, _strict = False)
+        
+        
+    def skip(self, tag = None, attr = None, value = ATTR_DEFINED, **attrs):
+        """
+        Return a copy of `self` that has the same structure as self (nodes, relations, parents and descendants),
+        but the subtrees rooted at nodes matching the provided criteria are removed.
+        The original DOM (self) and its nodes are left unmodified.
+        """
+        tag, name, attrs = self._constraint(tag, attr, value, attrs)
+        dom = self.copy()
+        
+        def drop(node):
+            """Drop subtrees whose root node satisfies the constraints."""
+            if self._test(node, tag, name, attrs):
+                return None
+            else:
+                return node.alter(drop)
+        
+        return dom.alter(drop)
+
+
+    def _constraint(self, tag, attr, value, attrs):
+        """Normalization of constraints for select() and skip()."""
+        
         name = None
         if tag:
             if isinstance(tag, str):
                 name = tag
                 tag  = None
-        
         if attr is not None:
             attrs[attr] = value
             
-        nodes = []
+        return tag, name, attrs
         
-        for node in self.walk(order):
-            if tag  is not None and node.tag is not tag: continue
-            if name is not None and (node.tag is None or node.tag.name != name): continue
-            
-            stop = False
-            for a, v in attrs.items():
-                if a not in node.kwattrs: stop = True; break
-                if v is not DOM.ATTR_DEFINED and node.kwattrs[a] != v: stop = True; break
-            if stop: continue
-            
-            nodes.append(node)
+    def _test(self, node, tag, name, attrs):
+        """Returns True if the `node` satisfies all of the constraints."""
         
-        return DOM(*nodes, _strict = False)
+        if tag  is not None and node.tag is not tag: return False
+        if name is not None and (node.tag is None or node.tag.name != name): return False
         
-        
-    def skip(self, tag = None, id = None, class_ = None, **attrs):
-        """Return a copy of `self`, but with the nodes matching the provided criteria removed."""
+        for a, v in attrs.items():
+            if a not in node.kwattrs: return False
+            if v is not DOM.ATTR_DEFINED and node.kwattrs[a] != v: return False
+
+        return True
+    
         
     # Selectors TODO:
     # - https://github.com/scrapy/cssselect (Scrapy converts all CSS selectors to XPath)
@@ -260,17 +300,11 @@ class DOM:
             return text
         
         def _render_body(self):
-            if not self.tag:
-                return self.body.render()
             
-            # if self.tag.void and self.body: raise VoidTagEx(f"body must be empty for a void tag {self.tag}")
-            #     body = None
-            # # elif self.tag.flat:
-            # #     body = self.body.render()
-            # else:
-            #     body = self.body
-                
-            return self.tag.expand(self.body, self.attrs or (), self.kwattrs or {})
+            if self.tag:
+                return self.tag.expand(self.body, self.attrs or (), self.kwattrs or {})
+            else:
+                return self.body.render()
             
         def tree(self, indent = '', step = '  '):
             r"""Return a multiline \n-terminated string that presents this node's structure as a tree."""
@@ -285,11 +319,14 @@ class DOM:
                 
             return indent + heading + '\n' + self.body.tree(indent + step, step)
 
-        def walk(self, order = 'preorder'):
+        def walk(self, order = 'preorder', reject = None):
             """
             Generator of all nodes inside the tree rooted at self: parent nodes and descendants.
             Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
+            An optional argument `reject` is a function that takes a Node instance and returns True if the subtree
+            rooted at this node should be omitted.
             """
+            if reject is not None and reject(self): return
             if order == 'preorder': yield self
             if self.body:
                 for node in self.body.walk(order): yield node

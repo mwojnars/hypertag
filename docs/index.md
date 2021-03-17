@@ -1352,25 +1352,25 @@ are discussed in next subsections. We also show how to generate a
 
 ### DOM structure
 
-The following classes are used by Hypertag parser to represent the DOM:
+The DOM is built of instances of the following classes:
 
-- **DOM**: keeps a list (`nodes`) of top-level nodes, typically constituting a body of another
-  (parent) node; the list can be empty; all node classes are defined as inner classes of `DOM`;
+- **DOM**: keeps a list of top-level `nodes` constituting a body of another (parent) 
+  node, or resulting from DOM manipulation, like `DOM.select()`;
+  the list can be empty; all node classes (below) are defined as inner classes of `DOM`;
 - **DOM.Node**: a regular (tagged) node, and a base class for other types of nodes;
   contains a `body` represented as a `DOM` instance, a `tag` that refers to an instance of `Tag`,
   attributes (`attrs`, `kwattrs`), and configuration of output layout (`indent`, `outline`);
 - **DOM.Text**: a text node; it has `text` string instead of a structural `body`, and no tag;
-- **DOM.Root**: a regular node that serves as the root of the entire document tree.
+- **DOM.Root**: a regular node that serves as a root of the entire document tree.
 
-The DOM class can be imported from Hypertag's root package:
+The `DOM` class can be imported from Hypertag's root package:
 
     from hypertag import DOM
 
-In hypertags (native tags), the [body attribute](#body-attribute) is always passed in
-as an instance of the DOM class. For [external tags](#external-tags), this works slightly 
-different: the `body` argument passed to `Tag.expand()` is an instance of the DOM
-when `self.flat` is false; otherwise, `body` contains rendered output (a string)
-of the corresponding DOM.
+During expansion of custom tags, both [native](#native-tags) and [external](#external-tags), 
+the [body attribute](#body-attribute) is passed as an instance of the `DOM` class.
+For the entire document, the result of script translation is additionally wrapped up
+in `DOM.Root` and returned as an instance of this class.
 
 If you want to check what DOM tree is being produced by a given script, you may call
 `runtime.translate()` instead of `runtime.render()`, and then `tree()` of the returned DOM
@@ -1381,32 +1381,72 @@ to get its textual representation:
 
 For example, the following script:
 
-    ul
-        li 
-            | Item
-    p
-        b : i | Paragraph
+    ul .short-list
+        li : i | Item
+    
+    for i in [1,2,3]:
+        b class="row$i" | Row no. $i
+    
 
 is translated to the DOM:
 
     <Root>
       <Text>
-      ul
-        li class=list-entry
-          <Text>
-      p id=paragraph1
-        b
+      ul class=short-list
+        li
           i
             <Text>
       <Text>
+      b class=row1
+        <Text>
+      b class=row2
+        <Text>
+      b class=row3
+        <Text>
+      <Text>
 
-As you can notice, all text blocks are converted to `DOM.Text` nodes;
-there are some extra `Text` nodes that encode whitespace between blocks;
-tags and their attributes are preserved.
+As you can notice, all text blocks are converted to `DOM.Text` nodes.
+All (vertical) whitespace surrounding or separating the blocks is also encoded as `DOM.Text`.
+Control blocks (`for`) are replaced with the result of their execution.
+Tags and their attributes are preserved. All positional attributes of hypertags
+(but not of external tags) are converted to keyword attributes.
+Chained tags (`li : i`) are mapped onto separate parent-child nodes.
+
+In places where `DOM.Node` instances occur, the `DOM.tree()` method prints names of tags
+instead of `<Node>`, for brevity.
 
 
 ### DOM manipulation
-(TODO...)
+
+There is one fundamental reason why Hypertag employs an intermediate DOM representation 
+and performs the AST-to-DOM translation as a separate phase during script execution
+instead of rendering the entire script to a string at once:
+this reason is to allow _document manipulation_ inside hypertags, before the final document
+gets rendered, so that hypertags can assume active role in document generation,
+and be able to communicate more efficiently with other parts of code. The incoming DOM
+can be used as a carrier of data that controls hypertag's execution, and not just 
+as a passive fragment that can only be blindly transfered to the output.
+<!--
+The input DOM can serve not only as a passive document fragment that should be 
+blindly transfered to the output; rather, the DOM can encode any type of
+extra information that may influence hypertag's execution.
+-->
+
+The following methods are currently available for DOM introspection and manipulation:
+
+- **DOM.walk**(order = "preorder"): 
+  a generator of all nodes inside the DOM: parent nodes and descendants.
+  Parents are yielded before descendants if order='preorder' (default), or after descendants 
+  if order='postorder'. The stream of nodes is _not_ being wrapped up in a DOM object.
+  The same method is available in the Node class: Node.walk().
+- **DOM.select**():
+- ...
+- `DOM.__getitem__`
+- `Node.__getitem__`
+
+Other methods may be added in the future, e.g., to handle a more generic class of selector
+expressions (XPath, CSS).
+
 
 ### Example: ToC generation
 (TODO...)
@@ -1415,7 +1455,7 @@ tags and their attributes are preserved.
 ## Runtime
 
 Execution of a Hypertag script is performed by a **runtime** object, which is an instance of 
-`hypertag.core.runtime.Runtime`. The execution constists of 3 phases:
+`hypertag.Runtime` class. The execution constists of 3 phases:
 
 1. **parsing** a script to an Abstract Syntax Tree (AST), with syntactic and semantic analysis
    of the tree;

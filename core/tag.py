@@ -14,11 +14,8 @@ class Tag:
     """
     name = None         # [str] name that indentifies this tag in a DOM and can be used in DOM selectors
     
-    # void = False        # if True, passing non-empty body to expand() is forbidden and the parser should rather raise an exception
-    # flat = True         # if True, body is passed as plain text (rendered DOM) to expand(); in the future, this will allow better
-    #                     # compactification of constant subtrees of the AST (TODO)
     pure = True         # if True, the tag is assumed to always return the same result for the same arguments (no side effects),
-                        # which potentially enables full compactification of a node tagged with this tag
+                        # which enables caching of expand() calls and compactification of DOM nodes tagged with this tag
     
     def expand(self, body, attrs, kwattrs):
         """
@@ -39,12 +36,14 @@ class Tag:
 class TagFunction(Tag):
     """A wrapper that creates a Tag instance from a function. The `body` attribute is passed as a string to the function."""
     
-    def __init__(self, fun):
+    def __init__(self, fun, dom = False):
         self.fun  = fun
         self.name = fun.__name__
+        self.dom  = dom
     
     def expand(self, body, attrs, kwattrs):
-        return self.fun(body.render(), *attrs, **kwattrs)
+        if not self.dom: body = body.render()
+        return self.fun(body, *attrs, **kwattrs)
         
 
 class Null(Tag):
@@ -71,9 +70,8 @@ class Markup(Tag):
     """
     
     name = None         # tag <name> to be printed into markup; may differ from the Hypertag name used inside a script (!)
-    void = False        # if True, the `body` passed to expand() must be empty and the element is rendered as self-closing: <NAME />
+    void = False        # True if this tag is void: the `body` in expand() should be empty and the element is rendered as self-closing: <NAME />
     mode = 'HTML'       # (X)HMTL compatibility mode: either 'HTML' or 'XHTML'
-    #flat = True         # markup tags don't do any DOM manipulation internally, so `body` can be passed in as a string
     
     def __init__(self, name = None, void = False, mode = 'HTML'):
         if name: self.name = name

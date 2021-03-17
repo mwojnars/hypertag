@@ -311,24 +311,14 @@ class NODES(object):
             """
             for c in self.children: c.analyse(ctx)
 
-        @staticmethod
-        def _render_all(nodes, state):
-            return u''.join(n.render(state) for n in nodes)
-            
         # @staticmethod
         # def _translate_all(nodes, state):
         #     return DOM(n.translate(state) for n in nodes)
 
-        # def render(self, state):
-        #     """
-        #     Convert this AST to its textual representation in target markup language.
-        #     render() may have side effects: modification of the `state`.
-        #     """
-        #     if self.children:
-        #         return u''.join(c.render(state) for c in self.children)
-        #     else:
-        #         return self.text()
-
+        @staticmethod
+        def _render_all(nodes, state):
+            return u''.join(n.render(state) for n in nodes)
+            
         def __str__(self): return "<%s>" % self.__class__.__name__  #object.__str__(self)
 
     class static(node):

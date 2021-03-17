@@ -128,16 +128,16 @@ if __name__ == '__main__':
                 b : i | bleble
     """
     text = r"""
+    ul .short-list
+        li : i | Item
+    
     for i in [1,2,3]:
         b class="row$i" | Row no. $i
     
-    ul
-        li class='list-entry'
-            | Item
     p id='paragraph1'
         b : i
             | Paragraph
-    
+
     % hypertag @body x y=0
         | Title $x $y
         @ body
@@ -153,14 +153,14 @@ if __name__ == '__main__':
         for heading in document['h2']
             $ id = heading.get('id', '')
             a href = "#{id}" @ heading.body
-                
+
     %with_toc @document
         | Table of Contents:
         toc @document
-        
+
         | The document:
         @document
-    
+
     with_toc
         h2 #first  | First heading
         p  | Contents...
@@ -168,9 +168,6 @@ if __name__ == '__main__':
         p  | Contents...
         h2 #third  | Third heading
         p  | Contents...
-    """
-    text = """
-    input enabled=True
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
