@@ -18,7 +18,7 @@ from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, Missi
 from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
 from hypertag.core.structs import Context, State, Slot, ValueSlot
 from hypertag.core.dom import del_indent, get_indent, DOM
-from hypertag.core.tag import Tag, NativeTag, ExternalTag, null_tag
+from hypertag.core.tag import Tag, null_tag
 
 DEBUG = False
 
@@ -59,22 +59,6 @@ def STR(value, node = None, msg = "expression to be embedded in markup text eval
     if value is None: raise NoneStringEx(msg, node)
     return text_type(value)
 
-class ImportedTag(NativeTag):
-    """
-    Wrapper around an imported NativeTag instance. Stores the global state of the imported module,
-    so that it can replace the state of the importing module when translate_tag() of the imported hypertag is called.
-    """
-    def __init__(self, native_tag, module_symbols):
-        
-        assert isinstance(native_tag, NativeTag)
-        self.native_tag = native_tag
-        self.module_symbols = module_symbols
-        
-    def dom_expand(self, body, attrs, kwattrs, state, caller):
-        
-        module_state = State(self.module_symbols)
-        return self.native_tag.dom_expand(body, attrs, kwattrs, module_state, caller)
-
 def partial(func, *args, **kwargs):
     """
     Create a partial function during processing of a filter pipeline, like in x:fun(a,b)
@@ -84,6 +68,46 @@ def partial(func, *args, **kwargs):
     def newfunc(*newargs):
         return func(*newargs, *args, **kwargs)
     return newfunc
+
+
+#####################################################################################################################################################
+
+class Native(Tag):
+    """
+    An already-expanded tag created by NODES.xblock_def for insertion into a DOM. Expansion of native tags is done
+    before DOM creation, hence expand() is implemented as an identity function.
+    """
+    def __init__(self, name):
+        self.name = name
+        
+    def expand(self, body, attrs, kwattrs):
+        return body
+
+
+class Hypertag:
+    """
+    Base class for a hypertag definition block and for hypertags imported from other scripts.
+    This class is UNRELATED to the Tag class: its expansion accepts more arguments and is performed
+    BEFORE creation of a DOM, not after.
+    """
+    def expand(self, body, attrs, kwattrs, state, caller):
+        raise NotImplementedError
+
+class Imported(Hypertag):
+    """
+    Wrapper around an imported hypertag. Stores the global state of the imported module,
+    so that it can replace the state of the importing module when translate_tag() of the imported hypertag is called.
+    """
+    def __init__(self, hypertag, module_symbols):
+        
+        assert isinstance(hypertag, Hypertag)
+        self.hypertag = hypertag
+        self.module_symbols = module_symbols
+        
+    def expand(self, body, attrs, kwattrs, state, caller):
+        
+        module_state = State(self.module_symbols)
+        return self.hypertag.expand(body, attrs, kwattrs, module_state, caller)
 
 
 #####################################################################################################################################################
@@ -447,7 +471,7 @@ class NODES(object):
             # # drop the 1st line (headline) if empty
             # if output.split('\n', 1)[0].strip() == '':
             #     output =
-                
+            
             return output
 
     class xblock_markup(block_text): pass
@@ -501,18 +525,16 @@ class NODES(object):
             body.set_indent(state.indentation)
             return body
 
-    class xblock_def(node, NativeTag):
+    class xblock_def(node, Hypertag):
         """Definition of a native hypertag."""
         name       = None
-        void       = False          # even a hypertag that does NOT accept actual body may produce a body in DOM (resulting from formal body)
-        
         attrs      = None           # all attributes as a list of children nodes, including @body
         attr_body  = None           # the @body node if present, otherwise None
         attr_names = None           # names of all attributes, including @body, as a dict {name: node}
         attr_regul = None           # all regular (non-body) attributes, as a list of children
         body       = None
         slot       = None
-        native     = None           # a NativeTag that will be inserted into DOMs
+        native     = None           # a Native tag instance that will be inserted into all DOMs
         
         def setup(self):
             self.name  = self.children[0].value
@@ -535,9 +557,8 @@ class NODES(object):
             else:
                 self.attr_regul = self.attrs
             
-            # create a NativeTag that will be inserted into DOMs
-            self.native = NativeTag()
-            self.native.name = self.name
+            # create a Native tag that will be inserted into DOMs
+            self.native = Native(self.name)
             
         def analyse(self, ctx):
             if ctx.control_depth >= 1: raise SyntaxErrorEx(f'hypertag definition inside a control block is not allowed', self)
@@ -566,7 +587,7 @@ class NODES(object):
             self.slot.set_value(state)
             return None                 # hypertag produces NO output in the place of its definition (only in places of occurrence)
 
-        def dom_expand(self, body, attrs, kwattrs, state, caller):
+        def expand(self, body, attrs, kwattrs, state, caller):
             """
             Translate the formal self.body in a given `state`, insert the actual `body` wherever necessary,
             and return as a DOM (not a string!) for possible further manipulation in other hypertags.
@@ -577,14 +598,8 @@ class NODES(object):
             # return output
             
             if output: output[0].set_outline(False)         # node's `outline` will be set for the root node up in xblock.translate()
-            root = DOM.node(output, state.indentation, tag = self.native, kwattrs = dom_attrs)
-            return root
+            return DOM.node(output, state.indentation, tag = self.native, kwattrs = dom_attrs)
 
-        # translate_tag = expand          # unlike external tags, a native tag gets expanded already during translate_tag()
-        
-        # def expand(self, body, attrs, kwattrs):
-        #     return body
-        
         def _append_attrs(self, body, attrs, kwattrs, state, caller):
             """Extend `state` with actual values of tag attributes."""
 
@@ -664,9 +679,9 @@ class NODES(object):
             runtime = self.tree.runtime
             symbols, state = runtime.import_module(self.path, self)         # top-level symbols of the imported module
 
-            # exclude private symbols AND wrap up all NativeTag instances within ImportedTag
+            # exclude private symbols AND wrap up all native tag definitions within Imported
             # to preserve original runtime state of their module, for translate_tag()
-            symbols = {name: ImportedTag(value, state) if (IS_TAG(name) and isinstance(value, NativeTag)) else value
+            symbols = {name: Imported(value, state) if (IS_TAG(name) and isinstance(value, Hypertag)) else value
                        for name, value in symbols.items() if name[1] != '_'}
             
             self.slots = {symbol: ValueSlot(symbol, value, ctx) for symbol, value in symbols.items()}
@@ -689,8 +704,8 @@ class NODES(object):
             if symbol not in symbols: raise ImportErrorEx(f"cannot import '{symbol}' from a given path ({self.path})", self)
             value = symbols[symbol]
             
-            if IS_TAG(symbol) and isinstance(value, NativeTag):
-                value = ImportedTag(value, state)
+            if IS_TAG(symbol) and isinstance(value, Hypertag):
+                value = Imported(value, state)
             
             self.slot = ValueSlot(rename, value, ctx)
             ctx.push(rename, self.slot)
@@ -1011,7 +1026,7 @@ class NODES(object):
         """
         DEFAULT = "div"     # default `name` when no tag name was provided (a shortcut was used: .xyz or #xyz); UNUSED!
         name  = None        # tag name: a, A, h1, div ...
-        tag   = None        # resolved definition of this tag, as a Tag instance (either <xblock_def> or ExternalTag); or a Slot
+        tag   = None        # resolved definition of this tag, as a Tag or Hypertag (xblock_def) instance; or a Slot
         attrs = None        # 0+ list of <attr_short> and <attr_val> nodes
         unnamed = None      # list of <expression> nodes of unnamed attributes from `attrs`
         named   = None      # list of (name, expression) pairs of named attributes from `attrs`; duplicate names allowed
@@ -1054,10 +1069,10 @@ class NODES(object):
             assert isinstance(self.tag, Slot)
             tag = self.tag.get(state)
 
-            if isinstance(tag, NativeTag):
-                return tag.dom_expand(body, attrs, kwattrs, state, self)
+            if isinstance(tag, Hypertag):
+                return tag.expand(body, attrs, kwattrs, state, self)
             
-            elif isinstance(tag, ExternalTag):
+            elif isinstance(tag, Tag):
                 return DOM.node(body, tag = tag, attrs = attrs, kwattrs = kwattrs)
             
             # if isinstance(tag, Tag):

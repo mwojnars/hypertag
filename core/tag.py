@@ -9,9 +9,8 @@ from hypertag.core.errors import VoidTagEx, TypeErrorEx
 
 class Tag:
     """
-    Common base class for two major types of tags:
-    - ExternalTag - a tag implemented as a python function
-    - NativeTag - a tag implemented inside Hypertag code
+    Base class for custom tags defined as a Python functions (external tags).
+    Instances can be imported to a Hypertag script and used as tags.
     """
     name = None         # [str] name that indentifies this tag in a DOM and can be used in DOM selectors
     
@@ -19,8 +18,6 @@ class Tag:
     flat = True         # if True, body is passed as plain text (rendered DOM) to expand(), which allows better compactification of constant subtrees of the AST (TODO)
     pure = True         # if True, the tag is assumed to always return the same result for the same arguments (no side effects),
                         # which potentially enables full compactification of a node tagged with this tag
-    
-    # term = False        # if True, the tag is treated as terminal (static), which means its expansion is delayed until DOM rendering
     
     def expand(self, body, attrs, kwattrs):
         """
@@ -38,13 +35,13 @@ class Tag:
 
 ########################################################################################################################################################
 
-class ExternalTag(Tag):
-    """
-    A custom tag defined as a Python function.
-    Instances of ExternalTag can be imported to a Hypertag script and used as tags.
-    """
+# class ExternalTag(Tag):
+#     """
+#     A custom tag defined as a Python function.
+#     Instances of ExternalTag can be imported to a Hypertag script and used as tags.
+#     """
 
-class NullTag(ExternalTag):
+class NullTag(Tag):
     """Null tag '.' is represented in the DOM tree. Its expand() passes the body unchanged."""
     
     name = 'null'
@@ -55,7 +52,7 @@ class NullTag(ExternalTag):
 null_tag = NullTag()
 
 
-class TagFunction(ExternalTag):
+class TagFunction(Tag):
     """A wrapper that creates an ExternalTag instance from a given function."""
     
     def __init__(self, fun):
@@ -68,18 +65,18 @@ class TagFunction(ExternalTag):
 
 ########################################################################################################################################################
 
-class NativeTag(Tag):
-    """Base class for native tags, i.e., tags implemented inside Hypertag code."""
-
-    def dom_expand(self, body, attrs, kwattrs, state, caller):
-        """
-        Native tags are expanded in a different way than external tags: they produce DOM during expansion, not a flat string,
-        hence a different method to be called by the parser.
-        """
-        raise NotImplementedError
-
-    def expand(self, body, attrs, kwattrs):
-        return body
+# class NativeTag(Tag):
+#     """Base class for native tags, i.e., tags implemented inside Hypertag code."""
+#
+#     def dom_expand(self, body, attrs, kwattrs, state, caller):
+#         """
+#         Native tags are expanded in a different way than external tags: they produce DOM during expansion, not a flat string,
+#         hence a different method to be called by the parser.
+#         """
+#         raise NotImplementedError
+#
+#     def expand(self, body, attrs, kwattrs):
+#         return body
     
 
 ########################################################################################################################################################
@@ -87,7 +84,7 @@ class NativeTag(Tag):
 #####  STANDARD MARKUP TAG
 #####
 
-class MarkupTag(ExternalTag):
+class MarkupTag(Tag):
     """
     A hypertag whose expand() outputs the body unchanged, surrounded by <name>...</name> strings, with proper handling
     of void tags <name /> and HTML/XHTML format differences for boolean attributes.
