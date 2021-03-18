@@ -1534,8 +1534,8 @@ what nodes get selected. The conditions below can be combined:
   (`Tag.name`) of their tags are equal to this string, are selected; note that in some cases 
   the internal name may differ from the name under which a given tag is used in Hypertag code,
   for example, when a tag was renamed (`as`) during import; the internal name of the special
-  null tag (`.`) is "null";
-- if `tag` is present and not a string, it should be a Tag instance, and 
+  [null tag](#null-tag) (`.`) is "null";
+- if `tag` is present and not a string (should be a Tag instance), 
   only the nodes tagged with this tag (checked by `is` comparison) are selected;
 - if `attr` is given, the selected nodes must have a keyword attribute of this name,
   and its value should be `value` (_not_ checked if `value` is `DOM.ATTR_DEFINED`);
