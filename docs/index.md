@@ -113,11 +113,11 @@
 
 <script>
 $(function() {
-  $("p").on("click", "a", function(event) {
+  $("li, p").on("click", "a", function(event) {
     var position = $($(this).attr("href")).offset().top - 190;
     $("html, body").animate({scrollTop: position}, 400);
-    $("nav ul li a").parent().removeClass("active");
-    $(this).parent().addClass("active");
+    // $("li a").parent().removeClass("active");
+    // $(this).parent().addClass("active");
     event.preventDefault();
   });
 });
