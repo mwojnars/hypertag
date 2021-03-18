@@ -12,6 +12,7 @@ DOM manipulation methods:
 import re, itertools
 from copy import copy
 from types import GeneratorType
+
 from nifty.util import Object
 
 from hypertag.core.errors import VoidTagEx, TypeErrorEx
@@ -87,11 +88,12 @@ class DOM:
     def __iter__(self):             return iter(self.nodes)
     def __getitem__(self, pos):
         
-        if isinstance(pos, str):
-            return self.select(pos)
-        if isinstance(pos, slice):
+        if isinstance(pos, int):
+            return self.nodes[pos]
+        if isinstance(pos, (int, slice)):
             return DOM(self.nodes[pos], _strict = False)
-        return self.nodes[pos]
+        # if isinstance(pos, (str, Tag)):
+        return self.select(pos)
     
     @staticmethod
     def node(*args, **kwargs):
@@ -145,35 +147,37 @@ class DOM:
 
     ### SELECTORS API
     
-    def walk(self, order = 'preorder', visit = None):
+    def walk(self, skip = None, order = 'preorder'):
         """
-        Generator of all nodes inside this DOM: parent nodes and descendants, traversed with depth-first search.
+        Generator of all nodes inside this DOM: parent nodes and descendants.
         Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
-        An optional argument `visit` is a function that takes a Node instance and returns True if the subtree
-        rooted at this node should be visited, False otherwise.
-        The stream of nodes returned is NOT wrapped up in a DOM - use select() instead if you need a DOM.
+        An optional argument `skip` is a function that takes a Node instance and returns True if the subtree
+        rooted at this node should be omitted, False otherwise.
+        The stream of nodes returned is NOT wrapped in a DOM - use select() instead if you need a DOM.
         """
         # if order not in ('preorder', 'postorder'): raise TypeErrorEx(f"incorrect value of order ({order})")
-        return itertools.chain(*(node.walk(order, visit) for node in self.nodes))
+        return itertools.chain(*(node.walk(skip, order) for node in self.nodes))
 
-    def alter(self, transform, order = 'preorder'):
+    def alter(self, transform, skip = None, order = 'preorder'):
         """
-        Apply `transform` function to nodes in this DOM. The DOM is traversed with depth-first search.
-        In every node, a list of child nodes is replaced with a concatenated list of nodes returned by `transform`
-        when applied to each child separately. This is done before recursive calls to alter() on child nodes
-        (if order='preorder'), or after these calls if order='postorder'.
+        Apply `transform` function to nodes in this DOM, and in nested DOMs.
+        Inside every DOM instance, starting from `self`, a list of nodes is replaced with a concatenated
+        list of nodes returned by transform(child) when applied to each child separately.
+        This is done before recursive calls to alter() on child nodes (if order='preorder'),
+        or after these calls if order='postorder'.
         The `transform` function can be a generator, or a regular function that returns a list of nodes.
         For each input node, `transform` can return any number of nodes: none, or one, or multiple;
         the input node itself can also be returned.
+        The alter() function returns self.
         """
         if order == 'preorder':
-            for node in self.nodes: node.alter(transform, order)
+            for node in self.nodes: node.alter(transform, skip, order)
         
         new_nodes  = itertools.chain(*(transform(node) for node in self.nodes))
         self.nodes = self._flatten(new_nodes)
         
         if order == 'postorder':
-            for node in self.nodes: node.alter(transform, order)
+            for node in self.nodes: node.alter(transform, skip, order)
 
         return self
         
@@ -182,17 +186,17 @@ class DOM:
 
     def select(self, tag = None, attr = None, value = ATTR_DEFINED, order = 'preorder', **attrs):
         """
-        Build a list of all nodes (including descendants) that match the search criteria and return it wrapped up in a new DOM instance.
+        Collect a list of all nodes (including descendants) that match the search criteria and return it wrapped up in a new DOM instance.
         Some of the nodes can be related, i.e., an ancestor and its descendant can be returned together,
         with the ancestor still linking to its children and (directly or indirectly) to this descendant.
         When a non-matching node gets removed, its subtree is NOT removed and descendants can still be included in the result.
         :param tag: desired tag name (<str>) or Tag instance that should be present in a matching node
         """
         tag, name, attrs = self._constraint(tag, attr, value, attrs)
-        nodes = [node for node in self.walk(order) if self._test(node, tag, name, attrs)]
+        nodes = [node for node in self.walk(order = order) if self._test(node, tag, name, attrs)]
         
         # nodes = []
-        # for node in self.walk(order):
+        # for node in self.walk(order = order):
         #     if tag  is not None and node.tag is not tag: continue
         #     if name is not None and (node.tag is None or node.tag.name != name): continue
         #
@@ -366,23 +370,24 @@ class DOM:
             return dup
             
         
-        def walk(self, order = 'preorder', visit = None):
+        def walk(self, skip = None, order = 'preorder'):
             """
             Generator of all nodes inside the tree rooted at self: parent nodes and descendants.
             Parents are yielded before descendants if order='preorder' (default), or after descendants if order='postorder'.
-            An optional argument `visit` is a function that takes a Node instance and returns True if the subtree
-            rooted at this node should be visited, False otherwise.
+            An optional argument `skip` is a function that takes a Node instance and returns True if the subtree
+            rooted at this node should be omitted, False otherwise.
             """
-            if visit is not None and not visit(self): return
+            if skip is not None and skip(self): return
             if order == 'preorder': yield self
             if self.body:
-                for node in self.body.walk(order): yield node
+                for node in self.body.walk(skip, order): yield node
             if order == 'postorder': yield self
 
-        def alter(self, transform, order = 'preorder'):
+        def alter(self, transform, skip = None, order = 'preorder'):
             """Transforms a list of child nodes by calling alter() on self.body. See DOM.alter() for details."""
             
-            if self.body: self.body.alter(transform, order)
+            if skip is not None and skip(self): return self
+            if self.body: self.body.alter(transform, skip, order)
             return self
             
 

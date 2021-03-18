@@ -26,8 +26,13 @@ def _read_module(module):
     symbols = {MARK_VAR + name : getattr(module, name) for name in dir(module)}
     tags = symbols.pop(f'{MARK_VAR}__tags__', None)
     if tags:
-        assert isinstance(tags, dict), "module's __tags__ if present must be a dict"
-        symbols.update({name if name[0] == MARK_TAG else MARK_TAG + name : link for name, link in tags.items()})
+        if not isinstance(tags, dict): raise ImportErrorEx(f"__tags__ must be a dict in {module}")
+        
+        # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
+        for name, tag in tags.items():
+            if name != tag.name: raise ImportErrorEx(f"tag's internal name ({tag.name}) differs from its public name ({name}) in {module}")
+        
+        symbols.update({name if name[0] == MARK_TAG else MARK_TAG + name : tag for name, tag in tags.items()})
         
     return symbols
 

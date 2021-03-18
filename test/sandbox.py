@@ -152,22 +152,45 @@ if __name__ == '__main__':
     %toc @document
         for heading in document['h2']
             $ id = heading.get('id', '')
-            a href = "#{id}" @ heading.body
+            li : a href="#{id}" @ heading.body
 
     %with_toc @document
         | Table of Contents:
-        toc @document
+        ol
+            toc @document
 
         | The document:
         @document
+        
+        #
+            | Everything except 'h2':
+            @document.skip('h2')
+    
+            | Everything except 'i':
+            @document.skip('i')
 
     with_toc
         h2 #first  | First heading
-        p  | Contents...
+        p  | text...
         h2 #second | Second heading
-        p  | Contents...
+        p  | text...
         h2 #third  | Third heading
-        p  | Contents...
+        p  | text...
+        
+        p : i | Contents...
+    
+    % tableRow @info name price='UNKNOWN'
+        tr
+            td | $name
+            td | $price
+            td
+               @ info           # inline form can be used as well:  td @ info
+            / $info
+            / $info.render()
+
+    tableRow 'Porsche' '200,000'
+        img src="porsche.jpg"
+        / If you insist on <s>air conditioning</s>, 🤔
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
