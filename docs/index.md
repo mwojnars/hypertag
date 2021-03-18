@@ -111,6 +111,18 @@
     }
 </style>
 
+<script>
+$(function() {
+  $("p").on("click", "a", function(event) {
+    var position = $($(this).attr("href")).offset().top - 190;
+    $("html, body").animate({scrollTop: position}, 400);
+    $("nav ul li a").parent().removeClass("active");
+    $(this).parent().addClass("active");
+    event.preventDefault();
+  });
+});
+</script>
+
 
 # Introduction
 
@@ -1465,8 +1477,9 @@ this reason is to allow _document manipulation_ inside hypertags, before the fin
 gets rendered, so that hypertags can assume active role in document generation,
 and be able to communicate more efficiently with other parts of code. 
 In a typical scenario, the incoming DOM is passively transferred to the output of a hypertag.
-However, with the DOM manipulation routines, the DOM can also be used as a means of communication
-between hypertags; and as a carrier of internal data that control hypertags' expansion.
+However, with DOM manipulation routines, the DOM can be freely modified along the way,
+and can also be used as a means of communication between hypertags, or as a carrier of 
+internal data that control hypertags' expansion.
 
 <!---
 The incoming DOM can be used as a carrier of internal data that controls hypertag's execution, 
