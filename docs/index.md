@@ -1445,8 +1445,9 @@ is translated to the DOM:
       <Text>
 
 As you can notice, all text blocks are converted to `Text` nodes.
-All (vertical) whitespace surrounding or separating the blocks is also encoded as `Text`.
+Vertical whitespace surrounding or separating the blocks is also encoded as `Text`.
 Control blocks (`for`) are replaced with the result of their execution.
+Expressions are replaced with their values (`row1` etc.).
 Tags and their attributes are preserved. All positional attributes of hypertags
 (but not of external tags) are converted to keyword attributes.
 Chained tags (`li : i`) are mapped onto separate parent-child nodes in the DOM.
@@ -1492,7 +1493,7 @@ The DOM base classes, `DOM` and `Node`, provide two general-purpose methods for 
   
 - **alter** (transform, skip = None, order = "preorder"):
   
-  traverses a DOM hierarchy in "preorder" or "postorder" and applies a given `transform(child)`
+  traverses the DOM hierarchy in "preorder" or "postorder" and applies a given `transform(child)`
   function to all child nodes, at every nesting level.
   The `transform` produces a sequence or list of nodes to replace
   a given input node in the child list of its parent, or in a node list of a DOM container;
@@ -1511,9 +1512,9 @@ unmodified:
 - **select** (tag = None, attr = None, value = ATTR_DEFINED, order = 'preorder', **attrs):
   
   walks through the DOM in a given `order`, collects all the nodes that satisfy the
-  constraints, inserts them into a list of top-level `nodes` of a newly created `DOM`
-  and returns. The nodes are _not_ being copied.
-  Some of the nodes can be related: an ancestor and its descendant can both satisfy 
+  constraints, and inserts them into a list of top-level `nodes` of a newly created `DOM`,
+  which is then returned. The nodes are _not_ copied.
+  The selected nodes can be related: an ancestor and its descendant can both satisfy 
   the constaints and get inserted as siblings to the `nodes` list, with the ancestor 
   still linking to its children and (directly or indirectly) to the descendant.
   For this reason, the returned DOM can take a form of a graph 
@@ -1521,11 +1522,10 @@ unmodified:
   
 - **skip** (tag = None, attr = None, value = ATTR_DEFINED, **attrs):
 
-  returns a mostly-deep copy of the original DOM; the copy has the same structure 
-  (nodes, relations, parents and descendants), but the subtrees rooted at selected nodes 
-  (satisfying the constraints) are _removed_.
-  All nodes in the new DOM are copies of the original ones and can be altered without
-  affecting the original DOM.
+  creates a mostly-deep copy of the original DOM, then truncates the subtrees
+  rooted at selected nodes (the ones that satisfy the constraints).
+  The new DOM is returned. All the nodes are copies of the original ones and can be 
+  altered without affecting the original DOM.
 
 Constraints for `select` and `skip` are defined through function arguments, which restrict
 what nodes get selected. The conditions below can be combined:
