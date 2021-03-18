@@ -148,7 +148,7 @@ Hypertag was inspired by Python and by indentation-based templating languages:
 <hr>
 
 # Language Reference
-<br>
+
 
 ## Blocks
 
