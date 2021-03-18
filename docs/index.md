@@ -6,6 +6,8 @@
     
     li.tag-h3 { display: none; }
     
+    h1 { margin: 40px 0 20px; }
+    h2 { margin: 35px 0 20px; }
     h3 {
      font-size:18px;
      line-height:35px;
