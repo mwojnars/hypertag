@@ -132,15 +132,15 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Advanced control of rendering process with native [control blocks](#control-blocks) 
   (_if_, _for_, _while_, _try_).
 - High level of modularity thanks to Python-like [imports](#imports).
-- Unprecedented support for code reuse with native and external [custom tags](#custom-tags).
-- Native [DOM manipulation](#dom-manipulation) during rendering.
-- Embedded [expressions](#expressions) of arbitrary type.
-- All standard Python [operators](#operators) to manipulate arbitrary Python objects.
+- Unprecedented support for code reuse with native [custom tags](#custom-tags).
+- Native [DOM](#dom) representation and [manipulation](#dom-manipulation) during rendering.
+- Embedded [expressions](#expressions) of arbitrary types.
+- Standard Python [operators](#operators) to manipulate arbitrary Python objects.
 - Custom [pipeline](#filters) operator (:) for chaining multiple functions as [filters](#filters).
-- Expression [qualifiers](#qualifiers) (!?) to create alternative paths of calculation and handle edge cases easily.
+- Expression [qualifiers](#qualifiers) (!?) for creation of alternative paths of calculation and easy handling of edge cases.
 - Predefined tags for [HTML5](#html-specific-symbols) generation and for [other](#hypertag-built-ins) purposes.
-- Integration of all [Python built-ins](#python-built-ins).
-- Integration of all [Django filters](#django-filters).
+- Integrated [Python built-ins](#python-built-ins).
+- Integrated [Django filters](#django-filters).
   
 If you are new to Hypertag, see the 
 [Quick Start](https://github.com/mwojnars/hypertag#quick-start) first for a brief introduction.
@@ -1163,15 +1163,15 @@ The inline and outline forms may differ with respect to output indentation and w
 otherwise they are, in most cases, equivalent 
 (although this may depend on a specific tag implementation).
 
-Most often, the DOM insertion block will contain just a name of the body attribute.
-However, in general, any expression is allowed, so for example,
-the DOM can be [preprocessed](#dom-manipulation) before insertion:
+Most often, a DOM insertion block contains just a name of the body attribute.
+However, in general, any expression is allowed, so the DOM can be 
+[preprocessed](#dom-manipulation) before insertion:
 
     @ info.select('img')[:1]
 
 The above code searches for `img` nodes and inserts the first one, if present.
 Note that within insertion blocks, everything is treated as an expression,
-so the casual embedding characters, `$...` and `{...}`, are not needed.
+so the casual embedding characters, `$...` and `{...}`, are not needed here.
 
 <!---
 Yes, associations with Python's `self` - the special argument to non-static methods -
@@ -1182,13 +1182,13 @@ tags it enables cleaner separation between presentation logic (tags) and textual
 --->
 
 Although each body attribute is a regular variable, which can be used in all the same places
-where other variables occur (in all types of expressions), embedding it through another 
+as other variables (in all types of expressions), embedding it through another 
 type of block (other than `@`) will _not_ work as expected. 
-For example, the following code is valid:
+For example, although the following code _is_ valid:
 
     / $info
 
-but will produce a Python representation string of the DOM instance,
+it will produce a Python representation string of the DOM instance,
 instead of merging the DOM into the hypertag's body:
 
     <hypertag.core.dom.DOM object at 0x7f5de33bcd60>
