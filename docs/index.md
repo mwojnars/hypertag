@@ -1861,4 +1861,3 @@ There is a number of additional elements of Hypertag that have not been mentione
 There are some _gotcha!_ you need to keep in mind when coding with Hypertag:
 - So far, Hypertag hasn't been yet optimized for performance.
 --->
-
