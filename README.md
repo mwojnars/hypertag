@@ -10,18 +10,21 @@
 ## Introduction
 
 Hypertag is a modern language for front-end development that allows
-writing HTML5 documents in a way similar to writing Python scripts,
+writing HTML5 and other markup documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
 and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
-high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
-with native custom tags (_hypertags_), and [more](#why-to-use-hypertag). 
+high level of modularity thanks to Python-like imports and DOM manipulation; 
+unprecedented support for code reuse with native custom tags (_hypertags_), 
+and [more](#why-to-use-hypertag). 
 See the [Quick Start](#quick-start) below, or the 
 [Language Reference](http://hypertag.io) for details.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
+<!---
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
+--->
 
 ### Usage
 
@@ -66,7 +69,7 @@ The `script` in the code above is rendered to `html` as shown below
 ### Why to use Hypertag
 
 - **Concise syntax**: inspired by Python, the indentation-based syntax is a lot cleaner, 
-  more readable and maintainable than raw HTML; it requires less typing, is less redundant,
+  more readable and maintainable than raw markup; it requires less typing, is less redundant,
   and lets you concentrate on coding rather than chasing unmatched opening-closing tags.
 - **Code reuse** by means of functions/classes is the corner stone of programming,
   yet it is missing from HTML; this is fixed now with Hypertag:
@@ -91,6 +94,15 @@ The `script` in the code above is rendered to `html` as shown below
   document description language.
   
 <!---
+- **Code reuse** by means of functions/classes is the corner stone of programming,
+  yet it is missing from HTML; this is fixed now with Hypertag:
+  programmers can create reusable components in a form of **custom tags** (_hypertags_), 
+  defined either as Python functions (_external tags_) 
+  or directly in a document using Hypertag syntax (_native tags_);
+  hypertags can be parameterized and may represent complex pieces 
+  of combined: content, style and layout - for a reuse across documents.
+- **DOM manipulation**:
+
   Hypertag is *not* limited to (X)HTML; by defining new tags,
   it can be adapted to produce an arbitrary document description language.
   HTML templating is one of applications, but Hypertag's capabilities are much bigger than that.

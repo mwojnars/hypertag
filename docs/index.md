@@ -125,22 +125,36 @@ $(function() {
 # Introduction
 
 Hypertag is a modern language for front-end development that allows
-writing HTML5 documents in a way similar to writing Python scripts,
-where _indentation_ determines relationships between nested elements 
-and removes the need for explicit closing tags.
-Hypertag provides advanced control of page rendering with native control blocks;
-high level of modularity thanks to Python-like imports; unprecedented support for code reuse 
-with native custom tags (_hypertags_), and more. 
-If you are new to Hypertag, see the [Quick Start](https://github.com/mwojnars/hypertag#quick-start) 
-first for a brief introduction.
+writing markup documents in a way similar to writing Python scripts,
+where [indentation](#layout) determines relationships between nested elements 
+and removes the need for explicit closing tags. Hypertag provides:
+
+- Advanced control of rendering process with native [control blocks](#control-blocks) 
+  (_if_, _for_, _while_, _try_).
+- High level of modularity thanks to Python-like [imports](#imports).
+- Unprecedented support for code reuse with native and external [custom tags](#custom-tags).
+- Native [DOM manipulation](#dom-manipulation) during rendering.
+- Embedded [expressions](#expressions) of arbitrary type.
+- All standard Python [operators](#operators) to manipulate arbitrary Python objects.
+- Custom [pipeline](#filters) operator (:) for chaining multiple functions as [filters](#filters).
+- Expression [qualifiers](#qualifiers) (!?) to create alternative paths of calculation and handle edge cases easily.
+- Predefined tags for [HTML5](#html-specific-symbols) generation and for [other](#hypertag-built-ins) purposes.
+- Integration of all [Python built-ins](#python-built-ins).
+- Integration of all [Django filters](#django-filters).
+  
+If you are new to Hypertag, see the 
+[Quick Start](https://github.com/mwojnars/hypertag#quick-start) first for a brief introduction.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
+<!--
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
+-->
 
 ## Setup
 
-(TODO)
+Install: _git clone_
+
 
 <!---
 Install: ........
@@ -152,7 +166,8 @@ Run: .......
 
 ## Acknowledgements
 
-Hypertag was inspired by Python and by indentation-based templating languages:
+Hypertag was inspired by [Python](https://www.python.org/) 
+and by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
@@ -191,7 +206,8 @@ output:
 </ul>
 ```
 
-During parsing, blocks are first **translated** into Hypertag's native Document Object Model (**DOM**),
+During parsing, blocks are first **translated** into Hypertag's native 
+[Document Object Model](#dom) (**DOM**),
 and then the DOM undergoes **rendering** to generate a document string in a target language. 
 Typically, the target language is HTML, although any other language can be supported 
 if an appropriate [runtime](#runtime) is implemented to provide language-specific 
@@ -625,6 +641,8 @@ as well as _in-place_ assignments:
     $ x += 5
     $ y *= 2
 
+### Operators
+
 Each Hypertag variable points to a Python object and can be used with all the standard operators
 known from Python. The list is ordered according to a decreasing operator priority:
 
@@ -864,9 +882,9 @@ Hypertag supports the following literal expressions:
 - raw strings (r-strings): `r"text"`, `r'text'`
 
 Literal strings can be created with the `'...'` or `"..."` syntax, both are equivalent.
-This creates _formatted strings_ (analogue of Python's f-strings),
+This creates **formatted strings** (_f-strings_, analogue of Python's f-strings),
 which may contain _embedded expressions_ of both the `$...` and `{...}` form.
-If you want to create raw strings instead, such that `$`, `{`, `}` are treated as regular
+If you want to create **raw strings** instead, such that `$`, `{`, `}` are treated as regular
 characters, the `r'...'` and `r"..."` syntax should be used:
 
     | { "this is a formatted string with an embedded expression: {2+3}" }
@@ -1185,22 +1203,57 @@ of this part of the DOM upstream in the script, and for this reason it is not re
 
 ### External tags
 
+Custom tags can have a form of Python objects of `hypertag.Tag` class or its subclass.
+Every new `tag` should have a name (`tag.name`) and expose the `expand` method:
 
-`hypertag.Tag`
+    def expand(self, body, attrs, kwattrs):
+        ...
 
-(TODO...)
+This method is called during DOM rendering in order to convert a `body`
+(an instance of `DOM`, see [DOM structure](#dom-structure)) tagged by the `tag` to a string 
+in a target language.
+Typically, `body.render()` is called inside `expand()` to first convert the body to a string,
+and only then a tag-specific surrounding text is added; this can be customized, however.
+In general, the tag class is free to do whatever it wants with the input DOM,
+including any transformation and manipulation, before an output text is produced.
+The tag expansion can be influenced by positional (`attrs`) and keyword attributes (`kwattrs`).
+Note that names of keyword attributes may follow the more general [XML rules](#symbols) 
+of attribute naming, so they may _not_ be valid Python identifiers.
+
+If you implement a tag that behaves similarly to HTML markup tags, in that it only adds
+surrounding plain-text tags `<...>`, possibly with attributes, it may be helpful to
+use the standard `hypertag.Markup` class, which can be subclassed or directly instantiated.
+This approach can be taken, for example, to implement custom XML tags, not present 
+on the list of [standard HTML5 tags](#html-specific-symbols).
+
+Hypertag provides also a convenient wrapper, `hypertag.TagFunction`, for converting
+functions into tags. The wrapper can be applied to any function of the form:
+
+    def fun(body, *attrs, **kwattrs)
+        ...
+
+The function is called in place of an `expand()` method; it should accept at least one positional 
+argument (the `body`) and return a string.
+Importantly, the `body` here is passed as an already-rendered string (!), rather than a DOM,
+so that existing text-processing functions can be used as they are with the wrapper.
+If you need to manipulate the DOM during expansion, you should subclass `hypertag.Tag` instead.
+
+After a new tag is implemented, it should be added to the special module-level dictionary,
+`__tags__`, where it could be found by [import](#imports) blocks.
 
 
 ## Control blocks
 
 Control blocks of multiple types are available in Hypertag to help you manipulate input data
-directly inside the document without going back and forth between Python and templating code.
+directly inside the document without going back and forth between Python and presentation code.
 The blocks are:
 
 - **if-elif-else**
 - **try-else**
-- **for**
+- **for-in**
 - **while**
+
+### "If", "for", "while" blocks
 
 The semantics of "if", "for", "while" blocks is analogous to what it is in Python.
 Both inline and outline body is supported, although the former comes with restrictions:
@@ -1209,7 +1262,7 @@ enclosed in `(...)` or `{...}` to avoid ambiguity of special symbols `|/!`,
 which can be interpreted both as operators inside the expressions, and as markers of inline body.
 Trailing colons in clause headlines are optional.
 
-An example "if" block with outline body:
+An example "if" block with an outline body may look like this:
 
     $size = 5
     if size > 10      
@@ -1223,12 +1276,14 @@ output:
 
     medium size
 
-The same code as above, but with inline body; notice the parentheses around expressions:
+The same code as above, but with inline body (notice the parentheses around expressions):
 
     $size = 5
     if (size > 10)    | large size
     elif (size > 3)   | medium size
     else              | small size
+
+Trailing colons (`:`) after clause headers are optional.
 
 Examples of loops:
 
@@ -1256,7 +1311,9 @@ letter "b"
 letter "c"
 ```
 
-The "try" block differs from the corresponding Python statement.
+### "Try" block
+
+The "try" block differs from the same-named Python statement.
 It consists of a single "try" clause plus any number (possibly none) of "else" clauses.
 The first clause that does _not_ raise an exception is returned.
 All exceptions that inherit from Python's Exception are caught.
@@ -1304,9 +1361,11 @@ The code below renders empty string instead of raising an exception:
 
     ? b : a href=$cars.url | the "a" tag fails because "cars" has no "url"
 
-The "try" block is particularly useful when combined with expression
-_qualifiers_: "optional" (`?`) and "obligatory" (`!`), placed at the end
-of (sub)expressions to mark that a given piece of calculation either:
+### Qualifiers
+
+The "try" block is particularly useful when combined with **expression qualifiers**:
+"optional" (`?`) and "obligatory" (`!`), placed at the end of (sub)expressions to mark 
+that a given piece of calculation either:
 
 - can be ignored (replaced with `''`) if it fails with an exception (`?`); or
 - must be non-empty (not false), otherwise an exception will be raised (`!`).
