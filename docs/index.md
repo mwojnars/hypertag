@@ -133,17 +133,17 @@ and removes the need for explicit closing tags. Hypertag provides:
   (_if_, _for_, _while_, _try_).
 - High level of modularity thanks to Python-like [imports](#imports).
 - Unprecedented support for code reuse with native [custom tags](#custom-tags).
-- Native [DOM](#dom) representation and [manipulation](#dom-manipulation) during rendering.
-- Embedded [expressions](#expressions) of arbitrary types.
+- Native [DOM](#dom) representation and [DOM manipulation](#dom-manipulation) during rendering.
+- Embedded [expressions](#expressions) of any complexity.
 - Standard Python [operators](#operators) to manipulate arbitrary Python objects.
-- Custom [pipeline](#filters) operator (:) for chaining multiple functions as [filters](#filters).
-- Expression [qualifiers](#qualifiers) (!?) for creation of alternative paths of calculation and easy handling of edge cases.
+- Custom [pipeline](#filters) operator (`:`) for chaining multiple functions as [filters](#filters).
+- Expression [qualifiers](#qualifiers) (`!?`) for creation of alternative paths of calculation and easy handling of edge cases.
 - Predefined tags for [HTML5](#html-specific-symbols) generation and for [other](#hypertag-built-ins) purposes.
 - Integrated [Python built-ins](#python-built-ins).
 - Integrated [Django filters](#django-filters).
   
 If you are new to Hypertag, see the 
-[Quick Start](https://github.com/mwojnars/hypertag#quick-start) first for a brief introduction.
+[Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
