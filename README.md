@@ -26,10 +26,17 @@ Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 **NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
 --->
 
-### Usage
+### Setup
 
 Install: _git clone_
 
+Usage:
+```python
+from hypertag import HyperHTML
+html = HyperHTML().render(script)       # rendering of a Hypertag script to HTML
+```
+
+<!---
 Run in Python 3 (example):
 ```python
 from hypertag import HyperHTML
@@ -65,6 +72,7 @@ The `script` in the code above is rendered to `html` as shown below
     <p><a href="http://hypertag.io">See the Hypertag site for more!</a></p>
 </body></html>
 ```
+--->
 
 ### Why to use Hypertag
 
@@ -134,7 +142,7 @@ A typical Hypertag script consists of nested blocks with tags:
               Slash (/) marks a <b>markup block</b> (no HTML escaping).
               Text blocks may consist of multiple lines, like here.
 
-Indentation of blocks gets preserved in the output:
+Indentation of blocks gets preserved in the output during rendering:
 
 ```html
 <ul>
