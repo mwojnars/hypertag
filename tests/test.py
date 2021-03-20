@@ -1,7 +1,7 @@
 """
-Run:
+Run in "src" folder:
 $
-$  pytest -vW ignore::DeprecationWarning hypertag/tests/test.py
+$  python3 -m pytest -vW ignore::DeprecationWarning ../tests/test.py
 $
 
 """
