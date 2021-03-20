@@ -1,7 +1,7 @@
 """
 Run:
 $
-$  pytest -vW ignore::DeprecationWarning hypertag/test/tests.py
+$  pytest -vW ignore::DeprecationWarning hypertag/tests/test.py
 $
 
 """
@@ -1234,7 +1234,7 @@ def test_024_import():
     assert render(src).strip() == "<p>kot</p>"
 
     src = """
-        from hypertag.test.sample1 import $x, $f
+        from hypertag.tests.sample1 import $x, $f
         | $x
         | $f(2)
     """
@@ -1244,12 +1244,12 @@ def test_024_import():
     """
     assert render(src).strip() == out.strip()
     src = """
-        from hypertag.test.sample2 import $x
+        from hypertag.tests.sample2 import $x
         | $x
     """
     assert render(src).strip() == "155"
     src = """
-        from hypertag.test.sample2 import %H
+        from hypertag.tests.sample2 import %H
         H 3
         $x = 10
         H 0
