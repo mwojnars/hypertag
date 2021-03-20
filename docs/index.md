@@ -140,7 +140,7 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Standard Python [operators](#operators) to manipulate arbitrary Python objects.
 - Custom [pipeline](#filters) operator (`:`) for chaining multiple functions as [filters](#filters).
 - Expression [qualifiers](#qualifiers) (`!?`) for creation of alternative paths of calculation and easy handling of edge cases.
-- Predefined tags for [HTML5](#html-specific-symbols) generation and for [other](#hypertag-built-ins) purposes.
+- Built-in tags for [HTML5](#html-specific-symbols) generation and for [general](#hypertag-built-ins) purposes.
 - Integrated [Python built-ins](#python-built-ins).
 - Integrated [Django filters](#django-filters).
   
