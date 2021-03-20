@@ -1,5 +1,5 @@
 import re, itertools
-from nifty.util import unique as unique_list, merge_spaces
+from hypertag.nifty.util import unique as unique_list, merge_spaces
 from hypertag.std.registry import Registry
 
 

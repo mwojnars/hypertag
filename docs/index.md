@@ -30,6 +30,8 @@
       width: 850px;
       /* padding: 30px 30px 50px 30px; */
       padding: 40px 50px 50px 50px; 
+      /* background: #fbfbfb; */
+      background: #fcfcfc;
     }
 
     .wrapper {

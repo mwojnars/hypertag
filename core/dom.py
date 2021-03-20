@@ -13,7 +13,7 @@ import re, itertools
 from copy import copy
 from types import GeneratorType
 
-from nifty.util import Object
+from hypertag.nifty.util import Object
 
 from hypertag.core.errors import VoidTagEx, TypeErrorEx
 

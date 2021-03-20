@@ -1,4 +1,4 @@
-from nifty.util import isfunction
+from hypertag.nifty.util import isfunction
 from hypertag.core.tag import TagFunction
 
 
