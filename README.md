@@ -78,8 +78,6 @@ If you try Hypertag, you will never miss old-school HTML templating.
 
 ## Quick Start
 
-### Setup
-
 Install in Python 3.6+:
 ```
 pip install hypertag-lang               # watch out the name, it is "hypertag-lang"
