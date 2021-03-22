@@ -18,11 +18,11 @@ high level of modularity thanks to Python-like imports and DOM manipulation;
 unprecedented support for code reuse with native custom tags (_hypertags_), 
 and much more. See the [Quick Start](#quick-start) below, or the 
 [Language Reference](http://hypertag.io) for details.
+Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 <!---
 The concept of the language stems from many years of experiences 
-in development of academic web services: [Paperity](https://paperity.org/) and others.
-Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
+in the development of academic web services: [Paperity](https://paperity.org/) and others.
 --->
 
 <!---
