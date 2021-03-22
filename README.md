@@ -16,10 +16,14 @@ and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports and DOM manipulation; 
 unprecedented support for code reuse with native custom tags (_hypertags_), 
-and [more](#why-to-use-hypertag). 
-See the [Quick Start](#quick-start) below, or the 
+and much more. See the [Quick Start](#quick-start) below, or the 
 [Language Reference](http://hypertag.io) for details.
+
+<!---
+The concept of the language stems from many years of experiences 
+in development of academic web services: [Paperity](https://paperity.org/) and others.
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
+--->
 
 <!---
 ### Why to use Hypertag

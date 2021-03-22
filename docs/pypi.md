@@ -5,7 +5,7 @@ If you are new to Hypertag, see the
 or the complete **[Language Reference](http://hypertag.io/#language-reference)** for details.
 
 Hypertag is a modern language for front-end development that allows
-writing markup documents in a way similar to writing Python scripts,
+writing HTML5 and other markup documents in a way similar to writing Python scripts,
 where [indentation](http://hypertag.io/#layout) determines relationships between nested elements 
 and removes the need for explicit closing tags. Hypertag provides:
 
