@@ -146,6 +146,7 @@ and removes the need for explicit closing tags. Hypertag provides:
   
 If you are new to Hypertag, see the 
 [Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
+The source code is available on [GitHub](https://github.com/mwojnars/hypertag).
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 

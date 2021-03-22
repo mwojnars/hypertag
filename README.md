@@ -33,7 +33,7 @@ Install: _git clone_
 Usage:
 ```python
 from hypertag import HyperHTML
-html = HyperHTML().render(script)       # rendering of a Hypertag script to HTML
+html = HyperHTML().render(script)       # rendering of a Hypertag `script` to HTML
 ```
 
 <!---
