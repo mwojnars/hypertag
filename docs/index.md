@@ -150,9 +150,6 @@ The source code is available on [GitHub](https://github.com/mwojnars/hypertag).
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
-<!--
-**NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
--->
 
 ## Setup
 

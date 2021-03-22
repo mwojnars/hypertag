@@ -19,12 +19,64 @@ unprecedented support for code reuse with native custom tags (_hypertags_),
 and [more](#why-to-use-hypertag). 
 See the [Quick Start](#quick-start) below, or the 
 [Language Reference](http://hypertag.io) for details.
-
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 <!---
-**NOTE:** Hypertag is currently in Alpha phase. The documentation is under development.
+### Why to use Hypertag
+
+- **Concise syntax**: inspired by Python, the indentation-based syntax is a lot cleaner, 
+  more readable and maintainable than raw markup; it requires less typing, is less redundant,
+  and lets you concentrate on coding rather than chasing unmatched opening-closing tags.
+- **Code reuse** by means of functions/classes is the corner stone of programming,
+  yet it is missing from HTML; this is fixed now with Hypertag:
+  programmers can create reusable components in a form of **custom tags** (_hypertags_), 
+  defined either as Python functions (_external tags_) 
+  or directly in a document using Hypertag syntax (_native tags_);
+  hypertags can be parameterized and may represent complex pieces 
+  of combined: content, style and layout - for a reuse across documents.
+- **Fine-grained control** over rendering process is possible with
+  a range of native _control blocks_ (for, while, if-elif-else, try-else) 
+  constituting a core part of Hypertag syntax, unlike in templating languages, 
+  where control structures are artificially overlaid on top of another language (HTML).
+- **Modularity** in Hypertag is modeled after Python's: 
+  every script may import tags and variables from other scripts,
+  from Python modules, and from the dynamic _context_ of script rendering;
+  scripts and modules are arranged into packages;
+  with these mechanisms in place, building libraries of reusable components is easy and fun.
+- **Applicability** to different target languages. 
+  Hypertag is _not_ just a templating system put on top of HTML. 
+  Hypertag is a full-featured standalone programming language tailored to the generation
+  of documents of all kinds. By defining new tags, Hypertag can be adapted to produce an arbitrary
+  document description language.
 --->
+  
+<!---
+- **Code reuse** by means of functions/classes is the corner stone of programming,
+  yet it is missing from HTML; this is fixed now with Hypertag:
+  programmers can create reusable components in a form of **custom tags** (_hypertags_), 
+  defined either as Python functions (_external tags_) 
+  or directly in a document using Hypertag syntax (_native tags_);
+  hypertags can be parameterized and may represent complex pieces 
+  of combined: content, style and layout - for a reuse across documents.
+- **DOM manipulation**:
+
+  Hypertag is *not* limited to (X)HTML; by defining new tags,
+  it can be adapted to produce an arbitrary document description language.
+  HTML templating is one of applications, but Hypertag's capabilities are much bigger than that.
+  whose one of use cases is being a replacement for web templating languages.
+- **consistency** (monolithic architecture): Hypertag combines presentation and logic in one language; 
+  you no longer have to mix presentation code (HTML) with foreign syntax of a 
+  templating language, or PHP etc.
+- **Object-Oriented Programming** (OOP) inside markup, through native language structures (??)
+- **high performace** in web applications achieved through caching of parsed AST,
+  combined with their **compactification**: constant parts of the AST are
+  pre-rendered and merged into single nodes, to avoid repeated rendering
+  with every web page request.
+
+If you try Hypertag, you will never miss old-school HTML templating.
+--->
+
+## Quick Start
 
 ### Setup
 
@@ -76,61 +128,6 @@ The `script` in the code above is rendered to `html` as shown below
 </body></html>
 ```
 --->
-
-### Why to use Hypertag
-
-- **Concise syntax**: inspired by Python, the indentation-based syntax is a lot cleaner, 
-  more readable and maintainable than raw markup; it requires less typing, is less redundant,
-  and lets you concentrate on coding rather than chasing unmatched opening-closing tags.
-- **Code reuse** by means of functions/classes is the corner stone of programming,
-  yet it is missing from HTML; this is fixed now with Hypertag:
-  programmers can create reusable components in a form of **custom tags** (_hypertags_), 
-  defined either as Python functions (_external tags_) 
-  or directly in a document using Hypertag syntax (_native tags_);
-  hypertags can be parameterized and may represent complex pieces 
-  of combined: content, style and layout - for a reuse across documents.
-- **Fine-grained control** over rendering process is possible with
-  a range of native _control blocks_ (for, while, if-elif-else, try-else) 
-  constituting a core part of Hypertag syntax, unlike in templating languages, 
-  where control structures are artificially overlaid on top of another language (HTML).
-- **Modularity** in Hypertag is modeled after Python's: 
-  every script may import tags and variables from other scripts,
-  from Python modules, and from the dynamic _context_ of script rendering;
-  scripts and modules are arranged into packages;
-  with these mechanisms in place, building libraries of reusable components is easy and fun.
-- **Applicability** to different target languages. 
-  Hypertag is _not_ just a templating system put on top of HTML. 
-  Hypertag is a full-featured standalone programming language tailored to the generation
-  of documents of all kinds. By defining new tags, Hypertag can be adapted to produce an arbitrary
-  document description language.
-  
-<!---
-- **Code reuse** by means of functions/classes is the corner stone of programming,
-  yet it is missing from HTML; this is fixed now with Hypertag:
-  programmers can create reusable components in a form of **custom tags** (_hypertags_), 
-  defined either as Python functions (_external tags_) 
-  or directly in a document using Hypertag syntax (_native tags_);
-  hypertags can be parameterized and may represent complex pieces 
-  of combined: content, style and layout - for a reuse across documents.
-- **DOM manipulation**:
-
-  Hypertag is *not* limited to (X)HTML; by defining new tags,
-  it can be adapted to produce an arbitrary document description language.
-  HTML templating is one of applications, but Hypertag's capabilities are much bigger than that.
-  whose one of use cases is being a replacement for web templating languages.
-- **consistency** (monolithic architecture): Hypertag combines presentation and logic in one language; 
-  you no longer have to mix presentation code (HTML) with foreign syntax of a 
-  templating language, or PHP etc.
-- **Object-Oriented Programming** (OOP) inside markup, through native language structures (??)
-- **high performace** in web applications achieved through caching of parsed AST,
-  combined with their **compactification**: constant parts of the AST are
-  pre-rendered and merged into single nodes, to avoid repeated rendering
-  with every web page request.
-
-If you try Hypertag, you will never miss old-school HTML templating.
---->
-
-## Quick Start
 
 ### Blocks
 
@@ -738,10 +735,9 @@ Qualifiers can be placed after all atomic expressions and embeddings, no space i
 
 ### Built-ins
 
-HyperHTML runtime automatically imports all Python built-in symbols (`builtins.*`) 
-at the beginning of script rendering, so all common types and functions: 
+All Python built-ins, including the common types and functions: 
 `list`, `set`, `dict`, `int`, `min`, `max`, `enumerate`, `sorted` etc., 
-are available to a script.
+are automatically imported and can be used in a Hypertag script:
 
     | $len('cat'), $list('cat')
     | $int('123'), $min(4,5,6)
@@ -756,26 +752,17 @@ output:
     1, c
     2, t
 
-Additionally, Hypertag provides a number of predefined tags and functions:
-
-1. General-purpose tags.
-2. Functions & filters.
-3. HTML-specific tags.
-
-All of the above are automatically imported as built-in symbols by HyperHTML runtime.
-
-(TODO...)
 
 ### Further reading
 
-There are still many features in Hypertag that have not been mentioned 
-in this Quick Start: [pipelines & filters](http://hypertag.io/#filters) (`:`); 
+There are still many Hypertag features that have not been mentioned 
+in this Quick Start: 
 block layout [modifiers](http://hypertag.io/#modifiers) (_dedent_, _append_); 
 [comments](http://hypertag.io/#comments) (`#` and `--`);
 [built-in](http://hypertag.io/#hypertag-built-ins) tags and functions;
 raw (r-) vs. formatted (f-) strings; 
 _pass_ keyword; concatenation operator; 
-[DOM manipulation](http://hypertag.io/#dom-manipulation); and more... 
+[DOM manipulation](http://hypertag.io/#dom-manipulation); and more.
 
 See the [Language Reference](http://hypertag.io/#language-reference) for details.
 
