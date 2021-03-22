@@ -2,7 +2,7 @@ import os, sys, importlib
 from six.moves import builtins
 
 from hypertag.core.errors import ImportErrorEx, ModuleNotFoundEx
-from hypertag.core.grammar import MARK_TAG, MARK_VAR, TAGS
+from hypertag.core.grammar import MARK_TAG, VAR, TAG, TAGS
 from hypertag.core.ast import HypertagAST
 import hypertag.builtins
 
@@ -23,16 +23,16 @@ def _read_module(module):
     Pull symbols: tags & variables from a module and return as a dict.
     All top-level symbols are treated as variables; tags are pulled from a special dictionary named `__tags__`.
     """
-    symbols = {MARK_VAR + name : getattr(module, name) for name in dir(module)}
-    tags = symbols.pop(f'{MARK_VAR}__tags__', None)
+    symbols = {VAR(name) : getattr(module, name) for name in dir(module)}
+    tags = symbols.pop(VAR('__tags__'), None)
     if tags:
-        if not isinstance(tags, dict): raise ImportErrorEx(f"__tags__ must be a dict in {module}")
+        if not isinstance(tags, dict): raise ImportErrorEx("__tags__ must be a dict in %s" % module)
         
         # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
         for name, tag in tags.items():
-            if name != tag.name: raise ImportErrorEx(f"tag's internal name ({tag.name}) differs from its public name ({name}) in {module}")
+            if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
         
-        symbols.update({name if name[0] == MARK_TAG else MARK_TAG + name : tag for name, tag in tags.items()})
+        symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
         
     return symbols
 
@@ -115,16 +115,16 @@ class Runtime:
         context = {}
         if tags:
             # TODO: check if names of tags are non-empty and syntactically correct
-            context.update({name if name[0] == MARK_TAG else MARK_TAG + name : link for name, link in tags.items()})
+                context.update({name if name[0] == MARK_TAG else TAG(name) : link for name, link in tags.items()})
         if variables:
-            context.update({MARK_VAR + name : value for name, value in variables.items()})
+            context.update({VAR(name) : value for name, value in variables.items()})
         return context
 
     # def import_one(self, symbol, path = None, ast_node = None):
     #     """`symbol` must start with either % or $ to denote whether a tag or a variable should be imported."""
     #
     #     module = self.import_module(path, ast_node)
-    #     if symbol not in module: raise ImportErrorEx(f"cannot import '{symbol}' from a given path ({path})", ast_node)
+    #     if symbol not in module: raise ImportErrorEx("cannot import '{symbol}' from a given path ({path})", ast_node)
     #     return module[symbol]
     #
     # def import_all(self, path = None, ast_node = None):
@@ -151,7 +151,7 @@ class Runtime:
 
         if module is None:
             module = self._load_module(path_canonical, ast_node)
-            if not module: raise ModuleNotFoundEx(f"import path not found '{path}', try setting __package__ or __file__ in parsing context", ast_node)
+            if not module: raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
             self.modules[path_canonical] = module
             
         if isinstance(module, Module):
@@ -182,8 +182,8 @@ class Runtime:
         # from script ...             -- only possible when __file__ of the calling script is defined; "script.hy" is always looked for in the same folder as the calling script
         # from .script
         
-        referrer_file    = self.context.get(f'{MARK_VAR}__file__')
-        referrer_package = self.context.get(f'{MARK_VAR}__package__')
+        referrer_file    = self.context.get(VAR('__file__'))
+        referrer_package = self.context.get(VAR('__package__'))
         
         # package path is present? the package & file can be localized through `importlib`
         if '.' in path:
@@ -193,13 +193,13 @@ class Runtime:
             package_path = package.__file__
             if package_path.endswith('.py'):
                 package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
-            filepath = f'{package_path}/{filename}.{self.SCRIPT_EXTENSION}'
+            filepath = '%s/%s.%s' % (package_path, filename, self.SCRIPT_EXTENSION)
             
         else:
             # no package path? the script must be in the same folder as __file__
             if referrer_file is None: return None
             folder   = os.path.dirname(referrer_file)
-            filepath = f"{folder}/{path}"
+            filepath = "%s/%s" % (folder, path)
             package_name = referrer_package
             
         if not os.path.exists(filepath):
@@ -217,7 +217,7 @@ class Runtime:
         Both absolute and relative Python paths are supported. The latter require that "$__package__" variable
         is properly set in the context.
         """
-        package = self.context.get(f'{MARK_VAR}__package__')
+        package = self.context.get(VAR('__package__'))
         try:
             module = importlib.import_module(path, package)
             return Module(_read_module(module))
@@ -227,8 +227,8 @@ class Runtime:
     def translate(self, script, __file__ = None, __package__ = None,  __tags__ = None, **variables):
         
         globals_ = self.import_default()
-        globals_[f'{MARK_VAR}__file__']    = __file__
-        globals_[f'{MARK_VAR}__package__'] = __package__
+        globals_[VAR('__file__')]    = __file__
+        globals_[VAR('__package__')] = __package__
         self.update_context(__tags__, variables)
         
         ast = HypertagAST(script, self, globals_)

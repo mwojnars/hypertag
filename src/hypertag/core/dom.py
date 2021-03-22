@@ -122,7 +122,7 @@ class DOM:
             elif isinstance(n, DOM.Node):
                 result.append(n)
             else:
-                raise TypeErrorEx(f"found {type(n)} in a DOM, expected DOM.Node")
+                raise TypeErrorEx("found %s in a DOM, expected DOM.Node" % type(n))
         return result
         
     def set_indent(self, indent):
@@ -155,7 +155,7 @@ class DOM:
         rooted at this node should be omitted, False otherwise.
         The stream of nodes returned is NOT wrapped in a DOM - use select() instead if you need a DOM.
         """
-        # if order not in ('preorder', 'postorder'): raise TypeErrorEx(f"incorrect value of order ({order})")
+        # if order not in ('preorder', 'postorder'): raise TypeErrorEx("incorrect value of order ({order})")
         return itertools.chain(*(node.walk(skip, order) for node in self.nodes))
 
     def alter(self, transform, skip = None, order = 'preorder'):
@@ -347,13 +347,13 @@ class DOM:
         def tree(self, indent = '', step = '  '):
             r"""Return a multiline \n-terminated string that presents this node's structure as a tree."""
             
-            name = self.tag.name if self.tag else f"<{self.__class__.__name__}>"
-            heading = f"{name}"
+            name = self.tag.name if self.tag else "<%s>" % self.__class__.__name__
+            heading = str(name)
             
             for attr in self.attrs or []:
-                heading += f" {attr}"
+                heading += " %s" % attr
             for key, attr in (self.kwattrs or {}).items():
-                heading += f" {key}={attr}"
+                heading += " %s=%s" % (key, attr)
                 
             return indent + heading + '\n' + self.body.tree(indent + step, step)
         

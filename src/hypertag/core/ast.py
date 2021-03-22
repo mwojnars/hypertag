@@ -220,14 +220,14 @@ class Grammar(Parsimonious):
                     lines[-1] += symbols
                     
                 else:
-                    raise IndentationError(f'indentation on line {linenum} is incompatible with previous line')
+                    raise IndentationError('indentation on line %s is incompatible with previous line' % linenum)
                     
                 tail   = margin * '\n' + tail
                 margin = 0
                 
                 lines.append(tail)
                 
-        assert current == '', f"'{current}'"
+        assert current == '', "'%s'" % current
 
         # append remaining empty lines
         output = '\n'.join(lines) + margin * '\n'
@@ -450,7 +450,7 @@ class NODES(object):
             sub_indent = get_indent(output)
             sub_indent = sub_indent[:lead+1]        # max 1 initial space/tab after the lead is dropped; remaining sub-indentation is preserved in `output`
             output = del_indent(output, sub_indent)
-            # print(f'sub_indent: "{sub_indent}"')
+            # print('sub_indent: "{sub_indent}"')
 
             # if tail lines have shorter indent than the headline, drop all the lead + 1 space (gap)
             if len(sub_indent) < lead:
@@ -490,7 +490,7 @@ class NODES(object):
             try:
                 body = list(body)
             except Exception as ex:
-                raise TypeErrorEx(f"embedded @-expression evaluates to {type(body)} instead of a DOM or DOM.Node or an iterable of DOM.Node's)", self)
+                raise TypeErrorEx("embedded @-expression evaluates to %s instead of a DOM or DOM.Node or an iterable of DOM.Node's" % type(body), self)
             return DOM(*body)
 
     class xblock_struct(node):
@@ -538,7 +538,7 @@ class NODES(object):
             
             # check that attr names are unique
             if len(self.attr_names) < len(self.attrs):
-                raise SyntaxErrorEx(f"duplicate attribute '{duplicate(self.attrs)}' in hypertag definition '{self.name}'", self)
+                raise SyntaxErrorEx("duplicate attribute '%s' in hypertag definition '%s'" % (duplicate(self.attrs), self.name), self)
             
             # pick body attribute (attr_body) and the remaining list of regular attributes (attr_regul)
             if self.attrs and self.attrs[0].body:
@@ -551,7 +551,7 @@ class NODES(object):
             self.native = Native(self.name)
             
         def analyse(self, ctx):
-            if ctx.control_depth >= 1: raise SyntaxErrorEx(f'hypertag definition inside a control block is not allowed', self)
+            if ctx.control_depth >= 1: raise SyntaxErrorEx('hypertag definition inside a control block is not allowed', self)
             
             ctx.regular_depth  += 1
             ctx.hypertag_depth += 1
@@ -595,16 +595,16 @@ class NODES(object):
 
             # verify no. of positional attributes & names of keyword attributes
             if len(attrs) > len(self.attr_regul):
-                raise TypeErrorEx(f"hypertag '{self.name}' takes {len(self.attr_regul)} positional attributes but {len(attrs)} were given", caller)
+                raise TypeErrorEx("hypertag '%s' takes %s positional attributes but %s were given" % (self.name, len(self.attr_regul), len(attrs)), caller)
             if self.attr_body and self.attr_body.name in kwattrs:
-                raise TypeErrorEx(f"direct assignment to body attribute '{self.attr_body.name}' of hypertag '{self.name}' is not allowed", caller)
+                raise TypeErrorEx("direct assignment to body attribute '%s' of hypertag '%s' is not allowed" % (self.attr_body.name, self.name), caller)
             
             # translate attribute names in `kwattrs` to nodes as keys
             try:
                 kwattrs = {self.attr_names[name]: value for name, value in kwattrs.items()}
             except KeyError as ex:
                 name = ex.args[0]
-                raise TypeErrorEx(f"hypertag '{self.name}' got an unexpected keyword attribute '{name}'", caller)
+                raise TypeErrorEx("hypertag '%s' got an unexpected keyword attribute '%s'" % (self.name, name), caller)
 
             dom_attrs = {}
             dom_kwattrs = {attr.name: value for attr, value in kwattrs.items()}
@@ -612,7 +612,7 @@ class NODES(object):
             # move positional attributes to `kwattrs`
             for pos, value in enumerate(attrs):
                 attr = self.attr_regul[pos]
-                if attr in kwattrs: raise TypeErrorEx(f"hypertag '{self.name}' got multiple values for attribute '{attr.name}'", caller)
+                if attr in kwattrs: raise TypeErrorEx("hypertag '%s' got multiple values for attribute '%s'" % (self.name, attr.name), caller)
                 kwattrs[attr] = value
                 dom_attrs[attr.name] = value
 
@@ -622,7 +622,7 @@ class NODES(object):
             # impute missing values with defaults
             for attr in self.attr_regul:
                 if attr not in kwattrs:
-                    if attr.expr is None: raise TypeErrorEx(f"hypertag '{self.name}' missing a required positional attribute '{attr.name}'", caller)
+                    if attr.expr is None: raise TypeErrorEx("hypertag '%s' missing a required positional attribute '%s'" % (self.name, attr.name), caller)
                     kwattrs[attr] = attr.expr.evaluate(state)
                     
             # transfer attribute values from `kwattrs` to `state`
@@ -635,7 +635,7 @@ class NODES(object):
                 self.attr_body.assign(state, body)
                 # state[self.attr_body] = body
             elif body:
-                raise VoidTagEx(f"non-empty body passed to a void hypertag '{self.name}'", caller)
+                raise VoidTagEx("non-empty body passed to a void hypertag '%s'" % self.name, caller)
             
             return dom_attrs
             
@@ -654,7 +654,7 @@ class NODES(object):
                 item.path = self.path
                 
         def analyse(self, ctx):
-            if ctx.control_depth >= 1: raise SyntaxErrorEx(f'import inside a control block is not allowed', self)
+            if ctx.control_depth >= 1: raise SyntaxErrorEx('import inside a control block is not allowed', self)
             super(NODES.xblock_import, self).analyse(ctx)
 
         def translate(self, state):
@@ -691,7 +691,7 @@ class NODES(object):
             
             symbols, state = runtime.import_module(self.path, self)     # top-level symbols of the imported module
             
-            if symbol not in symbols: raise ImportErrorEx(f"cannot import '{symbol}' from a given path ({self.path})", self)
+            if symbol not in symbols: raise ImportErrorEx("cannot import '%s' from a given path (%s)" % (symbol, self.path), self)
             value = symbols[symbol]
             
             if IS_TAG(symbol) and isinstance(value, Hypertag):
@@ -910,7 +910,7 @@ class NODES(object):
                 inplace   = self.children[1].value
                 self.oper = self.opers[inplace]
                 if self.targets.is_augmented():
-                    raise SyntaxErrorEx(f"illegal expression {inplace}= for augmented assignment", self)
+                    raise SyntaxErrorEx("illegal expression %s= for augmented assignment" % inplace, self)
                 self.targets.set_inplace()
             
         def analyse(self, ctx):
@@ -947,10 +947,10 @@ class NODES(object):
             # unpack and assign to multiple child targets
             i = 0
             for i, v in enumerate(value):               # raises TypeError if `value` is not iterable
-                if i >= N: raise ValueErrorEx(f"too many values to unpack (expected {N})", self)
+                if i >= N: raise ValueErrorEx("too many values to unpack (expected %s)" % N, self)
                 self.children[i].assign(state, v)
             if i+1 < N:
-                raise ValueErrorEx(f"not enough values to unpack (expected {N}, got {i+1})", self)
+                raise ValueErrorEx("not enough values to unpack (expected %s, got %s)" % (N, i+1), self)
             
         def evaluate(self, state):
             assert len(self.children) == 1
@@ -1042,14 +1042,14 @@ class NODES(object):
                 if name is None:
                     self.unnamed.append(expr)
                 else:
-                    # if name in self.named: raise SyntaxErrorEx(f"attribute '{name}' appears twice on attributes list of tag '{self.name}'", attr)
+                    # if name in self.named: raise SyntaxErrorEx("attribute '{name}' appears twice on attributes list of tag '{self.name}'", attr)
                     self.named.append((name, expr))
                 
         def analyse(self, ctx):
             
             for c in self.attrs: c.analyse(ctx)
             self.tag = ctx.get(TAG(self.name))
-            if self.tag is None: raise UndefinedTagEx(f"undefined tag '{self.name}'", self)
+            if self.tag is None: raise UndefinedTagEx("undefined tag '%s'" % self.name, self)
             
         def translate_tag(self, state, body):
             """
@@ -1068,7 +1068,7 @@ class NODES(object):
                 return DOM.node(body, tag = tag, attrs = attrs, kwattrs = kwattrs)
             
             else:
-                raise NotATagEx(f"Not a tag: '{self.name}' ({tag.__class__})", self)
+                raise NotATagEx("Not a tag: '%s' (%s)" % (self.name, tag.__class__), self)
             
         def _eval_attrs(self, state):
             unnamed = [attr.evaluate(state) for attr in self.unnamed]
@@ -1077,7 +1077,7 @@ class NODES(object):
             for name, expr in self.named:
                 value = expr.evaluate(state)
                 if name in named:
-                    named[name] += ' ' + value       # = f'{named[name]} {value}'
+                    named[name] += ' ' + value       # = '{named[name]} {value}'
                 else:
                     named[name] = value
                     
@@ -1185,7 +1185,7 @@ class NODES(object):
             
             # `val` is false ... check qualifiers to undertake appropriate action
             if self.qualifier == '?': return ''
-            if self.qualifier == '!': raise MissingValueEx(f"Obligatory expression evaluates to a false value ({repr(val)})", self)
+            if self.qualifier == '!': raise MissingValueEx("Obligatory expression evaluates to a false value (%s)" % repr(val), self)
             return val
 
         def _eval_inner_qualified(self, state):
@@ -1243,10 +1243,10 @@ class NODES(object):
         def analyse(self, ctx):
             symbol = VAR(self.name)
             slot   = ctx.get(symbol)
-            assert slot is None or isinstance(slot, Slot), f"not a slot: {type(slot)} in {self.name}"
+            assert slot is None or isinstance(slot, Slot), "not a slot: %s in %s" % (type(slot), self.name)
 
             if self.read:
-                if slot is None: raise NameErrorEx(f"variable '{self.name}' is not defined", self)
+                if slot is None: raise NameErrorEx("variable '%s' is not defined" % self.name, self)
                 self.slot_read = slot
             
             if self.write:
@@ -1263,7 +1263,7 @@ class NODES(object):
                 return self.slot_read.get(state)
             
             except KeyError:
-                raise UnboundLocalEx(f"variable '{self.name}' referenced before assignment", self)
+                raise UnboundLocalEx("variable '%s' referenced before assignment" % self.name, self)
 
         def assign(self, state, value):
             assert self.write
@@ -1840,7 +1840,8 @@ class HypertagAST(BaseTree):
         except IncompleteParseError as ex:
             L = 15
             line, line_num = self._locate_error(script)
-            raise SyntaxErrorEx(f'invalid syntax near line {line_num}: {line[:L]}{"..." if len(line) > L else ""}')
+            dots = "..." if len(line) > L else ""
+            raise SyntaxErrorEx('invalid syntax near line %s: %s%s' % (line_num, line[:L], dots))
         
         if self.root is None:           # workaround for Parsimonious bug in the special case of empty document (Parsimonious returns None instead of a tree root)
             self.root = NODES.xdocument(self, ObjDict(start = 0, end = 0, children = [], expr_name = 'document'))
@@ -1913,7 +1914,7 @@ class HypertagAST(BaseTree):
         # below, NODES.xdocument.translate() is being called - see there for detailed description of returned objects
         dom, symbols, state = self.root.translate(State())
         assert isinstance(dom, DOM.Root)
-        # print(f'top-level symbols: {symbols}')
+        # print('top-level symbols: {symbols}')
         return dom, symbols, state
 
     def render(self):

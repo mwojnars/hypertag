@@ -80,7 +80,7 @@ class Markup(Tag):
     
     def expand(self, body, attrs, kwattrs):
         
-        if attrs: raise TypeErrorEx(f"markup tag '{self.name}' does not accept positional attributes")
+        if attrs: raise TypeErrorEx("markup tag '%s' does not accept positional attributes" % self.name)
         
         name = self.name
         
@@ -92,13 +92,13 @@ class Markup(Tag):
         
         # render output
         if self.void:
-            if body: raise VoidTagEx(f"non-empty body passed to a void markup tag '{name}'")
-            return f"<{tag} />"
+            if body: raise VoidTagEx("non-empty body passed to a void markup tag '%s'" % name)
+            return "<%s />" % tag
         else:
             # if the block contains a headline, the closing tag is placed on the same line as body;
             # a newline is added at the end, otherwise
             nl = '\n' if body[:1] == '\n' else ''
-            return f"<{tag}>" + body + nl + f"</{name}>"
+            return "<%s>" % tag + body + nl + "</%s>" % name
 
     def _render_attr(self, name_value):
         
@@ -107,18 +107,18 @@ class Markup(Tag):
             if self.mode == 'HTML':
                 return name
             else:
-                return f'{name}="{name}"'
+                return '%s="%s"' % (name, name)
         if value is False:              # name=False  -- removed from attr list
             return None
         
         value = str(value)
         if '"' not in value:
-            value = f'"{value}"'
+            value = '"%s"' % value
         elif "'" not in value:
-            value = f"'{value}'"
+            value = "'%s'" % value
         else:
             value = quoteattr(value)    # escaping of <,>,&," chars is performed ONLY when the value contains a quote "
         
-        return f'{name}={value}'
+        return '%s=%s' % (name, value)
         
 

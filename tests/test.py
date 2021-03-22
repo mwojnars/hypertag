@@ -1442,5 +1442,6 @@ def test_101_varia():
 
 if __name__ == '__main__':
     # unittest.main()
-    pytest.main(['-vW ignore::DeprecationWarning', f'--rootdir={os.path.dirname(__file__)}', __file__])
+    root = os.path.dirname(__file__)
+    pytest.main(['-vW ignore::DeprecationWarning', '--rootdir=%s' % root, __file__])
     
