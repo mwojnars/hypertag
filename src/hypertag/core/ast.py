@@ -3,6 +3,8 @@
 @author:  Marcin Wojnarski
 """
 
+from __future__ import unicode_literals
+
 import sys, re, codecs, operator
 from collections import OrderedDict
 from six import reraise, text_type
@@ -15,7 +17,8 @@ from hypertag.nifty.parsing import ParsimoniousTree as BaseTree
 
 from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, MissingValueEx, NameErrorEx, \
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
-from hypertag.core.grammar import grammar, XML_StartChar, XML_Char, XML_EndChar, TAG, VAR, IS_TAG
+from hypertag.core.grammar import grammar, TAG, VAR, IS_TAG
+from hypertag.core.xml_chars import XML_StartChar, XML_Char, XML_EndChar
 from hypertag.core.structs import Context, State, Slot, ValueSlot
 from hypertag.core.dom import del_indent, get_indent, DOM
 from hypertag.core.tag import Tag, null
@@ -66,7 +69,7 @@ def partial(func, *args, **kwargs):
     it will be PREPENDED to the argument list, unlike in functools.partial() which APPENDS new arguments at the end.
     """
     def newfunc(*newargs):
-        return func(*newargs, *args, **kwargs)
+        return func(*(newargs + args), **kwargs)
     return newfunc
 
 
@@ -122,7 +125,7 @@ class Grammar(Parsimonious):
                         # special characters that are used in the parser for indent / dedent
     
     SPECIAL_SYMBOLS = ['INDENT_S', 'DEDENT_S', 'INDENT_T', 'DEDENT_T']
-    CHARS_DEFAULT   = ['\u2768', '\u2769', '\u276A', '\u276B']              # indent/dedent special chars to be used in `default` parser
+    CHARS_DEFAULT   = [u'\u2768', u'\u2769', u'\u276A', u'\u276B']              # indent/dedent special chars to be used in `default` parser
     
     symbols = None      # dict of special symbols: {symbol_name: character}
     

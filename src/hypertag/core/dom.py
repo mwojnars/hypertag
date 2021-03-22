@@ -76,7 +76,9 @@ class DOM:
     """
     nodes = None
     
-    def __init__(self, *nodes, _strict = True):
+    def __init__(self, *nodes, **params):  #_strict = True
+        _strict = params.pop('_strict', True)
+        if params: raise TypeErrorEx('unrecognized keyword argument "%s" in DOM.__init__()' % list(params.keys())[0])
         self.nodes = self._flatten(nodes) if _strict else list(nodes)
         # self.set_nodes(nodes, _strict)
         

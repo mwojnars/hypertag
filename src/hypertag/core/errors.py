@@ -46,8 +46,8 @@ class UnboundLocalEx(HError, UnboundLocalError):        pass
 class UndefinedTagEx(HError):                           pass
 class NotATagEx(HError):                                pass
 class NoneStringEx(HError):                             pass
-class ModuleNotFoundEx(HError, ModuleNotFoundError):    pass
 class ImportErrorEx(HError, ImportError):               pass
+class ModuleNotFoundEx(ImportErrorEx):                  pass
 class ParseErrorEx(HError):                             pass
 
 class MissingValueEx(HError):

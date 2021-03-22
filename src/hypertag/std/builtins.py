@@ -58,7 +58,7 @@ def upper(text):
     return text.upper()
 
 @register.var
-def cycle(*sequences, stop = 'first'):
+def cycle(*sequences, **params):   #stop = 'first'
     """
     A generator that cycles through each of the provided iterables IN PARALLEL and yields tuples containing
     one element from each iterable - like zip(), but the cycling runs indefinitely (if stop=False), or until
@@ -68,6 +68,9 @@ def cycle(*sequences, stop = 'first'):
     maintaining a hidden state, which enhances code readability.
     This function can be used, for instance, to alternate colors of rows in a table.
     """
+    stop = params.pop('stop', 'first')
+    if params: raise Exception('unrecognized keyword argument "%s" in cycle()' % list(params.keys())[0])
+    
     if not sequences: return []
     length = None
     
