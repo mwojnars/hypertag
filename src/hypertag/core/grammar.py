@@ -5,9 +5,6 @@
 from __future__ import unicode_literals
 
 
-########################################################################################################################################################
-###
-###  Regex patterns for character sets allowed in XML identifiers, to be put inside [...] in a regex.
 grammar = r"""
 
 ###  Before the grammar is applied, indentation in the input text must be converted into

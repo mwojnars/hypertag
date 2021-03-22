@@ -1,3 +1,6 @@
+########################################################################################################################################################
+###
+###  Regex patterns for character sets allowed in XML identifiers, to be put inside [...] in a regex.
 ###  XML identifiers differ substantially from typical name patterns in other computer languages. Main differences:
 ###   1) national Unicode characters are allowed, specified by ranges of unicode point values
 ###   2) special characters are allowed:  ':' (colon) '.' (dot) '-' (minus)
