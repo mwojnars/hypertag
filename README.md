@@ -28,7 +28,10 @@ Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 ### Setup
 
-Install: _git clone_
+Install in Python 3.6+:
+```
+pip install hypertag-lang         # watch out the name, it is "hypertag-lang"
+```
 
 Usage:
 ```python

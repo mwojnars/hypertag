@@ -156,15 +156,22 @@ Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
 
 ## Setup
 
-Install: _git clone_
+Install in Python 3.6+:
+```
+pip install hypertag-lang         # watch out the name, it is "hypertag-lang"
+```
 
+Usage:
+```python
+from hypertag import HyperHTML
+html = HyperHTML().render(script)       # rendering of a Hypertag `script` to HTML
+```
 
 <!---
-Install: ........
-Run: .......
-
 ### Community
 (TODO)
+
+I dedicate this project to ....
 --->
 
 ## Acknowledgements
