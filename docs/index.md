@@ -145,10 +145,11 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Integrated [Django filters](#django-filters).
   
 If you are new to Hypertag, see the 
-[Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
+**[Quick Start](https://github.com/mwojnars/hypertag#quick-start)** for a brief introduction.
 The source code is available on [GitHub](https://github.com/mwojnars/hypertag).
 
-Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski).
+Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski)
+from [Paperity](https://paperity.org/).
 
 
 ## Setup
