@@ -174,7 +174,7 @@ I dedicate this project to ....
 
 ## Acknowledgements
 
-Hypertag was partly modeled on [Python's](https://www.python.org/) syntax, and 
+Hypertag was partially modeled on [Python's](https://www.python.org/) syntax, and 
 was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
