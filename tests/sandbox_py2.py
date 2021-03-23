@@ -1,5 +1,12 @@
 #-*- coding: utf-8 -*-
-from __future__ import print_function, unicode_literals
+"""
+Sandbox for testing Hypertag with Python 2.
+For now, we stop backporting to Python 2 because Parsimonious apparently does NOT support Python 2
+(issues around Unicode handling).
+"""
+
+from __future__ import print_function
+# from __future__ import unicode_literals
 
 from hypertag.core.ast import HypertagAST
 

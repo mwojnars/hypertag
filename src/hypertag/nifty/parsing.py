@@ -97,7 +97,7 @@ class Tree(object):
         "For printing of the tree. Walks the tree via node.children, collects info() lines and concatenates them with proper indentation."
         lines = self.info(self.root)
         return '\n'.join(flatten(lines))
-
+    
     @staticmethod
     def info(node, depth = 0):
         prefix = '  ' * depth
