@@ -1,8 +1,8 @@
 #-*- coding: utf-8 -*-
 """
-Run in "src" folder:
+Run in root project folder:
 $
-$  python3 -m pytest -vW ignore::DeprecationWarning ../tests/test.py
+$  py.test-3 -vW ignore::DeprecationWarning
 $
 
 """
