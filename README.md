@@ -10,13 +10,13 @@
 ## Introduction
 
 Hypertag is a modern language for front-end development that allows
-writing HTML5 and other markup documents in a way similar to writing Python scripts,
+writing markup documents in a way similar to writing Python scripts,
 where _indentation_ determines relationships between nested elements 
 and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports and DOM manipulation; 
 unprecedented support for code reuse with native custom tags (_hypertags_), 
-and much more. See the [Quick Start](#quick-start) below, or the 
+and more. HTML 5 can be produced. See the [Quick Start](#quick-start) below, or the 
 [Language Reference](http://hypertag.io) for details.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski)
@@ -84,7 +84,7 @@ If you try Hypertag, you will never miss old-school HTML templating.
 
 ## Quick Start
 
-Install in Python 3.6+:
+Install in Python 3:
 ```
 pip install hypertag-lang               # watch out the name, it is "hypertag-lang"
 ```
