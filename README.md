@@ -146,7 +146,7 @@ A typical Hypertag script consists of nested blocks with tags:
               Slash (/) marks a <b>markup block</b> (no HTML escaping).
               Text blocks may consist of multiple lines, like here.
 
-Indentation of blocks gets preserved in the output during rendering:
+Here, `ul` is a "tag", which renders to its HTML equivalent `<ul>...</ul>`. Indentation of blocks gets preserved in the output during rendering:
 
 ```html
 <ul>

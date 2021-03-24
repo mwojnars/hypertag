@@ -1043,6 +1043,7 @@ class NODES(object):
                 name = attr.name
                 expr = attr.expr
                 if name is None:
+                    if self.named: raise SyntaxErrorEx("positional argument follows keyword argument")
                     self.unnamed.append(expr)
                 else:
                     # if name in self.named: raise SyntaxErrorEx("attribute '{name}' appears twice on attributes list of tag '{self.name}'", attr)

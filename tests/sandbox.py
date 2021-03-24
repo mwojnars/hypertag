@@ -193,6 +193,10 @@ if __name__ == '__main__':
         / If you insist on <s>air conditioning</s>, 🤔
     """
     
+    text = """
+    p .wide .left .green-text
+    """
+    
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
     
     # print()
