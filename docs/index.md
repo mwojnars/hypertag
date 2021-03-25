@@ -621,7 +621,7 @@ of `.CLASS` shortcuts with multiple classes, like in:
 
     p .wide .left .green-text
 
-This code is equivalent to a repeated use of the `class=...` attribute, and renders:
+which is equivalent to a repeated use of the `class=...` attribute, and renders:
 
 ```html
 <p class="wide left green-text"></p>
