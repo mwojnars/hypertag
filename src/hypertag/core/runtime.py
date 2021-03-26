@@ -2,7 +2,7 @@ import os, sys, importlib
 from six.moves import builtins
 
 from hypertag.core.errors import ImportErrorEx, ModuleNotFoundEx
-from hypertag.core.grammar import MARK_TAG, VAR, TAG, TAGS
+from hypertag.core.grammar import MARK_VAR, MARK_TAG, VAR, TAG, TAGS
 from hypertag.core.ast import HypertagAST
 import hypertag.builtins
 
@@ -69,9 +69,10 @@ class Context(Module):
     def __init__(self, tags, variables):
 
         self.symbols = symbols = {}
+
         if tags:
             # TODO: check if names of tags are non-empty and syntactically correct
-            symbols.update({name if name[0] == MARK_TAG else TAG(name) : link for name, link in tags.items()})
+            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else TAG(name) : link for name, link in tags.items()})
         if variables:
             symbols.update({VAR(name) : value for name, value in variables.items()})
     
@@ -160,19 +161,11 @@ class Runtime:
     SCRIPT_EXTENSION = 'hy'         # file extension of Hypertag scripts; used during import
     
 
-    # precomputed dict of built-in symbols to avoid recomputation on every __init__()
-    # imported automatically upon startup; subclasses may define a broader collection
+    # list of modules to be imported automatically into a script upon startup of translation (built-in symbols)
     BUILTINS = ['builtins', 'hypertag.builtins']
     
     # cached dict of built-in symbols, to avoid recalculation for every new AST
     _builtins = None
-    
-    # BUILTINS = _read_module(builtins)
-    # BUILTINS.update(_read_module(hypertag.builtins))
-    
-    # standard_modules = {
-    #     PATH_CONTEXT: {},
-    # }
 
     language = None     # target language the documents will be compiled into, defined in subclasses
     #compact  = True    # if True, compactification is performed after analysis: pure (static, constant) nodes are replaced with their pre-computed render() values,
@@ -189,48 +182,8 @@ class Runtime:
         return self.modules.get(self.PATH_CONTEXT, {})
 
     
-    def __init__(self):  #, __tags__ = None, **variables):
-        """
-        :param __tags__: dict of tag names and their Tag instances/classes that shall be made available to the script
-                     as a dynamic "context" of execution; names can be prepended with '%', though this is not mandatory
-        :param variables: names of external variables that shall be made available to the script
-                     as a dynamic "context" of execution
-        """
-        self.modules = {}   #self.standard_modules.copy()
-        # self.update_context(__tags__, variables)
-        
-    # def update_context(self, tags, variables):
-    #
-    #     if not (tags or variables): return
-    #     self.modules[self.PATH_CONTEXT] = context = self.modules[self.PATH_CONTEXT].copy()
-    #     context.update(self._create_context(tags, variables))
-    #
-    # @staticmethod
-    # def _create_context(tags, variables):
-    #
-    #     context = {}
-    #     if tags:
-    #         # TODO: check if names of tags are non-empty and syntactically correct
-    #         context.update({name if name[0] == MARK_TAG else TAG(name) : link for name, link in tags.items()})
-    #     if variables:
-    #         context.update({VAR(name) : value for name, value in variables.items()})
-    #     return context
-
-    # def import_one(self, symbol, path = None, ast_node = None):
-    #     """`symbol` must start with either % or $ to denote whether a tag or a variable should be imported."""
-    #
-    #     module = self.import_module(path, ast_node)
-    #     if symbol not in module: raise ImportErrorEx("cannot import '{symbol}' from a given path ({path})", ast_node)
-    #     return module[symbol]
-    #
-    # def import_all(self, path = None, ast_node = None):
-    #     """
-    #     Import all available symbols (tags and variables) from a given `path`, private symbols excluded.
-    #     A private symbol is the one whose name (after %$) starts with "_".
-    #     Return a dict of {symbol: object} pairs. Every symbol starts with either % (a tag) or $ (a variable).
-    #     """
-    #     module = self.import_module(path, ast_node)
-    #     return {name: value for name, value in module.items() if name[1] != '_'}
+    def __init__(self):
+        self.modules = {}
 
     def import_builtins(self):
         """
@@ -244,7 +197,6 @@ class Runtime:
                 self._builtins.update(module.symbols)
                 
         return self._builtins
-        # return self.BUILTINS
     
         
     def import_module(self, path, ast_node):
@@ -258,11 +210,6 @@ class Runtime:
             self.modules[path_canonical] = module
             
         return module
-        
-        # if isinstance(module, Module):
-        #     return module.symbols, module.state
-        # else:
-        #     return module, None
 
     def _canonical(self, path):
         """Convert `path` to its canonical form."""
@@ -337,22 +284,21 @@ class Runtime:
 
     def translate(self, script, __file__ = None, __package__ = None,  __tags__ = None, **variables):
         
-        globals_ = self.import_builtins()
-        globals_[VAR('__file__')]    = __file__
-        globals_[VAR('__package__')] = __package__
+        builtins = self.import_builtins()
+        builtins[VAR('__file__')]    = __file__
+        builtins[VAR('__package__')] = __package__
         
         if self.PATH_CONTEXT in self.modules:
-            if (__tags__ or variables): raise ImportErrorEx("dynamic context was already created and cannot be modified")
+            if __tags__ or variables: raise ImportErrorEx("dynamic context was already created and cannot be modified")
             context_created = False
         else:
             self.modules[self.PATH_CONTEXT] = Context(__tags__, variables)
             context_created = True
-            # self.update_context(__tags__, variables)
         
-        ast = HypertagAST(script, self, globals_)
+        ast = HypertagAST(script, self)
         
         try:
-            return ast.translate()
+            return ast.translate(builtins)
         finally:
             if context_created: del self.modules[self.PATH_CONTEXT]
             

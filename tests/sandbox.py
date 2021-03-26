@@ -198,7 +198,7 @@ if __name__ == '__main__':
         | $x
     """
     
-    tree = HypertagAST(text, HyperHTML(), stopAfter = "rewrite", verbose = True)
+    tree = HypertagAST(text, HyperHTML(), verbose = True)
     
     # print()
     # print("===== AST =====")
@@ -209,12 +209,12 @@ if __name__ == '__main__':
     print(tree)
     print()
     
-
-    print("===== After semantic analysis =====")
-    tree.analyse()
+    #
+    # print("===== After semantic analysis =====")
+    # tree.analyse()
+    # # print()
+    # # print(tree)
     # print()
-    # print(tree)
-    print()
     
     print("===== After translation =====")
     dom, _, _ = tree.translate()

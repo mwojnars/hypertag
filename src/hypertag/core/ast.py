@@ -1800,14 +1800,14 @@ class HypertagAST(BaseTree):
 
     ###  Dependencies & semantic analysis  ###
 
-    # a Loader instance that was used to load this HyML source file and should be used for loading related files;
-    # can perform caching and dependencies tracking; see loaders.Loader
-    loader = None
+    # # a Loader instance that was used to load this HyML source file and should be used for loading related files;
+    # # can perform caching and dependencies tracking; see loaders.Loader
+    # loader = None
+    # dependencies = None         # files included/imported by self, as a set of canonical names; for caching and dep. tracking
     
-    filename = None             # name of the file or resource where this document comes from; for debug messages and dependencies tracking
-    dependencies = None         # files included/imported by self, as a set of canonical names; for caching and dep. tracking
+    filename = None             # name of the file this script comes from; for error messages
 
-    globals = None              # dict of global symbols to be declared inside the script at the beginning of parsing
+    globals = None              # dict of global symbols to be declared inside the script at the beginning of analysis
     runtime = None              # instance of Runtime that loaded this document and controls how external modules and symbols are imported
     
     
@@ -1822,15 +1822,13 @@ class HypertagAST(BaseTree):
     #                             # includes imported hypertags (!), but not external ones, only the native ones defined in HyML
 
     
-    def __init__(self, script, runtime, globals = None, stopAfter = None, verbose = False):
+    def __init__(self, script, runtime, verbose = False):
         """
         :param script: input script to be parsed
-        :param globals: dict of global symbols to be declared inside the script at the beginning of parsing
-        :param stopAfter: either None (full parsing), or "parse", "rewrite"
         """
         self.runtime = runtime
-        self.globals = globals if globals is not None else runtime.import_builtins()
         self.parser  = Grammar.get_parser(script)
+        # self.globals = globals if globals is not None else runtime.import_builtins()
         
         # replace indentation with special characters INDENT/DEDENT
         flat_script = self.parser.preprocess(script, verbose = verbose)
@@ -1838,7 +1836,7 @@ class HypertagAST(BaseTree):
         # parse input text to the 1st version of AST (self.ast) as returned by Parsimonious,
         # then rewrite it to custom NODES.* classes rooted at self.root
         try:
-            super(HypertagAST, self).__init__(flat_script, stopAfter = stopAfter)
+            super(HypertagAST, self).__init__(flat_script)
             
         except IncompleteParseError as ex:
             L = 15
@@ -1850,10 +1848,7 @@ class HypertagAST(BaseTree):
             self.root = NODES.xdocument(self, ObjDict(start = 0, end = 0, children = [], expr_name = 'document'))
 
         assert isinstance(self.root, NODES.xdocument)
-        if stopAfter == "rewrite": return
 
-        self.analyse()
-        if stopAfter == "analyse": return
 
     def _locate_error(self, script):
         """
@@ -1883,41 +1878,24 @@ class HypertagAST(BaseTree):
         return lines[line_bad-1].strip(), line_bad
         
         
-    def analyse(self):
+    def analyse(self, builtins = None):
         "Link occurences of variables and hypertags with their definition nodes, collect all symbols defined in the document."
         
-        if self.loader:                 # only upon analyse() we start tracking dependencies, extracted from <include> nodes;
-            self.dependencies = set()   # before analysis, dependencies are not known and must not be relied upon (equal None)
-        
-        # for name in self.globals:       # make sure that global symbols use correct names: only regular identifiers, and not reserved
-        #     self._check_name(name, None, "Error in global symbols. ")
-        
         ctx = Context()
-        self.root.predefine(self.globals)
+        self.root.predefine(builtins)
         self.root.analyse(ctx)
         
-        # # perform compactification; a part of it was already done during analysis, because every hypertag launches
-        # # compactification in its subtree on its own, during analysis; what's left is compactification
-        # # of the top-level document only
-        # if self.config['compact']: self.compactify()
+    def translate(self, builtins = None):
         
-    # def compactify(self):
-    #     """
-    #     Replace pure nodes in the document tree with static string/value nodes containg pre-computed render() result
-    #     of a given node, so that this pre-computed string/value is returned on all future render() calls on the new node.
-    #
-    #     The document node doesn't take any arguments, so its render() is often a pure function, if only there are no non-pure
-    #     external references to variables/functions inside. So yes, the document can in many cases be replaced with a static string.
-    #     Although we lose access to the original tree (except the access via self.symbols and self.hypertags),
-    #     this access is normally not needed anymore. If it is, you should disable compactification in parser settings.
-    #     """
-    #     self.root.compactify(State())
-    
-    def translate(self):
-        # below, NODES.xdocument.translate() is being called - see there for detailed description of returned objects
-        dom, symbols, state = self.root.translate(State())
+        if builtins is None:
+            builtins = self.runtime.import_builtins()
+
+        self.analyse(builtins)
+        
+        dom, symbols, state = self.root.translate(State())        # calls NODES.xdocument.translate(), see there for description of returned objects
         assert isinstance(dom, DOM.Root)
         # print('top-level symbols: {symbols}')
+        
         return dom, symbols, state
 
     def render(self):
