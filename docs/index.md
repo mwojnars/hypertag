@@ -154,7 +154,7 @@ from [Paperity](https://paperity.org/).
 
 ## Setup
 
-Install in Python 3.6+:
+Install in Python 3:
 ```
 pip install hypertag-lang               # watch out the name, it is "hypertag-lang"
 ```

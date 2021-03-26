@@ -1,3 +1,4 @@
+#from .package1.sample3 import %G, $y
 
 $x = 5
 

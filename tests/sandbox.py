@@ -194,7 +194,8 @@ if __name__ == '__main__':
     """
     
     text = """
-    p .wide .left .green-text
+        from hypertag.tests.sample2 import $x
+        | $x
     """
     
     tree = HypertagAST(text, HyperHTML(**ctx), stopAfter = "rewrite", verbose = True)
@@ -235,6 +236,10 @@ if __name__ == '__main__':
     # print(inspect.getfile(text))
     # from hypertag.django.filters import slugify
     # print(slugify('Hypertag rocks'))
+    # __package__ = "xyz.abc"
+    # from ..hypertag.core.runtime import __file__
+    from hypertag.core.runtime import __file__
+    print(__file__)
     
     
 # TODO:

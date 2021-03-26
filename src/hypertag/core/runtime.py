@@ -6,6 +6,8 @@ from hypertag.core.grammar import MARK_TAG, VAR, TAG, TAGS
 from hypertag.core.ast import HypertagAST
 import hypertag.builtins
 
+PATH_SEP = os.path.sep
+
 
 #####################################################################################################################################################
 #####
@@ -69,11 +71,9 @@ class Runtime:
     
 
     # precomputed dict of built-in symbols to avoid recomputation on every __init__()
+    # imported automatically upon startup; subclasses may define a broader collection
     BUILTINS = _read_module(builtins)
     BUILTINS.update(_read_module(hypertag.builtins))
-    
-    # symbols to be imported automatically upon startup; subclasses may define a broader collection
-    DEFAULT = BUILTINS
     
     standard_modules = {
         PATH_CONTEXT: {},
@@ -136,12 +136,12 @@ class Runtime:
     #     module = self.import_module(path, ast_node)
     #     return {name: value for name, value in module.items() if name[1] != '_'}
 
-    def import_default(self):
+    def import_builtins(self):
         """
         Import default symbols that shall be available to every script upon startup.
-        This typically means all built-in symbols + standard tags/variables specific for a target language.
+        This typically means all general-purpose symbols + standard tags/variables specific for a target language.
         """
-        return self.DEFAULT
+        return self.BUILTINS
     
         
     def import_module(self, path, ast_node):
@@ -186,29 +186,35 @@ class Runtime:
         referrer_package = self.context.get(VAR('__package__'))
         
         # package path is present? the package & file can be localized through `importlib`
-        if '.' in path:
+        if '.' in path and (referrer_package or path[0] != '.'):
+            #if path[0] == '.' and not referrer_package: return None
             package_name, filename = path.rsplit('.', 1)
             package = importlib.import_module(package_name, referrer_package)
             package_name = package.__name__                                 # package_name could have been relative, must be changed to absolute
             package_path = package.__file__
             if package_path.endswith('.py'):
                 package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
-            filepath = '%s/%s.%s' % (package_path, filename, self.SCRIPT_EXTENSION)
+            filepath = '%s%s%s.%s' % (package_path, PATH_SEP, filename, self.SCRIPT_EXTENSION)
             
         else:
             # no package path? the script must be in the same folder as __file__
             if referrer_file is None: return None
+            if path[0] == '.': path = path[1:]
+            path = path.replace('.', PATH_SEP)
             folder   = os.path.dirname(referrer_file)
-            filepath = "%s/%s" % (folder, path)
+            filepath = folder + PATH_SEP + path
             package_name = referrer_package
             
         if not os.path.exists(filepath):
             return None
         
         script = open(filepath).read()
-
+        
         # context (~) has already been initialized by a calling method and will be available to the script below (!)
         dom, symbols, state = self.translate(script, __file__ = filepath, __package__ = package_name)
+        symbols[VAR('__file__')]    = filepath
+        symbols[VAR('__package__')] = package_name
+
         return Module(symbols, state)
     
         
@@ -226,7 +232,7 @@ class Runtime:
 
     def translate(self, script, __file__ = None, __package__ = None,  __tags__ = None, **variables):
         
-        globals_ = self.import_default()
+        globals_ = self.import_builtins()
         globals_[VAR('__file__')]    = __file__
         globals_[VAR('__package__')] = __package__
         self.update_context(__tags__, variables)
@@ -240,7 +246,17 @@ class Runtime:
         return dom.render()
         
 
-# class CompoundRuntime(Runtime):
+class Loader:
+    """
+    Base class for module loaders. A loader takes an import path as specified in `import` block of a Hypertag script,
+    together with the location of the referrer module; converts the path to its canonical form (subclass-dependent);
+    loads the module and returns it as a dict of symbols. Caching of modules can be performed internally.
+    """
+
+class StandardLoader:
+    """A loader of Python and Hypertag modules that searches the disk in a way analogous to what Python does."""
+
+# class CompoundLoader(Loader):
 #     """Runtime that combines multiple sub-runtimes, each one having its own XX/ prefix to be added to import paths."""
 #
 #     loaders = {

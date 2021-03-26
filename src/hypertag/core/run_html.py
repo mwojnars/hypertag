@@ -14,6 +14,6 @@ class HyperHTML(Runtime):
     language = 'HTML'
     escape   = staticmethod(html_escape)
     
-    DEFAULT = Runtime.DEFAULT.copy()
-    DEFAULT.update(_read_module(hypertag.html))
+    BUILTINS = Runtime.BUILTINS.copy()
+    BUILTINS.update(_read_module(hypertag.html))
     

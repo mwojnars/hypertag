@@ -1830,7 +1830,7 @@ class HypertagAST(BaseTree):
         :param stopAfter: either None (full parsing), or "parse", "rewrite"
         """
         self.runtime = runtime
-        self.globals = globals if globals is not None else runtime.import_default()
+        self.globals = globals if globals is not None else runtime.import_builtins()
         self.parser  = Grammar.get_parser(script)
         
         # replace indentation with special characters INDENT/DEDENT
