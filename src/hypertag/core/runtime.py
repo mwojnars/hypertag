@@ -22,7 +22,7 @@ sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 
 def _read_module(module):
     """
-    Pull symbols: tags & variables from a module and return as a dict.
+    Pull symbols: tags & variables from a Python module and return as a dict.
     All top-level symbols are treated as variables; tags are pulled from a special dictionary named `__tags__`.
     """
     symbols = {VAR(name) : getattr(module, name) for name in dir(module)}
@@ -39,11 +39,101 @@ def _read_module(module):
     return symbols
 
 
+#####################################################################################################################################################
+#####
+#####  MODULES
+#####
+
 class Module:
+    """Base class for wrappers around all types of imported modules (Hypertag's, Python's)."""
     
-    def __init__(self, symbols, state = None):
+    location = None     # canonical identifier (path) of this module, for deduplication and retrieval; there can be many
+                        # non-canonical (e.g., relative) paths pointing to a given module, but only 1 canonical path
+    symbols  = None     # cached dict of this module's symbols; each symbol has a leading mark % or $
+    state    = None     # internal State at the end of translation of a Hypertag module; required for evaluation of imported hypertags
+    
+    def __getitem__(self, key):
+        return self.symbols[key]
+        
+    def get(self, key, default = None):
+        return self.symbols.get(key, default)
+        
+    def normalize(self, path):
+        """Convert a path to its canonical form assuming that `self` is the referrer module where the path occured."""
+        return path
+    
+        
+class Context(Module):
+    """Special type of module to hold dynamic context of script translation."""
+    
+    def __init__(self, tags, variables):
+
+        self.symbols = symbols = {}
+        if tags:
+            # TODO: check if names of tags are non-empty and syntactically correct
+            symbols.update({name if name[0] == MARK_TAG else TAG(name) : link for name, link in tags.items()})
+        if variables:
+            symbols.update({VAR(name) : value for name, value in variables.items()})
+    
+    
+class HyModule(Module):
+    """"""
+    
+    def __init__(self, symbols, state):
         self.symbols = symbols
         self.state   = state
+        
+    
+class PyModule(Module):
+    """Wrapper around a regular Python module and its global symbols."""
+    
+    module = None       # the original Python module
+    
+    def __init__(self, module):
+        """
+        Pull symbols (tags & variables) from a Python module and return as a dict.
+        All top-level symbols are treated as variables; tags are pulled from a special module-level dictionary `__tags__`.
+        """
+        self.module   = module
+        self.location = module.__name__
+        self.symbols  = {VAR(name) : getattr(module, name) for name in dir(module)}
+        
+        # retrieve __tags__
+        tags = self.symbols.pop(VAR('__tags__'), None)
+        if tags:
+            if not isinstance(tags, dict): raise ImportErrorEx("__tags__ must be a dict in %s" % module)
+            
+            # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
+            for name, tag in tags.items():
+                if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
+            
+            self.symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
+    
+    def normalize(self, path):
+        
+        if path[:1] != '.': return path
+        
+        # `path` is relative, convert it to absolute
+        return self._joinpath(self.module.__package__, path)
+        
+    @staticmethod
+    def _joinpath(base, path):
+        """Convert a relative package `path` to an absolute one by appending it to an absolute `base` path."""
+        
+        orig_base = base
+        orig_path = path
+        
+        assert path[:1] == '.'
+        path = path[1:]
+        
+        while path[0] == '.':           # move upwards the package tree if `path` starts with multiple dots
+            if '.' not in base:
+                raise ImportErrorEx("attempted relative import (%s) beyond top-level package (%s)" % (orig_path, orig_base))
+            base = base.rsplit('.', 1)[0]
+            path = path[1:]
+
+        return base + '.' + path
+        
         
 
 #####################################################################################################################################################
@@ -72,12 +162,17 @@ class Runtime:
 
     # precomputed dict of built-in symbols to avoid recomputation on every __init__()
     # imported automatically upon startup; subclasses may define a broader collection
-    BUILTINS = _read_module(builtins)
-    BUILTINS.update(_read_module(hypertag.builtins))
+    BUILTINS = ['builtins', 'hypertag.builtins']
     
-    standard_modules = {
-        PATH_CONTEXT: {},
-    }
+    # cached dict of built-in symbols, to avoid recalculation for every new AST
+    _builtins = None
+    
+    # BUILTINS = _read_module(builtins)
+    # BUILTINS.update(_read_module(hypertag.builtins))
+    
+    # standard_modules = {
+    #     PATH_CONTEXT: {},
+    # }
 
     language = None     # target language the documents will be compiled into, defined in subclasses
     #compact  = True    # if True, compactification is performed after analysis: pure (static, constant) nodes are replaced with their pre-computed render() values,
@@ -87,38 +182,39 @@ class Runtime:
                         # in a subclass, staticmethod() must be applied as a wrapper to prevent this attr be treated as a regular method:
                         #   escape = staticmethod(custom_function)
 
-    modules  = None     # cached symbols of modules: {canonical_path: module}, where "module" is a dict of symbols and their values
+    modules  = None     # cached modules as a dict {canonical_path: module}
     
     @property
-    def context(self): return self.modules[self.PATH_CONTEXT]
+    def context(self):
+        return self.modules.get(self.PATH_CONTEXT, {})
 
     
-    def __init__(self, __tags__ = None, **variables):
+    def __init__(self):  #, __tags__ = None, **variables):
         """
         :param __tags__: dict of tag names and their Tag instances/classes that shall be made available to the script
                      as a dynamic "context" of execution; names can be prepended with '%', though this is not mandatory
         :param variables: names of external variables that shall be made available to the script
                      as a dynamic "context" of execution
         """
-        self.modules = self.standard_modules.copy()
-        self.update_context(__tags__, variables)
+        self.modules = {}   #self.standard_modules.copy()
+        # self.update_context(__tags__, variables)
         
-    def update_context(self, tags, variables):
-        
-        if not (tags or variables): return
-        self.modules[self.PATH_CONTEXT] = context = self.modules[self.PATH_CONTEXT].copy()
-        context.update(self._create_context(tags, variables))
-        
-    @staticmethod
-    def _create_context(tags, variables):
-
-        context = {}
-        if tags:
-            # TODO: check if names of tags are non-empty and syntactically correct
-                context.update({name if name[0] == MARK_TAG else TAG(name) : link for name, link in tags.items()})
-        if variables:
-            context.update({VAR(name) : value for name, value in variables.items()})
-        return context
+    # def update_context(self, tags, variables):
+    #
+    #     if not (tags or variables): return
+    #     self.modules[self.PATH_CONTEXT] = context = self.modules[self.PATH_CONTEXT].copy()
+    #     context.update(self._create_context(tags, variables))
+    #
+    # @staticmethod
+    # def _create_context(tags, variables):
+    #
+    #     context = {}
+    #     if tags:
+    #         # TODO: check if names of tags are non-empty and syntactically correct
+    #         context.update({name if name[0] == MARK_TAG else TAG(name) : link for name, link in tags.items()})
+    #     if variables:
+    #         context.update({VAR(name) : value for name, value in variables.items()})
+    #     return context
 
     # def import_one(self, symbol, path = None, ast_node = None):
     #     """`symbol` must start with either % or $ to denote whether a tag or a variable should be imported."""
@@ -141,7 +237,14 @@ class Runtime:
         Import default symbols that shall be available to every script upon startup.
         This typically means all general-purpose symbols + standard tags/variables specific for a target language.
         """
-        return self.BUILTINS
+        if self._builtins is None:
+            self._builtins = {}
+            for path in self.BUILTINS:
+                module = self.import_module(path, None)
+                self._builtins.update(module.symbols)
+                
+        return self._builtins
+        # return self.BUILTINS
     
         
     def import_module(self, path, ast_node):
@@ -154,10 +257,12 @@ class Runtime:
             if not module: raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
             self.modules[path_canonical] = module
             
-        if isinstance(module, Module):
-            return module.symbols, module.state
-        else:
-            return module, None
+        return module
+        
+        # if isinstance(module, Module):
+        #     return module.symbols, module.state
+        # else:
+        #     return module, None
 
     def _canonical(self, path):
         """Convert `path` to its canonical form."""
@@ -215,7 +320,7 @@ class Runtime:
         symbols[VAR('__file__')]    = filepath
         symbols[VAR('__package__')] = package_name
 
-        return Module(symbols, state)
+        return HyModule(symbols, state)
     
         
     def _load_module_python(self, path):
@@ -226,7 +331,7 @@ class Runtime:
         package = self.context.get(VAR('__package__'))
         try:
             module = importlib.import_module(path, package)
-            return Module(_read_module(module))
+            return PyModule(module)
         except:
             return None
 
@@ -235,16 +340,33 @@ class Runtime:
         globals_ = self.import_builtins()
         globals_[VAR('__file__')]    = __file__
         globals_[VAR('__package__')] = __package__
-        self.update_context(__tags__, variables)
+        
+        if self.PATH_CONTEXT in self.modules:
+            if (__tags__ or variables): raise ImportErrorEx("dynamic context was already created and cannot be modified")
+            context_created = False
+        else:
+            self.modules[self.PATH_CONTEXT] = Context(__tags__, variables)
+            context_created = True
+            # self.update_context(__tags__, variables)
         
         ast = HypertagAST(script, self, globals_)
-        return ast.translate()
+        
+        try:
+            return ast.translate()
+        finally:
+            if context_created: del self.modules[self.PATH_CONTEXT]
+            
         
     def render(self, script, __file__ = None, __package__ = None, __tags__ = None, **variables):
         
         dom, symbols, state = self.translate(script, __file__, __package__, __tags__, **variables)
         return dom.render()
         
+
+#####################################################################################################################################################
+#####
+#####  LOADERS
+#####
 
 class Loader:
     """

@@ -670,12 +670,12 @@ class NODES(object):
         
         def analyse(self, ctx):
             runtime = self.tree.runtime
-            symbols, state = runtime.import_module(self.path, self)         # top-level symbols of the imported module
+            module  = runtime.import_module(self.path, self)         # top-level symbols of the imported module
 
             # exclude private symbols AND wrap up all native tag definitions within Imported
             # to preserve original runtime state of their module, for expand()
-            symbols = {name: Imported(value, state) if (IS_TAG(name) and isinstance(value, Hypertag)) else value
-                       for name, value in symbols.items() if name[1] != '_'}
+            symbols = {name: Imported(value, module.state) if (IS_TAG(name) and isinstance(value, Hypertag)) else value
+                       for name, value in module.symbols.items() if name[1] != '_'}
             
             self.slots = {symbol: ValueSlot(symbol, value, ctx) for symbol, value in symbols.items()}
             ctx.pushall(self.slots)
@@ -691,14 +691,13 @@ class NODES(object):
             runtime = self.tree.runtime
             symbol  = self.children[0].value                            # original symbol name with leading % or $
             rename  = (symbol[0] + self.children[1].value) if len(self.children) == 2 else symbol
+            module  = runtime.import_module(self.path, self)     # top-level symbols of the imported module
             
-            symbols, state = runtime.import_module(self.path, self)     # top-level symbols of the imported module
-            
-            if symbol not in symbols: raise ImportErrorEx("cannot import '%s' from a given path (%s)" % (symbol, self.path), self)
-            value = symbols[symbol]
+            if symbol not in module.symbols: raise ImportErrorEx("cannot import '%s' from a given path (%s)" % (symbol, self.path), self)
+            value = module.symbols[symbol]
             
             if IS_TAG(symbol) and isinstance(value, Hypertag):
-                value = Imported(value, state)
+                value = Imported(value, module.state)
             
             self.slot = ValueSlot(rename, value, ctx)
             ctx.push(rename, self.slot)

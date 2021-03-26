@@ -19,7 +19,7 @@ from hypertag import HyperHTML
 #####
 
 def render(script, **ctx):
-    return HyperHTML(**ctx).render(script)
+    return HyperHTML().render(script, **ctx)
 
 def merge_spaces(s, pat = re.compile(r'\s+')):
     """Merge multiple spaces, replace newlines and tabs with spaces, strip leading/trailing space."""
