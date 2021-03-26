@@ -1798,17 +1798,16 @@ class HypertagAST(BaseTree):
     _reduce_string_ = True      # if a node to be reduced has no children but matched a non-empty part of text, it shall be replaced with a 'string' node
     
 
-    ###  Dependencies & semantic analysis  ###
+    ###  Environment  ###
 
     # # a Loader instance that was used to load this HyML source file and should be used for loading related files;
     # # can perform caching and dependencies tracking; see loaders.Loader
     # loader = None
     # dependencies = None         # files included/imported by self, as a set of canonical names; for caching and dep. tracking
+    # globals = None              # dict of global symbols to be declared inside the script at the beginning of analysis
     
     filename = None             # name of the file this script comes from; for error messages
-
-    globals = None              # dict of global symbols to be declared inside the script at the beginning of analysis
-    runtime = None              # instance of Runtime that loaded this document and controls how external modules and symbols are imported
+    runtime  = None             # instance of Runtime that loaded this document and controls how external modules and symbols are imported
     
     
     ###  Output of parsing and analysis  ###
@@ -1822,13 +1821,13 @@ class HypertagAST(BaseTree):
     #                             # includes imported hypertags (!), but not external ones, only the native ones defined in HyML
 
     
-    def __init__(self, script, runtime, verbose = False):
+    def __init__(self, script, runtime, filename = None, verbose = False):
         """
         :param script: input script to be parsed
         """
-        self.runtime = runtime
-        self.parser  = Grammar.get_parser(script)
-        # self.globals = globals if globals is not None else runtime.import_builtins()
+        self.runtime  = runtime
+        self.filename = filename
+        self.parser   = Grammar.get_parser(script)
         
         # replace indentation with special characters INDENT/DEDENT
         flat_script = self.parser.preprocess(script, verbose = verbose)

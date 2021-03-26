@@ -295,7 +295,7 @@ class Runtime:
             self.modules[self.PATH_CONTEXT] = Context(__tags__, variables)
             context_created = True
         
-        ast = HypertagAST(script, self)
+        ast = HypertagAST(script, self, filename = __file__)
         
         try:
             return ast.translate(builtins)
