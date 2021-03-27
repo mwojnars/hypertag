@@ -1,4 +1,5 @@
 from hypertag.core.ast import HypertagAST
+from hypertag import HyperHTML, Runtime
 
 
 ########################################################################################################################################################
@@ -8,7 +9,6 @@ from hypertag.core.ast import HypertagAST
 
 if __name__ == '__main__':
 
-    from hypertag import HyperHTML
     DEBUG = True
 
     text = """
@@ -69,14 +69,6 @@ if __name__ == '__main__':
             < try | {False}!
             <? | {True}!
             <? | {False}!
-    """
-    ctx  = {'x': 10, 'y': 11}
-    text = """
-        if True:
-            import $x
-        else:
-            $x = 5
-        | $x
     """
     text = """
         if False:
@@ -193,9 +185,15 @@ if __name__ == '__main__':
         / If you insist on <s>air conditioning</s>, 🤔
     """
     
+    # text = """
+    #     from hypertag.tests.sample2 import $x
+    #     | $x
+    # """
+    ctx  = {'x': 10, 'y': 11}
     text = """
-        from hypertag.tests.sample2 import $x
-        | $x
+        context $x            # variable "x"
+        context $y as z       -- variable "y" renamed internally to "z"
+        | {x + z}
     """
     
     tree = HypertagAST(text, HyperHTML(), verbose = True)
@@ -217,7 +215,8 @@ if __name__ == '__main__':
     # print()
     
     print("===== After translation =====")
-    dom, _, _ = tree.translate()
+    ctx = Runtime.make_context(None, ctx)
+    dom, _, _ = tree.translate(context = ctx)
     print('DOM:')
     print(dom.tree('  '))
     print()
@@ -236,10 +235,10 @@ if __name__ == '__main__':
     # print(inspect.getfile(text))
     # from hypertag.django.filters import slugify
     # print(slugify('Hypertag rocks'))
-    __package__ = "hypertag.core"
-    from .runtime import __file__, __name__
+    # __package__ = "hypertag.core"
+    # from .runtime import __file__, __name__
     # from hypertag.core.runtime import __file__
-    print(__name__)
+    # print(__name__)
     
     
 # TODO:

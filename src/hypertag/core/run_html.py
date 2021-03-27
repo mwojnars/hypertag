@@ -1,4 +1,4 @@
-from hypertag.core.runtime import Runtime, _read_module
+from hypertag.core.runtime import Runtime
 from hypertag.std.html import html_escape
 import hypertag.html
 

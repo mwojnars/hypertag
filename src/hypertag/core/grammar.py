@@ -19,7 +19,7 @@ document         =  core_blocks? margin?
 tail_blocks      =  (indent_s core_blocks dedent_s) / (indent_t core_blocks dedent_t)
 core_blocks      =  tail_blocks / block+
 
-block            =  margin_out (modifier ws)? (block_control / block_def / block_import / block_struct / block_comment / special_tag)
+block            =  margin_out (modifier ws)? (block_control / block_def / block_context / block_import / block_struct / block_comment / special_tag)
 modifier         =  dedent / append
 dedent           =  '<'                         # marks the block shall be dedented by one level (to parent's indentation)
 append           =  '...'                       # marks the block is a continuation and should be appended to a previous block without a newline (no top margin, inline mode)
@@ -55,10 +55,12 @@ attrs_def        =  (space attr_body)? (space attr_def)*
 attr_body        =  mark_embed ws name_id
 attr_def         =  name_id (ws '=' ws value_of_attr)?
 
-block_import     =  ('from' space path_import space)? 'import' space item_import (comma item_import)*
+block_context    =  'context' space cntx_import (comma cntx_import)* inline_comment?
+block_import     =  ('from' space path_import space)? 'import' space item_import (comma item_import)* inline_comment?
 path_import      =  ~"[^\s\x22\x27]+"                           # import path can be ANY string of 1+ characters unless it contains a whitespace, ' or "
 item_import      =  wild_import / name_import
 wild_import      =  '*'
+cntx_import      =  symbol rename?
 name_import      =  symbol rename?                              # imported name must always be prepended with percent or $ to denote whether we load it from (and save into) a tag namespace or a variable namespace
 rename           =  space 'as' space name_id
 

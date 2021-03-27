@@ -957,6 +957,8 @@ runtime classes could parse these paths differently, for instance, to enable the
 of scripts from a DB instead of files, or from remote locations etc.
 Wildcard import is supported: `from PATH import *`.
 
+Importing an entire module (`import PATH`) is currently _not_ supported.
+
 HyperHTML supports also a special import path "~" (tilde), which denotes 
 the **dynamic context** of script execution: a dictionary of all variables that have
 been passed to the rendering method (`HyperHTML.render()`) as extra keyword arguments.

@@ -1211,22 +1211,9 @@ def test_024_import():
     """
     assert render(src, x = 10, y = 'abc').strip() == "10, abc"
     src = """
-        from ~ import $x, $y
-        | $x, $y
-    """
-    assert render(src, x = 10, y = 'abc').strip() == "10, abc"
-    src = """
         | $abs(-5)
     """                                         # import of defaults (built-ins)
     assert render(src).strip() == "5"
-    src = """
-        from builtins import *
-        from builtins import $ord
-        from ~ import *
-        import *
-        | $ord(x)
-    """
-    assert render(src, x = 'A').strip() == "65"
     src = """
         from hypertag.html import *
         from hypertag.html import %p as PARAGRAPH
@@ -1381,6 +1368,33 @@ def test_029_charset():
     """
     assert render(src).strip() == out.strip()
     
+def test_030_context():
+    src = """
+        from ~ import $x, $y
+        | $x, $y
+    """
+    assert render(src, x = 10, y = 'abc').strip() == "10, abc"
+    src = """
+        from builtins import *
+        from builtins import $ord
+        from ~ import *
+        import *
+        | $ord(x)
+    """
+    assert render(src, x = 'A').strip() == "65"
+
+    src = """
+        context $x, $y as z
+        | {x + z}
+    """
+    assert render(src, x = 10, y = 11).strip() == "21"
+    src = """
+        context $x            # variable "x"
+        context $y as z       -- variable "y" renamed internally to "z"
+        | {x * z}
+    """
+    assert render(src, x = 10, y = 11).strip() == "110"
+
 
 #####################################################################################################################################################
 

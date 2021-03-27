@@ -20,23 +20,23 @@ MIN_RECURSION_LIMIT = 20000
 sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 
 
-def _read_module(module):
-    """
-    Pull symbols: tags & variables from a Python module and return as a dict.
-    All top-level symbols are treated as variables; tags are pulled from a special dictionary named `__tags__`.
-    """
-    symbols = {VAR(name) : getattr(module, name) for name in dir(module)}
-    tags = symbols.pop(VAR('__tags__'), None)
-    if tags:
-        if not isinstance(tags, dict): raise ImportErrorEx("__tags__ must be a dict in %s" % module)
-        
-        # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
-        for name, tag in tags.items():
-            if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
-        
-        symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
-        
-    return symbols
+# def _read_module(module):
+#     """
+#     Pull symbols: tags & variables from a Python module and return as a dict.
+#     All top-level symbols are treated as variables; tags are pulled from a special dictionary named `__tags__`.
+#     """
+#     symbols = {VAR(name) : getattr(module, name) for name in dir(module)}
+#     tags = symbols.pop(VAR('__tags__'), None)
+#     if tags:
+#         if not isinstance(tags, dict): raise ImportErrorEx("__tags__ must be a dict in %s" % module)
+#
+#         # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
+#         for name, tag in tags.items():
+#             if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
+#
+#         symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
+#
+#     return symbols
 
 
 #####################################################################################################################################################
@@ -282,6 +282,22 @@ class Runtime:
         except:
             return None
 
+    @staticmethod
+    def make_context(tags, variables):
+        """
+        Combine two dicts of symbols into one. If a symbol is missing a leading mark ($,%), the mark is imputed
+        with $ (for `variables`) and % (for `tags`).
+        """
+        symbols = {}
+
+        if tags:
+            # TODO: check if names of tags are non-empty and syntactically correct
+            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else TAG(name) : value for name, value in tags.items()})
+        if variables:
+            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else VAR(name) : value for name, value in variables.items()})
+        
+        return symbols
+
     def translate(self, script, __file__ = None, __package__ = None,  __tags__ = None, **variables):
         
         builtins = self.import_builtins()
@@ -294,11 +310,13 @@ class Runtime:
         else:
             self.modules[self.PATH_CONTEXT] = Context(__tags__, variables)
             context_created = True
+
+        context = self.modules[self.PATH_CONTEXT].symbols
         
         ast = HypertagAST(script, self, filename = __file__)
         
         try:
-            return ast.translate(builtins)
+            return ast.translate(builtins, context)
         finally:
             if context_created: del self.modules[self.PATH_CONTEXT]
             

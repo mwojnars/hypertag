@@ -203,6 +203,9 @@ class Context(MultiDict):
     regular_depth  = 0      # no. of tags or tag-def nodes (control nodes excluded) on the path from tree root,
                             # or from the closest nesting hypertag definition node, to the current node;
                             # sibling nodes located at the same regular_depth share a namespace
+
+    in_prolog = True        # True inside the document prolog, i.e., from the document beginning till the first block
+                            # different than a context specification or a comment
     
     def add_refdepth(self, d, symbol = None):
         """Update self.ref_depth with the depth of one more definition of a variable/hypertag.
