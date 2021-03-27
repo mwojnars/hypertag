@@ -46,15 +46,67 @@ class Module:
         """Convert a path to its canonical form assuming that `self` is the referrer module where the path occured."""
         return path
     
+    @classmethod
+    def load(cls, path, referrer, runtime):
+        """
+        Try to load a module given its (possibly non-canonical) path. Return a Module instance,
+        or None if the path is invalid or module can't be found.
+        """
+        return None
+
         
 class HyModule(Module):
     """"""
-    
+    SCRIPT_EXTENSION = 'hy'         # default file extension of Hypertag scripts
+
     def __init__(self, symbols, state):
         self.symbols = symbols
         self.state   = state
         
+    @classmethod
+    def load(cls, path, referrer, runtime):
+        """"""
+        # from package.script ...     -- "package." prefix must be present to allow file identification
+        # from .package.script ...    --
+        # from script ...             -- only possible when __file__ of the calling script is defined; "script.hy" is always looked for in the same folder as the calling script
+        # from .script
+        
+        referrer_file    = None  #self.context.get(VAR('__file__'))
+        referrer_package = None  #self.context.get(VAR('__package__'))
+        
+        # package path is present? the package & file can be localized through `importlib`
+        if '.' in path and (referrer_package or path[0] != '.'):
+            #if path[0] == '.' and not referrer_package: return None
+            package_name, filename = path.rsplit('.', 1)
+            package = importlib.import_module(package_name, referrer_package)
+            package_name = package.__name__                                 # package_name could have been relative, must be changed to absolute
+            package_path = package.__file__
+            if package_path.endswith('.py'):
+                package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
+            filepath = '%s%s%s.%s' % (package_path, PATH_SEP, filename, cls.SCRIPT_EXTENSION)
+            
+        else:
+            # no package path? the script must be in the same folder as __file__
+            if referrer_file is None: return None
+            if path[0] == '.': path = path[1:]
+            path = path.replace('.', PATH_SEP)
+            folder   = os.path.dirname(referrer_file)
+            filepath = folder + PATH_SEP + path
+            package_name = referrer_package
+            
+        if not os.path.exists(filepath):
+            return None
+        
+        script = open(filepath).read()
+        
+        # context (~) has already been initialized by a calling method and will be available to the script below (!)
+        dom, symbols, state = runtime.translate(script) #, __file__ = filepath, __package__ = package_name)
+        symbols[VAR('__file__')]    = filepath
+        symbols[VAR('__package__')] = package_name
+
+        return HyModule(symbols, state)
     
+        
 class PyModule(Module):
     """Wrapper around a regular Python module and its global symbols."""
     
@@ -107,7 +159,20 @@ class PyModule(Module):
             path = path[1:]
 
         return base + '.' + path
-        
+
+    @classmethod
+    def load(cls, path, referrer, runtime):
+        """
+        Both absolute and relative Python paths are supported. The latter require that "$__package__" variable
+        is properly set in the context.
+        """
+        package = None  #self.context.get(VAR('__package__'))
+        try:
+            module = importlib.import_module(path, package)
+            return PyModule(module)
+        except:
+            return None
+
 
 #####################################################################################################################################################
 #####
@@ -121,9 +186,6 @@ class Runtime:
     to enable the import of tags and variables from these external sources to a Hypertag script.
     Modules are identified by "paths". The meaning of a particular path is determined by loaders.
     """
-    
-    # predefined constants
-    SCRIPT_EXTENSION = 'hy'         # file extension of Hypertag scripts; used during import
 
     # list of modules to be imported automatically into a script upon startup of translation (built-in symbols)
     BUILTINS = ['builtins', 'hypertag.builtins']
@@ -168,78 +230,23 @@ class Runtime:
         module = self.modules.get(path)
 
         if module is None:
-            module = self._load_module(path, ast_node)
+            module = self._load_module(path, referrer, ast_node)
             if not module: raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
             self.modules[path] = module
             
         return module
 
-    def _load_module(self, path, ast_node):
+    def _load_module(self, path, referrer, ast_node):
         """Path must be already converted to a canonical form."""
         
-        module = self._load_module_hypertag(path)
+        module = HyModule.load(path, referrer, self)
         if module: return module
 
-        module = self._load_module_python(path)
+        module = PyModule.load(path, referrer, self)
         if module: return module
         
         return None
         
-    def _load_module_hypertag(self, path):
-        """"""
-        # from package.script ...     -- "package." prefix must be present to allow file identification
-        # from .package.script ...    --
-        # from script ...             -- only possible when __file__ of the calling script is defined; "script.hy" is always looked for in the same folder as the calling script
-        # from .script
-        
-        referrer_file    = None  #self.context.get(VAR('__file__'))
-        referrer_package = None  #self.context.get(VAR('__package__'))
-        
-        # package path is present? the package & file can be localized through `importlib`
-        if '.' in path and (referrer_package or path[0] != '.'):
-            #if path[0] == '.' and not referrer_package: return None
-            package_name, filename = path.rsplit('.', 1)
-            package = importlib.import_module(package_name, referrer_package)
-            package_name = package.__name__                                 # package_name could have been relative, must be changed to absolute
-            package_path = package.__file__
-            if package_path.endswith('.py'):
-                package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
-            filepath = '%s%s%s.%s' % (package_path, PATH_SEP, filename, self.SCRIPT_EXTENSION)
-            
-        else:
-            # no package path? the script must be in the same folder as __file__
-            if referrer_file is None: return None
-            if path[0] == '.': path = path[1:]
-            path = path.replace('.', PATH_SEP)
-            folder   = os.path.dirname(referrer_file)
-            filepath = folder + PATH_SEP + path
-            package_name = referrer_package
-            
-        if not os.path.exists(filepath):
-            return None
-        
-        script = open(filepath).read()
-        
-        # context (~) has already been initialized by a calling method and will be available to the script below (!)
-        dom, symbols, state = self.translate(script) #, __file__ = filepath, __package__ = package_name)
-        symbols[VAR('__file__')]    = filepath
-        symbols[VAR('__package__')] = package_name
-
-        return HyModule(symbols, state)
-    
-        
-    def _load_module_python(self, path):
-        """
-        Both absolute and relative Python paths are supported. The latter require that "$__package__" variable
-        is properly set in the context.
-        """
-        package = None  #self.context.get(VAR('__package__'))
-        try:
-            module = importlib.import_module(path, package)
-            return PyModule(module)
-        except:
-            return None
-
     def translate(self, __script__, __module__ = None, __tags__ = None, **variables):
         
         builtins = self.import_builtins()
