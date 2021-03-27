@@ -196,9 +196,9 @@ if __name__ == '__main__':
         | {x + z}
     """
     text = """
+        context $s
         from builtins import *
         from builtins import $ord
-        context $s
         #from ~ import *
         #import *
         | $ord(s)
@@ -223,8 +223,7 @@ if __name__ == '__main__':
     # print()
     
     print("===== After translation =====")
-    ctx = Runtime.make_context(None, ctx)
-    dom, _, _ = tree.translate(context = ctx)
+    dom, _, _ = tree.translate(**ctx)
     print('DOM:')
     print(dom.tree('  '))
     print()

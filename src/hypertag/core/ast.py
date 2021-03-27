@@ -17,7 +17,7 @@ from hypertag.nifty.parsing import ParsimoniousTree as BaseTree
 
 from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, MissingValueEx, NameErrorEx, \
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
-from hypertag.core.grammar import grammar, TAG, VAR, IS_TAG
+from hypertag.core.grammar import grammar, MARK_TAG, MARK_VAR, TAG, VAR, IS_TAG
 from hypertag.core.xml_chars import XML_StartChar, XML_Char, XML_EndChar
 from hypertag.core.structs import Context, State, Slot, ValueSlot
 from hypertag.core.dom import del_indent, get_indent, DOM
@@ -1906,6 +1906,22 @@ class HypertagAST(BaseTree):
         if not line_bad: line_bad = 1
         return lines[line_bad-1].strip(), line_bad
         
+    @staticmethod
+    def make_context(tags, variables):
+        """
+        Combine two dicts of symbols into one. If a symbol lacks a leading mark ($,%), the mark is imputed
+        as $ (for `variables`), or % (for `tags`).
+        """
+        symbols = {}
+
+        if tags:
+            # TODO: check if names of tags are non-empty and syntactically correct
+            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else TAG(name) : value for name, value in tags.items()})
+        if variables:
+            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else VAR(name) : value for name, value in variables.items()})
+        
+        return symbols
+
         
     def analyse(self, builtins = None):
         "Link occurences of variables and hypertags with their definition nodes, collect all symbols defined in the document."
@@ -1914,13 +1930,13 @@ class HypertagAST(BaseTree):
         self.root.predefine(builtins)
         self.root.analyse(ctx)
         
-    def translate(self, builtins = None, context = None):
+    def translate(self, __builtins__ = None, __tags__ = None, **variables):
         
-        if builtins is None:
-            builtins = self.runtime.import_builtins()
-        self.context = context or {}
+        if __builtins__ is None:
+            __builtins__ = self.runtime.import_builtins()
+        self.context = self.make_context(__tags__, variables)
         
-        self.analyse(builtins)
+        self.analyse(__builtins__)
         
         dom, symbols, state = self.root.translate(State())        # calls NODES.xdocument.translate(), see there for description of returned objects
         assert isinstance(dom, DOM.Root)
@@ -1936,9 +1952,9 @@ class HypertagAST(BaseTree):
         # assert output[0] == '\n'        # extra empty line was prepended by Grammar.preprocess() and must be removed now
         # return output[1:]
 
-    def __getitem__(self, tag_name):
-        """Returns a top-level hypertag node wrapped up in Hypertag, for isolated rendering. Analysis must have been performed first."""
-        # TODO
-        return self.hypertags[tag_name]
+    # def __getitem__(self, tag_name):
+    #     """Returns a top-level hypertag node wrapped up in Hypertag, for isolated rendering. Analysis must have been performed first."""
+    #     # TODO
+    #     return self.hypertags[tag_name]
         
 

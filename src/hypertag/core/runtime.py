@@ -232,31 +232,15 @@ class Runtime:
         except:
             return None
 
-    @staticmethod
-    def make_context(tags, variables):
-        """
-        Combine two dicts of symbols into one. If a symbol lacks a leading mark ($,%), the mark is imputed
-        as $ (for `variables`), or % (for `tags`).
-        """
-        symbols = {}
-
-        if tags:
-            # TODO: check if names of tags are non-empty and syntactically correct
-            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else TAG(name) : value for name, value in tags.items()})
-        if variables:
-            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else VAR(name) : value for name, value in variables.items()})
-        
-        return symbols
-
-    def translate(self, script, __file__ = None, __package__ = None,  __tags__ = None, **variables):
+    def translate(self, __script__, __file__ = None, __package__ = None,  __tags__ = None, **variables):
         
         builtins = self.import_builtins()
         builtins[VAR('__file__')]    = __file__
         builtins[VAR('__package__')] = __package__
-        context = self.make_context(__tags__, variables)
+        # context = self.make_context(__tags__, variables)
 
-        ast = HypertagAST(script, self, filename = __file__)
-        return ast.translate(builtins, context)
+        ast = HypertagAST(__script__, self, filename = __file__)
+        return ast.translate(builtins, __tags__, **variables)
         
     def render(self, script, __file__ = None, __package__ = None, __tags__ = None, **variables):
         
