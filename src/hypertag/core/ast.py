@@ -674,8 +674,8 @@ class NODES(object):
             return DOM()
         
     class xwild_import(node):
-        path    = None      # path string as specified in the "from" clause
-        slots   = None      # dict of symbols and their slots created during analysis
+        path    = None          # path string as specified in the "from" clause
+        slots   = None          # dict of symbols and their slots created during analysis
         
         def analyse(self, ctx):
             runtime = self.tree.runtime
@@ -697,10 +697,11 @@ class NODES(object):
         slot  = None        # <slot> that will keep value of this imported symbol
         
         def analyse(self, ctx):
+            assert self.path
             runtime = self.tree.runtime
-            symbol  = self.children[0].value                            # original symbol name with leading % or $
+            symbol  = self.children[0].value                        # original symbol name with leading % or $
             rename  = (symbol[0] + self.children[1].value) if len(self.children) == 2 else symbol
-            module  = runtime.import_module(self.path, self)     # top-level symbols of the imported module
+            module  = runtime.import_module(self.path, self)        # top-level symbols of the imported module
             
             if symbol not in module.symbols: raise ImportErrorEx("cannot import '%s' from a given path (%s)" % (symbol, self.path), self)
             value = module.symbols[symbol]
@@ -724,7 +725,7 @@ class NODES(object):
             super(NODES.xblock_import, self).analyse(ctx)
 
     class xcntx_import(node):
-        """Like <xname_import> but imports the name from a dynamic context rather than from another module."""
+        """Like <xname_import> but imports the name from a dynamic context rather than from a module."""
         slot  = None        # <slot> that will keep value of the symbol
         
         def analyse(self, ctx):
@@ -1899,7 +1900,7 @@ class HypertagAST(BaseTree):
                 super(HypertagAST, self).__init__(flat)
                 line_good = split
                 
-            except Exception:
+            except IncompleteParseError:
                 line_bad = split
 
         if not line_bad: line_bad = 1

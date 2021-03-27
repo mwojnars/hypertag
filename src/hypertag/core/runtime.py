@@ -63,18 +63,18 @@ class Module:
         return path
     
         
-class Context(Module):
-    """Special type of module to hold dynamic context of script translation."""
-    
-    def __init__(self, tags, variables):
-
-        self.symbols = symbols = {}
-
-        if tags:
-            # TODO: check if names of tags are non-empty and syntactically correct
-            symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else TAG(name) : link for name, link in tags.items()})
-        if variables:
-            symbols.update({VAR(name) : value for name, value in variables.items()})
+# class Context(Module):
+#     """Special type of module to hold dynamic context of script translation."""
+#
+#     def __init__(self, tags, variables):
+#
+#         self.symbols = symbols = {}
+#
+#         if tags:
+#             # TODO: check if names of tags are non-empty and syntactically correct
+#             symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else TAG(name) : link for name, link in tags.items()})
+#         if variables:
+#             symbols.update({VAR(name) : value for name, value in variables.items()})
     
     
 class HyModule(Module):
@@ -135,7 +135,6 @@ class PyModule(Module):
 
         return base + '.' + path
         
-        
 
 #####################################################################################################################################################
 #####
@@ -156,10 +155,10 @@ class Runtime:
               denoted by "~" import path:  from ~ import $x, %tag
     """
     
-    # predefined constants
-    PATH_CONTEXT     = '~'          # import path of the global context
-    SCRIPT_EXTENSION = 'hy'         # file extension of Hypertag scripts; used during import
+    # PATH_CONTEXT     = '~'          # import path of the global context
     
+    # predefined constants
+    SCRIPT_EXTENSION = 'hy'         # file extension of Hypertag scripts; used during import
 
     # list of modules to be imported automatically into a script upon startup of translation (built-in symbols)
     BUILTINS = ['builtins', 'hypertag.builtins']
@@ -177,9 +176,9 @@ class Runtime:
 
     modules  = None     # cached modules as a dict {canonical_path: module}
     
-    @property
-    def context(self):
-        return self.modules.get(self.PATH_CONTEXT, {})
+    # @property
+    # def context(self):
+    #     return self.modules.get(self.PATH_CONTEXT, {})
 
     
     def __init__(self):
@@ -197,24 +196,25 @@ class Runtime:
                 self._builtins.update(module.symbols)
                 
         return self._builtins
-    
         
     def import_module(self, path, ast_node):
-
-        path_canonical = self._canonical(path)
-        module = self.modules.get(path_canonical)
+        """Import symbols defined in a module identified by `path`. Return as an instance of Module."""
+        
+        assert path
+        # path = self._canonical(path)
+        module = self.modules.get(path)
 
         if module is None:
-            module = self._load_module(path_canonical, ast_node)
+            module = self._load_module(path, ast_node)
             if not module: raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
-            self.modules[path_canonical] = module
+            self.modules[path] = module
             
         return module
 
-    def _canonical(self, path):
-        """Convert `path` to its canonical form."""
-        if path is None: return self.PATH_CONTEXT
-        return path
+    # def _canonical(self, path):
+    #     """Convert `path` to its canonical form."""
+    #     if path is None: return self.PATH_CONTEXT
+    #     return path
         
     def _load_module(self, path, ast_node):
         """Path must be already converted to a canonical form."""
@@ -234,8 +234,8 @@ class Runtime:
         # from script ...             -- only possible when __file__ of the calling script is defined; "script.hy" is always looked for in the same folder as the calling script
         # from .script
         
-        referrer_file    = self.context.get(VAR('__file__'))
-        referrer_package = self.context.get(VAR('__package__'))
+        referrer_file    = None  #self.context.get(VAR('__file__'))
+        referrer_package = None  #self.context.get(VAR('__package__'))
         
         # package path is present? the package & file can be localized through `importlib`
         if '.' in path and (referrer_package or path[0] != '.'):
@@ -275,7 +275,7 @@ class Runtime:
         Both absolute and relative Python paths are supported. The latter require that "$__package__" variable
         is properly set in the context.
         """
-        package = self.context.get(VAR('__package__'))
+        package = None  #self.context.get(VAR('__package__'))
         try:
             module = importlib.import_module(path, package)
             return PyModule(module)
@@ -285,8 +285,8 @@ class Runtime:
     @staticmethod
     def make_context(tags, variables):
         """
-        Combine two dicts of symbols into one. If a symbol is missing a leading mark ($,%), the mark is imputed
-        with $ (for `variables`) and % (for `tags`).
+        Combine two dicts of symbols into one. If a symbol lacks a leading mark ($,%), the mark is imputed
+        as $ (for `variables`), or % (for `tags`).
         """
         symbols = {}
 
@@ -303,22 +303,25 @@ class Runtime:
         builtins = self.import_builtins()
         builtins[VAR('__file__')]    = __file__
         builtins[VAR('__package__')] = __package__
-        
-        if self.PATH_CONTEXT in self.modules:
-            if __tags__ or variables: raise ImportErrorEx("dynamic context was already created and cannot be modified")
-            context_created = False
-        else:
-            self.modules[self.PATH_CONTEXT] = Context(__tags__, variables)
-            context_created = True
+        context = self.make_context(__tags__, variables)
 
-        context = self.modules[self.PATH_CONTEXT].symbols
-        
         ast = HypertagAST(script, self, filename = __file__)
+        return ast.translate(builtins, context)
         
-        try:
-            return ast.translate(builtins, context)
-        finally:
-            if context_created: del self.modules[self.PATH_CONTEXT]
+        # if self.PATH_CONTEXT in self.modules:
+        #     if __tags__ or variables: raise ImportErrorEx("dynamic context was already created and cannot be modified")
+        #     context_created = False
+        # else:
+        #     self.modules[self.PATH_CONTEXT] = Context(__tags__, variables)
+        #     context_created = True
+        #
+        # context = self.modules[self.PATH_CONTEXT].symbols
+        # ast = HypertagAST(script, self, filename = __file__)
+        #
+        # try:
+        #     return ast.translate(builtins, context)
+        # finally:
+        #     if context_created: del self.modules[self.PATH_CONTEXT]
             
         
     def render(self, script, __file__ = None, __package__ = None, __tags__ = None, **variables):

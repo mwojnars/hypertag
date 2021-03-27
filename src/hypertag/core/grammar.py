@@ -56,7 +56,7 @@ attr_body        =  mark_embed ws name_id
 attr_def         =  name_id (ws '=' ws value_of_attr)?
 
 block_context    =  'context' space cntx_import (comma cntx_import)* inline_comment?
-block_import     =  ('from' space path_import space)? 'import' space item_import (comma item_import)* inline_comment?
+block_import     =  'from' space path_import space 'import' space item_import (comma item_import)* inline_comment?
 path_import      =  ~"[^\s\x22\x27]+"                           # import path can be ANY string of 1+ characters unless it contains a whitespace, ' or "
 item_import      =  wild_import / name_import
 wild_import      =  '*'

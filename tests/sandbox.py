@@ -189,11 +189,19 @@ if __name__ == '__main__':
     #     from hypertag.tests.sample2 import $x
     #     | $x
     # """
-    ctx  = {'x': 10, 'y': 11}
+    ctx  = {'x': 10, 'y': 11, 's': "A"}
     text = """
         context $x            # variable "x"
         context $y as z       -- variable "y" renamed internally to "z"
         | {x + z}
+    """
+    text = """
+        context $s
+        from builtins import *
+        from builtins import $ord
+        #from ~ import *
+        #import *
+        | $ord(s)
     """
     
     tree = HypertagAST(text, HyperHTML(), verbose = True)
