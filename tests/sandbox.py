@@ -10,41 +10,8 @@ from hypertag import HyperHTML, Runtime
 if __name__ == '__main__':
 
     DEBUG = True
-
-    text = """
-        h1 : a href="http://xxx.com" : b : | This is <h1> title
-            p / And <a> paragraph.
-            p | tail text
-                  tail text
-               tail text
-        div
-            | Ala
-              kot { 'Mru' "czek" 123 } {0}? {456}!
-                Ola
-            /     i pies
-                  Azor
-
-        if False:
-            div #box .top .grey
-        elif True:
-            div #box class="bottom"
-        else
-            input enabled=True
-        """
-
-    # text = """
-    #     $k = 5
-    #     for i, val in enumerate(range(k-2), start = k*2):
-    #         $ i = i + 1
-    #         | $val at $i
-    #     | $i
-    # """
-    # text = """
-    #     p | Ala
-    #     dedent nested=False
-    #         div: | kot
-    #             i | pies
-    # """
+    ctx = {}
+    
     # text = """
     #     $g = 100
     #     %g x | xxx {x+g}
@@ -185,23 +152,23 @@ if __name__ == '__main__':
         / If you insist on <s>air conditioning</s>, 🤔
     """
     
+    # ctx  = {'x': 10, 'y': 11, 's': "A"}
     # text = """
-    #     from hypertag.tests.sample2 import $x
-    #     | $x
+    #     context $x            # variable "x"
+    #     context $y as z       -- variable "y" renamed internally to "z"
+    #     | {x + z}
     # """
-    ctx  = {'x': 10, 'y': 11, 's': "A"}
+    # text = """
+    #     context $s
+    #     from builtins import *
+    #     from builtins import $ord
+    #     #from ~ import *
+    #     #import *
+    #     | $ord(s)
+    # """
     text = """
-        context $x            # variable "x"
-        context $y as z       -- variable "y" renamed internally to "z"
-        | {x + z}
-    """
-    text = """
-        context $s
-        from builtins import *
-        from builtins import $ord
-        #from ~ import *
-        #import *
-        | $ord(s)
+        from hypertag.tests.sample2 import $x
+        | $x
     """
     
     tree = HypertagAST(text, HyperHTML(), verbose = True)

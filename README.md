@@ -16,7 +16,7 @@ and removes the need for explicit closing tags.
 Hypertag provides advanced control of page rendering with native control blocks;
 high level of modularity thanks to Python-like imports and DOM manipulation; 
 unprecedented support for code reuse with native custom tags (_hypertags_), 
-and more. HTML 5 can be produced. See the [Quick Start](#quick-start) below, or the 
+and more. Compatible with HTML 5. See the [Quick Start](#quick-start) below, or the 
 [Language Reference](http://hypertag.io) for details.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski)

@@ -673,13 +673,18 @@ class NODES(object):
             for item in self.items: item.translate(state)
             return DOM()
         
-    class xwild_import(node):
+    class _import(node):
+        def _import(self, path):
+            runtime = self.tree.runtime
+            module  = self.tree.module
+            return runtime.import_module(path, module, self)
+        
+    class xwild_import(_import):
         path    = None          # path string as specified in the "from" clause
         slots   = None          # dict of symbols and their slots created during analysis
         
         def analyse(self, ctx):
-            runtime = self.tree.runtime
-            module  = runtime.import_module(self.path, self)         # top-level symbols of the imported module
+            module = self._import(self.path)
 
             # exclude private symbols AND wrap up all native tag definitions within Imported
             # to preserve original runtime state of their module, for expand()
@@ -692,17 +697,16 @@ class NODES(object):
         def translate(self, state):
             for slot in self.slots.values(): slot.set_value(state)
             
-    class xname_import(node):
+    class xname_import(_import):
         path  = None        # path string as specified in the "from" clause
         slot  = None        # <slot> that will keep value of this imported symbol
         
         def analyse(self, ctx):
             assert self.path
-            runtime = self.tree.runtime
             symbol  = self.children[0].value                        # original symbol name with leading % or $
             rename  = (symbol[0] + self.children[1].value) if len(self.children) == 2 else symbol
-            module  = runtime.import_module(self.path, self)        # top-level symbols of the imported module
-            
+            module  = self._import(self.path)
+
             if symbol not in module.symbols: raise ImportErrorEx("cannot import '%s' from a given path (%s)" % (symbol, self.path), self)
             value = module.symbols[symbol]
             
@@ -1835,7 +1839,8 @@ class HypertagAST(BaseTree):
     
 
     ###  Environment  ###
-
+    
+    module   = None             # the module this script was imported from, as runtime.Module instance; can be None (script from a string)
     filename = None             # name of the file this script comes from; for error messages
     runtime  = None             # instance of Runtime that loaded this document and controls how external modules and symbols are imported
     context  = None             # dict of symbols passed to self.translate() as `context`
@@ -1851,12 +1856,13 @@ class HypertagAST(BaseTree):
     #                             # includes imported hypertags (!), but not external ones, only the native ones
 
     
-    def __init__(self, script, runtime, filename = None, verbose = False):
+    def __init__(self, script, runtime, module = None, verbose = False):
         """
         :param script: input script to be parsed
         """
         self.runtime  = runtime
-        self.filename = filename
+        self.module   = module
+        self.filename = module.filename if module else None
         self.parser   = Grammar.get_parser(script)
         
         # replace indentation with special characters INDENT/DEDENT

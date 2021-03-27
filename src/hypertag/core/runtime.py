@@ -30,6 +30,9 @@ class Module:
     
     location = None     # canonical identifier (path) of this module, for deduplication and retrieval; there can be many
                         # non-canonical (e.g., relative) paths pointing to a given module, but only 1 canonical path
+    filename = None     # name of the file if this module was loaded from disk
+    package  = None     # Python package path of this module's package, if available
+    
     symbols  = None     # cached dict of this module's symbols; each symbol has a leading mark % or $
     state    = None     # internal State at the end of translation of a Hypertag module; required for evaluation of imported hypertags
     
@@ -63,7 +66,10 @@ class PyModule(Module):
         All top-level symbols are treated as variables; tags are pulled from a special module-level dictionary `__tags__`.
         """
         self.module   = module
-        self.location = module.__name__
+        self.location = getattr(module, '__name__', None)
+        self.filename = getattr(module, '__file__', None)
+        self.package  = getattr(module, '__package__', None)
+        
         self.symbols  = {VAR(name) : getattr(module, name) for name in dir(module)}
         
         # retrieve __tags__
@@ -133,10 +139,12 @@ class Runtime:
                         # in a subclass, staticmethod() must be applied as a wrapper to prevent this attr be treated as a regular method:
                         #   escape = staticmethod(custom_function)
 
+    loaders  = None     # list of Loaders to be used when locating a module given its path
     modules  = None     # cached modules as a dict {canonical_path: module}
     
     
     def __init__(self):
+        self.loaders = [StandardLoader()]
         self.modules = {}
 
     def import_builtins(self):
@@ -147,12 +155,12 @@ class Runtime:
         if self._builtins is None:
             self._builtins = {}
             for path in self.BUILTINS:
-                module = self.import_module(path, None)
+                module = self.import_module(path, None, None)
                 self._builtins.update(module.symbols)
                 
         return self._builtins
         
-    def import_module(self, path, ast_node):
+    def import_module(self, path, referrer, ast_node):
         """Import symbols defined in a module identified by `path`. Return as an instance of Module."""
         
         assert path
@@ -213,7 +221,7 @@ class Runtime:
         script = open(filepath).read()
         
         # context (~) has already been initialized by a calling method and will be available to the script below (!)
-        dom, symbols, state = self.translate(script, __file__ = filepath, __package__ = package_name)
+        dom, symbols, state = self.translate(script) #, __file__ = filepath, __package__ = package_name)
         symbols[VAR('__file__')]    = filepath
         symbols[VAR('__package__')] = package_name
 
@@ -232,19 +240,19 @@ class Runtime:
         except:
             return None
 
-    def translate(self, __script__, __file__ = None, __package__ = None,  __tags__ = None, **variables):
+    def translate(self, __script__, __module__ = None, __tags__ = None, **variables):
         
         builtins = self.import_builtins()
-        builtins[VAR('__file__')]    = __file__
-        builtins[VAR('__package__')] = __package__
-        # context = self.make_context(__tags__, variables)
+        if __module__:
+            builtins[VAR('__file__')]    = __module__.filename
+            builtins[VAR('__package__')] = __module__.package
 
-        ast = HypertagAST(__script__, self, filename = __file__)
+        ast = HypertagAST(__script__, self, __module__)
         return ast.translate(builtins, __tags__, **variables)
         
-    def render(self, script, __file__ = None, __package__ = None, __tags__ = None, **variables):
+    def render(self, __script__, __module__ = None, __tags__ = None, **variables):
         
-        dom, symbols, state = self.translate(script, __file__, __package__, __tags__, **variables)
+        dom, symbols, state = self.translate(__script__, __module__, __tags__, **variables)
         return dom.render()
         
 
