@@ -20,25 +20,6 @@ MIN_RECURSION_LIMIT = 20000
 sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 
 
-# def _read_module(module):
-#     """
-#     Pull symbols: tags & variables from a Python module and return as a dict.
-#     All top-level symbols are treated as variables; tags are pulled from a special dictionary named `__tags__`.
-#     """
-#     symbols = {VAR(name) : getattr(module, name) for name in dir(module)}
-#     tags = symbols.pop(VAR('__tags__'), None)
-#     if tags:
-#         if not isinstance(tags, dict): raise ImportErrorEx("__tags__ must be a dict in %s" % module)
-#
-#         # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
-#         for name, tag in tags.items():
-#             if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
-#
-#         symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
-#
-#     return symbols
-
-
 #####################################################################################################################################################
 #####
 #####  MODULES
@@ -63,20 +44,6 @@ class Module:
         return path
     
         
-# class Context(Module):
-#     """Special type of module to hold dynamic context of script translation."""
-#
-#     def __init__(self, tags, variables):
-#
-#         self.symbols = symbols = {}
-#
-#         if tags:
-#             # TODO: check if names of tags are non-empty and syntactically correct
-#             symbols.update({name if name[0] in (MARK_TAG, MARK_VAR) else TAG(name) : link for name, link in tags.items()})
-#         if variables:
-#             symbols.update({VAR(name) : value for name, value in variables.items()})
-    
-    
 class HyModule(Module):
     """"""
     
@@ -143,19 +110,11 @@ class PyModule(Module):
 
 class Runtime:
     """
-    Base class for runtime execution environments of Hypertag scripts. A runtime keeps references to external
-    scripts and modules, as well as dynamic *context* of a particular execution.
-    Enables import of tags and variables from these external sources to a Hypertag script.
-    Sources are identified by "paths". The meaning of a particular path is determined by the Runtime or its subclasses.
-    In the future, Runtime may include a *routing* mechanism that maps external names of resources
-    to an arbitrarily defined namespace of paths as visible to a script.
-    
-    Context = virtual module whose contents is initialized when a new script is to be rendered;
-              all scripts imported by the initial one use the SAME context (!);
-              denoted by "~" import path:  from ~ import $x, %tag
+    Base class for runtime execution environments of Hypertag scripts.
+    A runtime maintains a collection of loaders and is responsible for loading and caching scripts and Python modules,
+    to enable the import of tags and variables from these external sources to a Hypertag script.
+    Modules are identified by "paths". The meaning of a particular path is determined by loaders.
     """
-    
-    # PATH_CONTEXT     = '~'          # import path of the global context
     
     # predefined constants
     SCRIPT_EXTENSION = 'hy'         # file extension of Hypertag scripts; used during import
@@ -176,10 +135,6 @@ class Runtime:
 
     modules  = None     # cached modules as a dict {canonical_path: module}
     
-    # @property
-    # def context(self):
-    #     return self.modules.get(self.PATH_CONTEXT, {})
-
     
     def __init__(self):
         self.modules = {}
@@ -211,11 +166,6 @@ class Runtime:
             
         return module
 
-    # def _canonical(self, path):
-    #     """Convert `path` to its canonical form."""
-    #     if path is None: return self.PATH_CONTEXT
-    #     return path
-        
     def _load_module(self, path, ast_node):
         """Path must be already converted to a canonical form."""
         
@@ -307,22 +257,6 @@ class Runtime:
 
         ast = HypertagAST(script, self, filename = __file__)
         return ast.translate(builtins, context)
-        
-        # if self.PATH_CONTEXT in self.modules:
-        #     if __tags__ or variables: raise ImportErrorEx("dynamic context was already created and cannot be modified")
-        #     context_created = False
-        # else:
-        #     self.modules[self.PATH_CONTEXT] = Context(__tags__, variables)
-        #     context_created = True
-        #
-        # context = self.modules[self.PATH_CONTEXT].symbols
-        # ast = HypertagAST(script, self, filename = __file__)
-        #
-        # try:
-        #     return ast.translate(builtins, context)
-        # finally:
-        #     if context_created: del self.modules[self.PATH_CONTEXT]
-            
         
     def render(self, script, __file__ = None, __package__ = None, __tags__ = None, **variables):
         

@@ -718,10 +718,10 @@ class NODES(object):
     class xblock_context(xblock_import):
         """
         Wrapper-block around `context` imports (xcntx_import). Checks whether the block is placed
-        at the beginning of a document.
+        at the beginning of a document (in document's prolog).
         """
         def analyse(self, ctx):
-            if not ctx.in_prolog: raise SyntaxErrorEx('context specifier(s) can only be preceeded by whitespace and comments', self)
+            if not ctx.in_prolog: raise SyntaxErrorEx('context specifier(s) must be the first block(s) in a document (after comments)', self)
             super(NODES.xblock_import, self).analyse(ctx)
 
     class xcntx_import(node):

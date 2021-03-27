@@ -196,9 +196,9 @@ if __name__ == '__main__':
         | {x + z}
     """
     text = """
-        context $s
         from builtins import *
         from builtins import $ord
+        context $s
         #from ~ import *
         #import *
         | $ord(s)
