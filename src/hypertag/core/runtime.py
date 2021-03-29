@@ -28,13 +28,11 @@ sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 class Module:
     """Wrapper around all types of imported modules (Hypertag's, Python's)."""
     
-    location = None     # canonical path of this module, for deduplication and retrieval; there can be many
+    location = None     # canonical path of this module, for deduplication and caching; there can be many
                         # non-canonical (e.g., relative) paths pointing to the same module, but only one canonical path
-    filename = None     # name of the file if this module was loaded from disk
-    package  = None     # Python package path of this module's package, if available
-    
+    filename = None     # name of the file if this module was loaded from disk; mapped to __file__ inside a script
+    package  = None     # Python package path of this module's package, if available; mapped to __package__ inside a script
     symbols  = None     # cached dict of this module's symbols; each symbol has a leading mark % or $
-    state    = None     # internal State at the end of translation of a Hypertag module; required for evaluation of imported hypertags
     
     def __init__(self, **kwattrs):
         for attr, value in kwattrs.items():
@@ -47,8 +45,8 @@ class Module:
         return self.symbols.get(key, default)
         
 
-class NoModule(Module):
-    """Mock-up class to be used in place of a referrer module for top-level scripts that have no referrers."""
+# class NoModule(Module):
+#     """Mock-up class to be used in place of a referrer module for top-level scripts that have no referrers."""
     
 
 class PyModule(Module):
@@ -78,6 +76,13 @@ class PyModule(Module):
                 if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
             
             self.symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
+
+class HyModule(Module):
+    """Wrapper around a Hypertag script that stores all arguments and results of translation."""
+    
+    script = None       # plain text of the Hypertag script
+    dom    = None       # output DOM produced by translation
+    state  = None       # internal State at the end of translation; needed when hypertags from this module are to be expanded
     
 # class HyScript(HyModule):
 #
@@ -176,7 +181,9 @@ class Loader:
 class PyLoader(Loader):
     """
     Loader of regular Python modules. They are identified by absolute package paths (dot-separated, no initial dot),
-    which are used as modules' unique locations.
+    which are used as modules' unique locations. When importing a Python module from a Hypertag script using
+    a RELATIVE package path, the script's module must have its `package` property set, otherwise it will be impossible
+    to infer the referred module's package path.
     """
 
     def _find(self, path, referrer):
@@ -242,7 +249,8 @@ class HyLoader(Loader):
         
         location = None
         ref_root = os.path.dirname(referrer.filename) if referrer.filename else None
-
+        ref_package = referrer.package
+        
         # relative import path is always resolved relative to the referrer's folder
         if path[:1] == '.':
             if ref_root:
@@ -293,12 +301,11 @@ class HyLoader(Loader):
             return None
         
         script = open(location).read()
-        dom, symbols, state = runtime.translate(script)
         
-        # symbols[VAR('__file__')]    = filepath
-        # symbols[VAR('__package__')] = package_name
+        module = self.cache[location] = runtime.translate(script, location, package)
+        module.location = location
+        return module
         
-        return Module(location = location, filename = location, symbols = symbols, state = state)
     
     @staticmethod
     def _join_path(root, path):
@@ -436,19 +443,26 @@ class Runtime:
     #
     #     return None
         
-    def translate(self, __script__, __module__ = None, __tags__ = None, **variables):
+    def translate(self, __script__, __file__ = None, __package__ = None, __tags__ = None, **variables):
         
         builtins = self.import_builtins()
-        if __module__:
-            builtins[VAR('__file__')]    = __module__.filename
-            builtins[VAR('__package__')] = __module__.package
-
-        ast = HypertagAST(__script__, self, __module__)
-        return ast.translate(builtins, __tags__, **variables)
+        builtins[VAR('__file__')]    = __file__
+        builtins[VAR('__package__')] = __package__
         
-    def render(self, __script__, __module__ = None, __tags__ = None, **variables):
+        ast = HypertagAST(__script__, self, __file__)
+        dom, symbols, state = ast.translate(builtins, __tags__, **variables)
         
-        dom, symbols, state = self.translate(__script__, __module__, __tags__, **variables)
-        return dom.render()
+        return HyModule(script   = __script__,
+                        filename = __file__,
+                        package  = __package__,
+                        dom      = dom,
+                        symbols  = symbols,
+                        state    = state,
+                        )
+        
+    def render(self, __script__, __file__ = None, __package__ = None, __tags__ = None, **variables):
+        
+        module = self.translate(__script__, __file__, __package__, __tags__, **variables)
+        return module.dom.render()
         
 
