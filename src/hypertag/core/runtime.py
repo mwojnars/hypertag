@@ -22,14 +22,82 @@ sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 
 #####################################################################################################################################################
 #####
-#####  MODULES
+#####  MODULES & LOADERS
+#####
+
+class Loader:
+    """Wrapper around a specific Module subclass that implements a delegated load() and adds caching of loaded modules."""
+
+    module_class = None
+    cache        = None         # dict of loaded modules indexed by the canonical path (module.location)
+    
+    def __init__(self, module_class):
+        
+        self.module_class = module_class
+        self.cache = {}
+    
+    def load(self, path, referrer, runtime):
+        
+        location = self.module_class.find(path, referrer)
+        if location in self.cache:
+            return self.cache[location]
+        
+        module = self.module_class.load(location, runtime)
+        if module is None: return None
+
+        self.cache[location] = module
+        return module
+        
+        
+# class Loader:
+#     """
+#     Base class for module loaders. A loader takes an import path as specified in `import` block of a Hypertag script,
+#     together with the location of the referrer module; converts the path to its canonical form (subclass-dependent);
+#     loads the module and returns it as a dict of symbols. Caching of modules can be performed internally.
+#     """
+#     def load_module(self, path, referrer, runtime):
+#         raise NotImplementedError
+#
+#
+# class StandardLoader:
+#     """
+#     A loader of Hypertag and Python modules that uses the same package structure and paths as Python.
+#     Modules are loaded from files. First, it tries to load a Hypertag file, only then a Python file.
+#     """
+#
+#     def load_module(self, path, referrer, runtime):
+#
+#         module = HyModule.load(path, referrer, runtime)
+#         if module: return module
+#
+#         module = PyModule.load(path, referrer, runtime)
+#         if module: return module
+#
+#         return None
+
+
+# class CompoundLoader(Loader):
+#     """Runtime that combines multiple sub-runtimes, each one having its own XX/ prefix to be added to import paths."""
+#
+#     loaders = {
+#         'HY':   HypertagLoader,
+#         'PY':   PythonLoader,
+#         'file': FileLoader,
+#     }
+
+#####################################################################################################################################################
+#####
+#####
 #####
 
 class Module:
-    """Base class for wrappers around all types of imported modules (Hypertag's, Python's)."""
+    """
+    Base class for wrappers around all types of imported modules (Hypertag's, Python's).
+    Each Module subclass represents a specific naming convention and an ontology of valid paths of modules.
+    """
     
-    location = None     # canonical identifier (path) of this module, for deduplication and retrieval; there can be many
-                        # non-canonical (e.g., relative) paths pointing to a given module, but only 1 canonical path
+    location = None     # canonical path of this module, for deduplication and retrieval; there can be many
+                        # non-canonical (e.g., relative) paths pointing to the same module, but only one canonical path
     filename = None     # name of the file if this module was loaded from disk
     package  = None     # Python package path of this module's package, if available
     
@@ -42,21 +110,101 @@ class Module:
     def get(self, key, default = None):
         return self.symbols.get(key, default)
         
-    def normalize(self, path):
-        """Convert a path to its canonical form assuming that `self` is the referrer module where the path occured."""
-        return path
+    @classmethod
+    def find(cls, path, referrer):
+        """
+        Convert a path to its canonical form. The `referrer` is the module where the path occured.
+        Return None if the path is invalid for this type of modules.
+        """
+        return None
+        
+    # def normalize(self, path):
+    #     """Convert a path to its canonical form assuming that `self` is the referrer module where the path occured."""
+    #     return path
     
     @classmethod
-    def load(cls, path, referrer, runtime):
+    def load(cls, location, runtime):
         """
-        Try to load a module given its (possibly non-canonical) path. Return a Module instance,
+        Try to load a module given its location (*canonical* path). Returns a Module instance,
         or None if the path is invalid or module can't be found.
         """
         return None
 
         
+class PyModule(Module):
+    """Wrapper around a regular Python module and its global symbols."""
+    
+    module = None       # the original Python module
+    
+    def __init__(self, module):
+        """
+        Pull symbols (tags & variables) from a Python module and return as a dict.
+        All top-level symbols are treated as variables; tags are pulled from a special module-level dictionary `__tags__`.
+        """
+        self.module   = module
+        self.location = getattr(module, '__name__', None)
+        self.filename = getattr(module, '__file__', None)
+        self.package  = getattr(module, '__package__', None)
+        
+        self.symbols  = {VAR(name) : getattr(module, name) for name in dir(module)}
+        
+        # retrieve __tags__
+        tags = self.symbols.pop(VAR('__tags__'), None)
+        if tags:
+            if not isinstance(tags, dict): raise ImportErrorEx("__tags__ must be a dict in %s" % module)
+            
+            # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
+            for name, tag in tags.items():
+                if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
+            
+            self.symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
+    
+    @classmethod
+    def find(cls, path, referrer):
+        """Absolute and relative Python paths are supported. The latter require that referrer's package is set."""
+        if path[:1] != '.': return path
+        return cls._joinpath(referrer.package, path)        # `path` is relative, convert it to absolute
+
+    # def normalize(self, path):
+    #     if path[:1] != '.': return path
+    #     # `path` is relative, convert it to absolute
+    #     return self._joinpath(self.module.__package__, path)
+        
+    @staticmethod
+    def _joinpath(base, path):
+        """Convert a relative package `path` to an absolute one by appending it to an absolute `base` path."""
+        if base is None: return None
+        
+        orig_base = base
+        orig_path = path
+        
+        assert path[:1] == '.'
+        path = path[1:]
+        
+        while path[0] == '.':           # move upwards the package tree if `path` starts with multiple dots
+            if '.' not in base:
+                raise ImportErrorEx("attempted relative import (%s) beyond top-level package (%s)" % (orig_path, orig_base))
+            base = base.rsplit('.', 1)[0]
+            path = path[1:]
+
+        return base + '.' + path
+
+    @classmethod
+    def load(cls, location, runtime):
+        # package = self.context.get(VAR('__package__'))
+        try:
+            module = importlib.import_module(location)  #, package)
+            return PyModule(module)
+        except:
+            return None
+
+
 class HyModule(Module):
-    """"""
+    """
+    Location of a Hypertag module is defined as an absolute file system path to the script file.
+    However, import paths have the same structure as in Python: with a dot '.' separating subfolders (packages).
+    """
+    
     SCRIPT_EXTENSION = 'hy'         # default file extension of Hypertag scripts
 
     def __init__(self, symbols, state):
@@ -64,7 +212,44 @@ class HyModule(Module):
         self.state   = state
         
     @classmethod
-    def load(cls, path, referrer, runtime):
+    def find(cls, path, referrer):
+        """
+        Types of paths:
+        - script (no dots in the path) --
+        - package.script ...     -- "package." prefix must be present to allow file identification
+        - .package.script ...    --
+        - script ...             -- only possible when __file__ of the calling script is defined; "script.hy" is always looked for in the same folder as the calling script
+        - .script
+        """
+        
+        # package path is present? the package & file can be localized through `importlib`
+        if '.' in path and (referrer.package or path[0] != '.'):
+            #if path[0] == '.' and not referrer.package: return None
+            package_name, filename = path.rsplit('.', 1)
+            package = importlib.import_module(package_name, referrer.package)
+            package_path = package.__file__
+            if package_path.endswith('.py'):
+                package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
+            filepath = '%s%s%s.%s' % (package_path, PATH_SEP, filename, cls.SCRIPT_EXTENSION)
+            
+        else:
+            # no package path? the script must be in the same folder as __file__
+            if referrer.filename is None: return None
+            if path[0] == '.': path = path[1:]
+            path = path.replace('.', PATH_SEP)
+            folder   = os.path.dirname(referrer.filename)
+            filepath = folder + PATH_SEP + path
+            
+        if not os.path.exists(filepath):
+            return None
+        
+    @classmethod
+    def load(cls, location, runtime):
+        pass
+    
+    
+    @classmethod
+    def load(cls, path, runtime):
         """"""
         # from package.script ...     -- "package." prefix must be present to allow file identification
         # from .package.script ...    --
@@ -106,72 +291,14 @@ class HyModule(Module):
 
         return HyModule(symbols, state)
     
-        
-class PyModule(Module):
-    """Wrapper around a regular Python module and its global symbols."""
-    
-    module = None       # the original Python module
-    
-    def __init__(self, module):
-        """
-        Pull symbols (tags & variables) from a Python module and return as a dict.
-        All top-level symbols are treated as variables; tags are pulled from a special module-level dictionary `__tags__`.
-        """
-        self.module   = module
-        self.location = getattr(module, '__name__', None)
-        self.filename = getattr(module, '__file__', None)
-        self.package  = getattr(module, '__package__', None)
-        
-        self.symbols  = {VAR(name) : getattr(module, name) for name in dir(module)}
-        
-        # retrieve __tags__
-        tags = self.symbols.pop(VAR('__tags__'), None)
-        if tags:
-            if not isinstance(tags, dict): raise ImportErrorEx("__tags__ must be a dict in %s" % module)
-            
-            # make sure that the tags being imported are assigned to the same names as configured in their Tag.name property
-            for name, tag in tags.items():
-                if name != tag.name: raise ImportErrorEx("tag's internal name (%s) differs from its public name (%s) in %s" % (tag.name, name, module))
-            
-            self.symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
-    
-    def normalize(self, path):
-        
-        if path[:1] != '.': return path
-        
-        # `path` is relative, convert it to absolute
-        return self._joinpath(self.module.__package__, path)
-        
-    @staticmethod
-    def _joinpath(base, path):
-        """Convert a relative package `path` to an absolute one by appending it to an absolute `base` path."""
-        
-        orig_base = base
-        orig_path = path
-        
-        assert path[:1] == '.'
-        path = path[1:]
-        
-        while path[0] == '.':           # move upwards the package tree if `path` starts with multiple dots
-            if '.' not in base:
-                raise ImportErrorEx("attempted relative import (%s) beyond top-level package (%s)" % (orig_path, orig_base))
-            base = base.rsplit('.', 1)[0]
-            path = path[1:]
 
-        return base + '.' + path
+class HyScript(HyModule):
 
-    @classmethod
-    def load(cls, path, referrer, runtime):
-        """
-        Both absolute and relative Python paths are supported. The latter require that "$__package__" variable
-        is properly set in the context.
-        """
-        package = None  #self.context.get(VAR('__package__'))
-        try:
-            module = importlib.import_module(path, package)
-            return PyModule(module)
-        except:
-            return None
+    def __init__(self, filename = None, package = None):
+        """A mock-up module for a Hypertag script passed directly as a string, no loading."""
+        self.filename = filename
+        self.package  = package
+        self.symbols  = {VAR('__file__'): filename, VAR('__package__'): package}
 
 
 #####################################################################################################################################################
@@ -184,7 +311,7 @@ class Runtime:
     Base class for runtime execution environments of Hypertag scripts.
     A runtime maintains a collection of loaders and is responsible for loading and caching scripts and Python modules,
     to enable the import of tags and variables from these external sources to a Hypertag script.
-    Modules are identified by "paths". The meaning of a particular path is determined by loaders.
+    Modules are identified by "paths". The meaning of a particular path is determined by `loaders`.
     """
 
     # list of modules to be imported automatically into a script upon startup of translation (built-in symbols)
@@ -201,13 +328,17 @@ class Runtime:
                         # in a subclass, staticmethod() must be applied as a wrapper to prevent this attr be treated as a regular method:
                         #   escape = staticmethod(custom_function)
 
-    loaders  = None     # list of Loaders to be used when locating a module given its path
+    loaders  = None     # list of Module subclasses whose static load() is called in sequence to find the first one
+                        # that is able to locate and load a module by a given path
     modules  = None     # cached modules as a dict {canonical_path: module}
     
     
     def __init__(self):
-        self.loaders = [StandardLoader()]
         self.modules = {}
+        loaders = [HyModule, PyModule]
+        
+        self.loaders = [loader if isinstance(Loader) else Loader(loader) for loader in loaders]
+        
 
     def import_builtins(self):
         """
@@ -223,29 +354,35 @@ class Runtime:
         return self._builtins
         
     def import_module(self, path, referrer, ast_node):
-        """Import symbols defined in a module identified by `path`. Return as an instance of Module."""
+        """Import symbols that are defined in a module identified by `path`. Return as an instance of Module."""
         
         assert path
-        # path = self._canonical(path)
-        module = self.modules.get(path)
+        for mod_class in self.loaders:
+            module = mod_class.load(path, referrer, self)
+            if module: return module
 
-        if module is None:
-            module = self._load_module(path, referrer, ast_node)
-            if not module: raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
-            self.modules[path] = module
-            
-        return module
+        raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
 
-    def _load_module(self, path, referrer, ast_node):
-        """Path must be already converted to a canonical form."""
-        
-        module = HyModule.load(path, referrer, self)
-        if module: return module
+        # # path = self._canonical(path)
+        # module = self.modules.get(path)
+        #
+        # if module is None:
+        #     module = self._load_module(path, referrer)
+        #     if not module: raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
+        #     self.modules[path] = module
+        #
+        # return module
 
-        module = PyModule.load(path, referrer, self)
-        if module: return module
-        
-        return None
+    # def _load_module(self, path, referrer):
+    #     """Path must be already converted to a canonical form."""
+    #
+    #     module = HyModule.load(path, referrer, self)
+    #     if module: return module
+    #
+    #     module = PyModule.load(path, referrer, self)
+    #     if module: return module
+    #
+    #     return None
         
     def translate(self, __script__, __module__ = None, __tags__ = None, **variables):
         
@@ -263,27 +400,3 @@ class Runtime:
         return dom.render()
         
 
-#####################################################################################################################################################
-#####
-#####  LOADERS
-#####
-
-class Loader:
-    """
-    Base class for module loaders. A loader takes an import path as specified in `import` block of a Hypertag script,
-    together with the location of the referrer module; converts the path to its canonical form (subclass-dependent);
-    loads the module and returns it as a dict of symbols. Caching of modules can be performed internally.
-    """
-
-class StandardLoader:
-    """A loader of Python and Hypertag modules that searches the disk in a way analogous to what Python does."""
-
-# class CompoundLoader(Loader):
-#     """Runtime that combines multiple sub-runtimes, each one having its own XX/ prefix to be added to import paths."""
-#
-#     loaders = {
-#         'HY':   HypertagLoader,
-#         'PY':   PythonLoader,
-#         'file': FileLoader,
-#     }
-    
