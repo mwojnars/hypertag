@@ -1860,9 +1860,13 @@ class HypertagAST(BaseTree):
         """
         :param script: input script to be parsed
         """
+        if module is None:
+            from hypertag.core.runtime import NoModule
+            module = NoModule()
+            
         self.runtime  = runtime
         self.module   = module
-        self.filename = module.filename if module else None
+        self.filename = module.filename
         self.parser   = Grammar.get_parser(script)
         
         # replace indentation with special characters INDENT/DEDENT
