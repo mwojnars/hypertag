@@ -20,6 +20,37 @@ MIN_RECURSION_LIMIT = 20000
 sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 
 
+def _join_path(base, path, sep = '.', ext = None):
+    """
+    Convert a relative import `path` to an absolute one by appending it to an absolute `base` path.
+    The `base` can be any type of path: a file path (slash-separated) or an import path (dot-separated) -
+    the `sep` argument determines what character is treated as a separator; the same character is inserted
+    in the result instead of dots, in the `path` part of the output string. If `ext` is provided,
+    it is appended as a file extension of the output path.
+    """
+    if base is None: return None
+    
+    orig_base = base
+    orig_path = path
+    
+    assert path[:1] == '.'                  # `path` is a relative import path
+    path = path[1:]
+    
+    if base[-1:] == sep:                    # truncate a trailing separator in the base path
+        base = base[:-1]
+
+    while path[:1] == '.':                  # move upwards the package tree if `path` starts with multiple dots
+        if sep not in base:
+            raise ImportErrorEx("attempted relative import (%s) beyond top-level package or folder (%s)" % (orig_path, orig_base))
+        base = base.rsplit(sep, 1)[0]
+        path = path[1:]
+
+    fullpath = base + sep + path.replace('.', sep)
+    if ext: fullpath += '.' + ext
+    
+    return fullpath
+
+
 #####################################################################################################################################################
 #####
 #####  MODULES
@@ -176,6 +207,12 @@ class Loader:
         """Read a module identified by `location`. Return None if the module is missing."""
         return None
     
+    @staticmethod
+    def _make_absolute(path, referrer):
+        """Utility method for internal purposes: converting a python import path to an absolute path."""
+        if path[:1] != '.': return path                 # `path` is absolute, return it unchanged
+        return _join_path(referrer.package, path)       # `path` is relative, convert it to an absolute one
+        
         
 class PyLoader(Loader):
     """
@@ -187,8 +224,7 @@ class PyLoader(Loader):
 
     def _find(self, path, referrer):
         """Absolute and relative Python paths are supported. The latter require that referrer's package is set."""
-        if path[:1] != '.': return path
-        return self._join_path(referrer.package, path)          # `path` is relative, convert it to absolute
+        return self._make_absolute(path, referrer)
         
     def _read(self, location, runtime):
         try:
@@ -198,29 +234,27 @@ class PyLoader(Loader):
         except ModuleNotFoundError:
             return None
 
-    @classmethod
-    def make_absolute(cls, path, referrer):
-        if path[:1] != '.': return path
-        return cls._join_path(referrer.package, path)          # `path` is relative, convert it to absolute
-        
-    @classmethod
-    def _join_path(cls, base, path):
-        """Convert a relative import `path` to an absolute one by appending it to an absolute `base` path."""
-        if base is None: return None
-        
-        orig_base = base
-        orig_path = path
-        
-        assert path[:1] == '.'
-        path = path[1:]
-        
-        while path[0] == '.':           # move upwards the package tree if `path` starts with multiple dots
-            if '.' not in base:
-                raise ImportErrorEx("attempted relative import (%s) beyond top-level package (%s)" % (orig_path, orig_base))
-            base = base.rsplit('.', 1)[0]
-            path = path[1:]
-
-        return base + '.' + path
+    # @classmethod
+    # def _join_path(cls, base, path):
+    #     """
+    #     Convert a relative import `path` to an absolute one by appending it to an absolute `base` path.
+    #     Both paths are python import paths (dots used as separators).
+    #     """
+    #     if base is None: return None
+    #
+    #     orig_base = base
+    #     orig_path = path
+    #
+    #     assert path[:1] == '.'
+    #     path = path[1:]
+    #
+    #     while path[0] == '.':           # move upwards the package tree if `path` starts with multiple dots
+    #         if '.' not in base:
+    #             raise ImportErrorEx("attempted relative import (%s) beyond top-level package (%s)" % (orig_path, orig_base))
+    #         base = base.rsplit('.', 1)[0]
+    #         path = path[1:]
+    #
+    #     return base + '.' + path
 
 
 class HyLoader(Loader):
@@ -238,9 +272,9 @@ class HyLoader(Loader):
     1. resolve(import_path, referrer) is called to get a location; `resolve` function is an optional argument
        of HyLoader instantiation;
     2. location is being searched for using Python's import mechanism, like if the script was a Python file - this only
-       works when the import path contains a package specifier, and it is a valid Python package (with __init__.py);
-    3. location is created as a directory path starting at the current folder of the process;
-    4. location is created as a directory path starting at the referrer's folder (like for relative imports).
+       works when the import path contains a package specifier, which points to a valid Python package (with __init__.py);
+    3. location is created as a directory path based at the current folder of the process;
+    4. location is created as a directory path based at the referrer's folder (like for relative imports).
     
     Import paths CAN refer to folders which are NOT valid Python packages (don't have __init__.py inside).
     HyLoader does not check the existence of __init__.py on directory paths to scripts.
@@ -262,7 +296,7 @@ class HyLoader(Loader):
         if path[:1] == '.':
             if ref_root:
                 location = self._join_path(ref_root, path)
-                python_path = PyLoader.make_absolute(path, referrer)
+                python_path = self._make_absolute(path, referrer)
                 
         # absolute import path can be resolved in several different ways; the first one that returns a valid file path is used
         else:
@@ -274,28 +308,29 @@ class HyLoader(Loader):
                     location = None
 
             # 2. try the Python's standard import mechanism (importlib); must be applied to the parent package, not the script itself
-            if not location and '.' in path and (referrer.package or path[0] != '.'):
+            if not location and '.' in path:
                 package_name, filename = path.rsplit('.', 1)
-                pkg = importlib.import_module(package_name, referrer.package)
+                pkg = importlib.import_module(package_name)                 # package_name is an absolute path, so referrer is not needed here
                 package_path = pkg.__file__
                 if package_path.endswith('.py'):
-                    package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
-                location = self._make_path(package_path, filename)
+                    package_path = os.path.dirname(package_path)            # truncate /__init__.py part of a package file path
+                
+                location = package_path + PATH_SEP + filename + '.' + self.SCRIPT_EXTENSION
                 python_path = package_path + '.' + filename
                 if location and not os.path.exists(location):
                     location = python_path = None
                 
             # 3. try using the process' current folder as a root
             if not location:
-                location = self._join_path(os.getcwd(), path)
+                location = self._join_path(os.getcwd(), '.' + path)
                 if location in self.cache: return self.cache[location]
                 if location and not os.path.exists(location):
                     location = None
 
             # 4. try using the referrer's folder as a root
             if not location and ref_root:
-                location = self._join_path(ref_root, path)
-                python_path = PyLoader.make_absolute('.' + path, referrer)
+                location = self._join_path(ref_root, '.' + path)
+                python_path = self._make_absolute('.' + path, referrer)
 
         # # package path is present? the package & file can be localized through `importlib`
         # if '.' in path and (referrer.package or path[0] != '.'):
@@ -333,17 +368,18 @@ class HyLoader(Loader):
         
     
     def _join_path(self, root, path):
-        """Convert an import `path` to a file path and append to a root folder's path."""
+        """Convert a python import `path` (with dots) to a file path (with slashes) and append to a root folder's path."""
         
-        assert path[:1] != '.'
-        path = path.replace('.', PATH_SEP)              # convert package separators to directory separators
-        if root[-1:] == PATH_SEP:                       # trancate a trailing separator in the root path
-            root = root[:-1]
-        return self._make_path(root, path)
+        return _join_path(root, path, PATH_SEP, self.SCRIPT_EXTENSION)
         
-    def _make_path(self, root, path):
-        return root + PATH_SEP + path + '.' + self.SCRIPT_EXTENSION
+        # assert path[:1] == '.'
+        # path = path.replace('.', PATH_SEP)              # convert package separators to directory separators
+        # if root[-1:] == PATH_SEP:                       # trancate a trailing separator in the root path
+        #     root = root[:-1]
+        # return self._make_path(root, path)
 
+    # def _make_path(self, root, path):
+    #     return root + PATH_SEP + path + '.' + self.SCRIPT_EXTENSION
     
     # def _find(self, path, referrer):
     #     # package path is present? the package & file can be localized through `importlib`
