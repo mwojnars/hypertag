@@ -1,4 +1,4 @@
-#from .package1.sample3 import %G, $y
+from .package1.sample3 import %G, $y
 
 $x = 5
 
@@ -8,3 +8,4 @@ $x = 5
     | {x*y}
 
 $x = 155
+$z = 155 + y

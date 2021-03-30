@@ -25,6 +25,8 @@ def merge_spaces(s, pat = re.compile(r'\s+')):
     """Merge multiple spaces, replace newlines and tabs with spaces, strip leading/trailing space."""
     return pat.sub(' ', s).strip()
 
+FILE_PKG = {'__file__': __file__, '__package__': __package__}
+
 
 #####################################################################################################################################################
 #####
@@ -1246,6 +1248,23 @@ def test_024_import():
         0
     """
     assert render(src).strip() == out.strip()
+    src = """
+        from hypertag.tests.sample2 import $x, $z, %G
+        | $x, $z
+        G | abc
+        G x=20
+            | xyz
+    """
+    out = """
+        155, 170
+        24
+        abc
+        135
+        35
+        xyz
+        300
+    """
+    assert render(src, **FILE_PKG).strip() == out.strip()
 
 def test_025_empty_control():
     """
