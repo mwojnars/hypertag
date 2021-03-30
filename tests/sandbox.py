@@ -1,5 +1,6 @@
-from hypertag.core.ast import HypertagAST
 from hypertag import HyperHTML, Runtime
+from hypertag.core.ast import HypertagAST
+from hypertag.core.runtime import RootModule
 
 
 ########################################################################################################################################################
@@ -152,26 +153,27 @@ if __name__ == '__main__':
         / If you insist on <s>air conditioning</s>, 🤔
     """
     
-    # ctx  = {'x': 10, 'y': 11, 's': "A"}
-    # text = """
-    #     context $x            # variable "x"
-    #     context $y as z       -- variable "y" renamed internally to "z"
-    #     | {x + z}
-    # """
-    # text = """
-    #     context $s
-    #     from builtins import *
-    #     from builtins import $ord
-    #     #from ~ import *
-    #     #import *
-    #     | $ord(s)
-    # """
+    ctx  = {'x': 10, 'y': 11, 's': "A"}
+    text = """
+        context $x            # variable "x"
+        context $y as z       -- variable "y" renamed internally to "z"
+        | {x + z}
+    """
+    text = """
+        context $s
+        from builtins import *
+        from builtins import $ord
+        #from ~ import *
+        #import *
+        | $ord(s)
+    """
     text = """
         from hypertag.tests.sample2 import $x
         | $x
     """
     
-    tree = HypertagAST(text, HyperHTML(), verbose = True)
+    root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)
+    tree = HypertagAST(text, root, verbose = True)
     
     # print()
     # print("===== AST =====")

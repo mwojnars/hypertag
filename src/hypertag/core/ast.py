@@ -1856,17 +1856,11 @@ class HypertagAST(BaseTree):
     #                             # includes imported hypertags (!), but not external ones, only the native ones
 
     
-    def __init__(self, script, runtime, filename = None, verbose = False):
-        """
-        :param script: input script to be parsed
-        """
-        # if module is None:
-        #     from hypertag.core.runtime import NoModule
-        #     module = NoModule()
-        # self.module   = module
-        
-        self.runtime  = runtime
-        self.filename = filename  #module.filename
+    def __init__(self, script, module, verbose = False):
+
+        self.module   = module
+        self.runtime  = module.runtime
+        self.filename = module.filename
         self.parser   = Grammar.get_parser(script)
         
         # replace indentation with special characters INDENT/DEDENT

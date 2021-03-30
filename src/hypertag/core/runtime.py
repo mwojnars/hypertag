@@ -28,6 +28,7 @@ sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 class Module:
     """Wrapper around all types of imported modules (Hypertag's, Python's)."""
     
+    runtime  = None     # Runtime that created this module
     location = None     # canonical path of this module, for deduplication and caching; there can be many
                         # non-canonical (e.g., relative) paths pointing to the same module, but only one canonical path
     filename = None     # name of the file if this module was loaded from disk; mapped to __file__ inside a script
@@ -44,10 +45,6 @@ class Module:
     def get(self, key, default = None):
         return self.symbols.get(key, default)
         
-
-# class NoModule(Module):
-#     """Mock-up class to be used in place of a referrer module for top-level scripts that have no referrers."""
-    
 
 class PyModule(Module):
     """Wrapper around a regular Python module and its global symbols."""
@@ -78,20 +75,22 @@ class PyModule(Module):
             self.symbols.update({name if name[0] == MARK_TAG else TAG(name) : tag for name, tag in tags.items()})
 
 class HyModule(Module):
-    """Wrapper around a Hypertag script that stores all arguments and results of translation."""
+    """Wrapper around a Hypertag script to be executed (translated). Stores results of translation."""
     
     script = None       # plain text of the Hypertag script
     dom    = None       # output DOM produced by translation
     state  = None       # internal State at the end of translation; needed when hypertags from this module are to be expanded
     
-# class HyScript(HyModule):
-#
-#     def __init__(self, filename = None, package = None):
-#         """A mock-up module for a Hypertag script passed directly as a string, no loading."""
-#         self.filename = filename
-#         self.package  = package
-#         self.symbols  = {VAR('__file__'): filename, VAR('__package__'): package}
-
+    def translate(self, builtins, __tags__, **variables):
+    
+        ast = HypertagAST(self.script, self)
+        self.dom, self.symbols, self.state = ast.translate(builtins, __tags__, **variables)
+        return self
+        
+    
+class RootModule(HyModule):
+    """Wrapper module for a top-level script, to provide a referrer module for other (imported) scripts."""
+    
 
 #####################################################################################################################################################
 #####
@@ -199,8 +198,13 @@ class PyLoader(Loader):
         except ModuleNotFoundError:
             return None
 
-    @staticmethod
-    def _join_path(base, path):
+    @classmethod
+    def make_absolute(cls, path, referrer):
+        if path[:1] != '.': return path
+        return cls._join_path(referrer.package, path)          # `path` is relative, convert it to absolute
+        
+    @classmethod
+    def _join_path(cls, base, path):
         """Convert a relative import `path` to an absolute one by appending it to an absolute `base` path."""
         if base is None: return None
         
@@ -228,12 +232,15 @@ class HyLoader(Loader):
     A relative import path (.XYZ) is converted to a file path rooted at the referrer's module folder
     (referrer.filename must be present) to obtain the location.
     
-    For absolute paths, different methods are tried to obtain the location, and the first one that succeeds
+    For absolute paths, different methods are tried to obtain the location. The first one that succeeds
     (i.e., the file exists) is selected:
     
-    1. resolve(path, referrer) is called to get a location; `resolve` function is an optional argument during HyLoader instantiation;
-    2. location is created as a directory path starting at the current folder of the process;
-    3. location is created as a directory path starting at the referrer's folder (like for relative imports).
+    1. resolve(import_path, referrer) is called to get a location; `resolve` function is an optional argument
+       of HyLoader instantiation;
+    2. location is being searched for using Python's import mechanism, like if the script was a Python file - this only
+       works when the import path contains a package specifier, and it is a valid Python package (with __init__.py);
+    3. location is created as a directory path starting at the current folder of the process;
+    4. location is created as a directory path starting at the referrer's folder (like for relative imports).
     
     Import paths CAN refer to folders which are NOT valid Python packages (don't have __init__.py inside).
     HyLoader does not check the existence of __init__.py on directory paths to scripts.
@@ -247,16 +254,17 @@ class HyLoader(Loader):
 
     def load(self, path, referrer, runtime):
         
-        location = None
+        # whenever possible, python package path (python_path) of the module is inferred, so that its `package` can be set
+        location = python_path = None
         ref_root = os.path.dirname(referrer.filename) if referrer.filename else None
-        ref_package = referrer.package
         
         # relative import path is always resolved relative to the referrer's folder
         if path[:1] == '.':
             if ref_root:
                 location = self._join_path(ref_root, path)
+                python_path = PyLoader.make_absolute(path, referrer)
                 
-        # absolute import path can be resolved in several different ways: the first one that works is used
+        # absolute import path can be resolved in several different ways; the first one that returns a valid file path is used
         else:
             # 1. try calling a resolve() function
             if self.resolve:
@@ -265,16 +273,29 @@ class HyLoader(Loader):
                 if location and not os.path.exists(location):
                     location = None
 
-            # 2. try using the process' current folder as a root
+            # 2. try the Python's standard import mechanism (importlib); must be applied to the parent package, not the script itself
+            if not location and '.' in path and (referrer.package or path[0] != '.'):
+                package_name, filename = path.rsplit('.', 1)
+                pkg = importlib.import_module(package_name, referrer.package)
+                package_path = pkg.__file__
+                if package_path.endswith('.py'):
+                    package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
+                location = self._make_path(package_path, filename)
+                python_path = package_path + '.' + filename
+                if location and not os.path.exists(location):
+                    location = python_path = None
+                
+            # 3. try using the process' current folder as a root
             if not location:
                 location = self._join_path(os.getcwd(), path)
                 if location in self.cache: return self.cache[location]
                 if location and not os.path.exists(location):
                     location = None
 
-            # 3. try using the referrer's folder as a root
+            # 4. try using the referrer's folder as a root
             if not location and ref_root:
                 location = self._join_path(ref_root, path)
+                python_path = PyLoader.make_absolute('.' + path, referrer)
 
         # # package path is present? the package & file can be localized through `importlib`
         # if '.' in path and (referrer.package or path[0] != '.'):
@@ -297,26 +318,32 @@ class HyLoader(Loader):
         #     # location = root + PATH_SEP + path
         #     # package_name = referrer.package
             
-        if not os.path.exists(location):
+        if not location or not os.path.exists(location):
             return None
+        
+        package = python_path.rsplit('.', 1)[0] if python_path else None
         
         script = open(location).read()
         
         module = self.cache[location] = runtime.translate(script, location, package)
         module.location = location
+        module.package = package
+        
         return module
         
     
-    @staticmethod
-    def _join_path(root, path):
-        """Convert an import path to a directory path and append to a root folder's path."""
+    def _join_path(self, root, path):
+        """Convert an import `path` to a file path and append to a root folder's path."""
         
         assert path[:1] != '.'
         path = path.replace('.', PATH_SEP)              # convert package separators to directory separators
         if root[-1:] == PATH_SEP:                       # trancate a trailing separator in the root path
             root = root[:-1]
-        return root + PATH_SEP + path
+        return self._make_path(root, path)
         
+    def _make_path(self, root, path):
+        return root + PATH_SEP + path + '.' + self.SCRIPT_EXTENSION
+
     
     # def _find(self, path, referrer):
     #     # package path is present? the package & file can be localized through `importlib`
@@ -348,10 +375,10 @@ class HyLoader(Loader):
 
 class Runtime:
     """
-    Base class for runtime execution environments of Hypertag scripts.
-    A runtime maintains a collection of loaders and is responsible for loading and caching scripts and Python modules,
-    to enable the import of tags and variables from these external sources to a Hypertag script.
-    Modules are identified by "paths". The meaning of a particular path is determined by `loaders`.
+    Runtime execution environment of Hypertag scripts.
+    Defines a set of built-in symbols, a target language, and an escape function.
+    Manages modules loading through a collection of predefined loaders.
+    Modules are identified by "paths". The meaning of a particular path is determined by its loader.
     """
 
     # list of modules to be imported automatically into a script upon startup of translation (built-in symbols)
@@ -390,7 +417,7 @@ class Runtime:
         if self._builtins is None:
             self._builtins = {}
             for path in self.BUILTINS:
-                module = self.import_module(path, None, None)
+                module = self.import_module(path, RootModule(), None)
                 self._builtins.update(module.symbols)
                 
         return self._builtins
@@ -449,16 +476,21 @@ class Runtime:
         builtins[VAR('__file__')]    = __file__
         builtins[VAR('__package__')] = __package__
         
-        ast = HypertagAST(__script__, self, __file__)
-        dom, symbols, state = ast.translate(builtins, __tags__, **variables)
+        module = HyModule(runtime = self, script = __script__, filename = __file__, package  = __package__)
+        module.translate(builtins, __tags__, **variables)
         
-        return HyModule(script   = __script__,
-                        filename = __file__,
-                        package  = __package__,
-                        dom      = dom,
-                        symbols  = symbols,
-                        state    = state,
-                        )
+        return module
+        
+        # ast = HypertagAST(__script__, self, module)
+        # dom, symbols, state = ast.translate(builtins, __tags__, **variables)
+        #
+        # return HyModule(script   = __script__,
+        #                 filename = __file__,
+        #                 package  = __package__,
+        #                 dom      = dom,
+        #                 symbols  = symbols,
+        #                 state    = state,
+        #                 )
         
     def render(self, __script__, __file__ = None, __package__ = None, __tags__ = None, **variables):
         
