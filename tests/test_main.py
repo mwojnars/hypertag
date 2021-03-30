@@ -1265,6 +1265,23 @@ def test_024_import():
         300
     """
     assert render(src, **FILE_PKG).strip() == out.strip()
+    src = """
+        from hypertag.tests.sample4 import $x, $y, %G, %H
+        | $x, $y
+        G | abc
+        H | xyz
+    """
+    out = """
+        310, 155
+        in G
+        24
+        abc
+        135
+        24
+        xyz
+        135
+    """
+    assert render(src, **FILE_PKG).strip() == out.strip()
 
 def test_025_empty_control():
     """
