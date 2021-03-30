@@ -1,10 +1,8 @@
 import os, sys, importlib
-from six.moves import builtins
 
 from hypertag.core.errors import ImportErrorEx, ModuleNotFoundEx
 from hypertag.core.grammar import MARK_VAR, MARK_TAG, VAR, TAG, TAGS
 from hypertag.core.ast import HypertagAST
-import hypertag.builtins
 
 PATH_SEP = os.path.sep
 
@@ -128,39 +126,6 @@ class RootModule(HyModule):
 #####  LOADERS
 #####
 
-# class Cache:
-#     """Dict of key-value pairs."""
-#
-#     entries = None
-#
-#     class Found(Exception):
-#         """Raised by check() when the key being searched for was found in the cache."""
-#         def __init__(self, key, value):
-#             self.key = key
-#             self.value = value
-#
-#     def __init__(self):
-#         self.entries = {}
-#
-#     def __contains__(self, key):
-#         return key in self.entries
-#
-#     def __setitem__(self, key, value):
-#         self.entries[key] = value
-#
-#     def __getitem__(self, key):
-#         return self.entries[key]
-#
-#     def __delitem__(self, key):
-#         del self.entries[key]
-#
-#     def check(self, key):
-#         """Check if `key` is present in the cache, and if so, raise its value wrapped up in a Found exception."""
-#         if key in self.entries:
-#             value = self.entries[key]
-#             raise Cache.Found(key, value)
-    
-    
 class Loader:
     """
     Finding, loading, and caching modules.
@@ -183,12 +148,6 @@ class Loader:
         of the same module every time after a `path` is converted to a canonical `location`; every newly loaded module
         should be put into cache.
         """
-        # try:
-        #     module = self._find(path, referrer)
-        #     if module is None: return None
-        # except Cache.Found as found:
-        #     return found.value
-
         location = self._find(path, referrer)
         if location is None: return None
         if location in self.cache: return self.cache[location]
@@ -233,28 +192,6 @@ class PyLoader(Loader):
         
         except ModuleNotFoundError:
             return None
-
-    # @classmethod
-    # def _join_path(cls, base, path):
-    #     """
-    #     Convert a relative import `path` to an absolute one by appending it to an absolute `base` path.
-    #     Both paths are python import paths (dots used as separators).
-    #     """
-    #     if base is None: return None
-    #
-    #     orig_base = base
-    #     orig_path = path
-    #
-    #     assert path[:1] == '.'
-    #     path = path[1:]
-    #
-    #     while path[0] == '.':           # move upwards the package tree if `path` starts with multiple dots
-    #         if '.' not in base:
-    #             raise ImportErrorEx("attempted relative import (%s) beyond top-level package (%s)" % (orig_path, orig_base))
-    #         base = base.rsplit('.', 1)[0]
-    #         path = path[1:]
-    #
-    #     return base + '.' + path
 
 
 class HyLoader(Loader):
@@ -332,27 +269,6 @@ class HyLoader(Loader):
                 location = self._join_path(ref_root, '.' + path)
                 python_path = self._make_absolute('.' + path, referrer)
 
-        # # package path is present? the package & file can be localized through `importlib`
-        # if '.' in path and (referrer.package or path[0] != '.'):
-        #     #if path[0] == '.' and not referrer_package: return None
-        #     package_name, filename = path.rsplit('.', 1)
-        #     package = importlib.import_module(package_name, referrer.package)
-        #     # package_name = package.__name__                                 # package_name could have been relative, must be changed to absolute
-        #     package_path = package.__file__
-        #     if package_path.endswith('.py'):
-        #         package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
-        #     location = '%s%s%s.%s' % (package_path, PATH_SEP, filename, self.SCRIPT_EXTENSION)
-        #
-        # else:
-        #     # no package path? the script must be in the same folder as __file__
-        #     if referrer.filename is None: return None
-        #     if path[0] == '.': path = path[1:]
-        #     root = os.path.dirname(referrer.filename)
-        #     location = self._join_path(root, path)
-        #     # path = path.replace('.', PATH_SEP)
-        #     # location = root + PATH_SEP + path
-        #     # package_name = referrer.package
-            
         if not location or not os.path.exists(location):
             return None
         
@@ -372,37 +288,6 @@ class HyLoader(Loader):
         
         return _join_path(root, path, PATH_SEP, self.SCRIPT_EXTENSION)
         
-        # assert path[:1] == '.'
-        # path = path.replace('.', PATH_SEP)              # convert package separators to directory separators
-        # if root[-1:] == PATH_SEP:                       # trancate a trailing separator in the root path
-        #     root = root[:-1]
-        # return self._make_path(root, path)
-
-    # def _make_path(self, root, path):
-    #     return root + PATH_SEP + path + '.' + self.SCRIPT_EXTENSION
-    
-    # def _find(self, path, referrer):
-    #     # package path is present? the package & file can be localized through `importlib`
-    #     if '.' in path and (referrer.package or path[0] != '.'):
-    #         #if path[0] == '.' and not referrer.package: return None
-    #         package_name, filename = path.rsplit('.', 1)
-    #         package = importlib.import_module(package_name, referrer.package)
-    #         package_path = package.__file__
-    #         if package_path.endswith('.py'):
-    #             package_path = os.path.dirname(package_path)                # truncate /__init__.py part of a package file path
-    #         filepath = '%s%s%s.%s' % (package_path, PATH_SEP, filename, self.SCRIPT_EXTENSION)
-    #
-    #     else:
-    #         # no package path? the script must be in the same folder as __file__
-    #         if referrer.filename is None: return None
-    #         if path[0] == '.': path = path[1:]
-    #         path = path.replace('.', PATH_SEP)
-    #         folder   = os.path.dirname(referrer.filename)
-    #         filepath = folder + PATH_SEP + path
-    #
-    #     if not os.path.exists(filepath):
-    #         return None
-    
 
 #####################################################################################################################################################
 #####
@@ -433,17 +318,11 @@ class Runtime:
 
     loaders  = None     # list of Module subclasses whose static load() is called in sequence to find the first one
                         # that is able to locate and load a module by a given path
-    # cache    = None     # Cache for caching modules; keys are pairs of the form (loader, module.location)
-    # modules  = None     # cached modules as a dict {canonical_path: module}
     
     
     def __init__(self):
-        # self.cache   = Cache()
         self.loaders = [HyLoader, PyLoader]
         self.loaders = [loader if isinstance(loader, Loader) else loader() for loader in self.loaders]
-        
-        # loaders = [HyModule, PyModule]
-        # self.loaders = [loader if isinstance(Loader) else Loader(loader) for loader in loaders]
 
     def import_builtins(self):
         """
@@ -463,48 +342,11 @@ class Runtime:
         
         assert path
 
-        # try:
-        #     module = loader = None
-        #     for loader in self.loaders:
-        #         check_cache = lambda location: self.cache.check((loader, location))
-        #         module = loader.find(path, referrer, check_cache)
-        #         if module: break
-        #
-        # except Cache.Found as found:
-        #     return found.value
-        #
-        # if module is None: return None
-        # if module.location is not None:
-        #     key = (loader, module.location)
-        #     if key in self.cache: raise ImportErrorEx("loader %s did not check the cache before loading a module" % loader)
-        #     self.cache[key] = module
-
         for loader in self.loaders:
             module = loader.load(path, referrer, self)
             if module: return module
 
         raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ when calling render()" % path, ast_node)
-
-        # # path = self._canonical(path)
-        # module = self.modules.get(path)
-        #
-        # if module is None:
-        #     module = self._load_module(path, referrer)
-        #     if not module: raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ in parsing context" % path, ast_node)
-        #     self.modules[path] = module
-        #
-        # return module
-
-    # def _load_module(self, path, referrer):
-    #     """Path must be already converted to a canonical form."""
-    #
-    #     module = HyModule.load(path, referrer, self)
-    #     if module: return module
-    #
-    #     module = PyModule.load(path, referrer, self)
-    #     if module: return module
-    #
-    #     return None
         
     def translate(self, __script__, __file__ = None, __package__ = None, __tags__ = None, **variables):
         
@@ -516,17 +358,6 @@ class Runtime:
         module.translate(builtins, __tags__, **variables)
         
         return module
-        
-        # ast = HypertagAST(__script__, self, module)
-        # dom, symbols, state = ast.translate(builtins, __tags__, **variables)
-        #
-        # return HyModule(script   = __script__,
-        #                 filename = __file__,
-        #                 package  = __package__,
-        #                 dom      = dom,
-        #                 symbols  = symbols,
-        #                 state    = state,
-        #                 )
         
     def render(self, __script__, __file__ = None, __package__ = None, __tags__ = None, **variables):
         
