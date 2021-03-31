@@ -30,13 +30,15 @@ class Hypertag(BaseEngine):
     # inside an installed application.
     app_dirname = 'hypertag'
 
+
     def __init__(self, params):
         # print('setting up Hypertag backend...')
-        params = params.copy()
+        params  = params.copy()
         options = params.pop('OPTIONS').copy()
         super().__init__(params)
-
-        self.engine = HyperHTML(**options)
+        
+        # `options` are ignored currently
+        self.engine = HyperHTML()  #**options
 
     def from_string(self, template_code):
         
@@ -48,7 +50,7 @@ class Hypertag(BaseEngine):
         for template_file in self.iter_template_filenames(template_name):
             try:
                 script = open(template_file, 'rt').read()
-                return Template(self.engine, script)
+                return Template(self.engine, script, template_file)
 
             except FileNotFoundError:
                 tried.append((
@@ -61,9 +63,10 @@ class Hypertag(BaseEngine):
 
 class Template:
 
-    def __init__(self, engine, view):
+    def __init__(self, engine, view, filename = None):
         self.engine = engine
         self.view = view
+        self.filename = filename
 
     def render(self, context=None, request=None):
         if context is None:
@@ -72,6 +75,9 @@ class Template:
             context['request'] = request
             context['csrf_input'] = csrf_input_lazy(request)
             context['csrf_token'] = csrf_token_lazy(request)
+        if self.filename and '__file__' not in context:
+            context['__file__'] = self.filename
+        
         return self.engine.render(self.view, **context)
     
     

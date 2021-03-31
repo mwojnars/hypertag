@@ -1,10 +1,5 @@
-## Introduction
 
-If you are new to Hypertag, see the 
-**[Quick Start](https://github.com/mwojnars/hypertag#quick-start)** for a brief introduction,
-or the complete **[Language Reference](http://hypertag.io/#language-reference)** for details.
-
-Hypertag is a modern language for front-end development that allows
+**Hypertag** is a modern language for front-end development that allows
 writing markup documents in a way similar to writing Python scripts,
 where [indentation](http://hypertag.io/#layout) determines relationships between nested elements 
 and removes the need for explicit closing tags. Hypertag provides:
@@ -21,9 +16,13 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Built-in tags for [HTML5](http://hypertag.io/#html-specific-symbols) generation and for [general](http://hypertag.io/#hypertag-built-ins) purposes.
 - Integrated [Python built-ins](http://hypertag.io/#python-built-ins).
 - Integrated [Django filters](http://hypertag.io/#django-filters).
-  
 
-### Setup
+More information:
+- **[Quick Start](https://github.com/mwojnars/hypertag#quick-start)**
+- **[Language Reference](http://hypertag.io/#language-reference)**
+
+
+## Setup
 
 Install:
 ```
