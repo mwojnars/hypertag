@@ -221,5 +221,5 @@ if __name__ == '__main__':
     
 # TODO:
 # - czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
-# - selectors @body[...]
+# - Runtime & Loader: detection of circular imports
 # - Python's "bitwise not" operator (~)

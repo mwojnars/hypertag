@@ -133,7 +133,7 @@ and removes the need for explicit closing tags. Hypertag provides:
 
 - Advanced control of rendering process with native [control blocks](#control-blocks) 
   (_if_, _for_, _while_, _try_).
-- High level of modularity thanks to Python-like [imports](#imports).
+- High level of modularity thanks to Python-like [imports](#imports) and explicit script's [context](#context) specification.
 - Unprecedented support for code reuse with native [custom tags](#custom-tags).
 - Native [DOM](#dom) representation and [DOM manipulation](#dom-manipulation) during rendering.
 - Embedded [expressions](#expressions) of any complexity.
@@ -146,7 +146,7 @@ and removes the need for explicit closing tags. Hypertag provides:
   
 If you are new to Hypertag, see the 
 **[Quick Start](https://github.com/mwojnars/hypertag#quick-start)** for a brief introduction.
-The source code is available on [GitHub](https://github.com/mwojnars/hypertag).
+The source code is available on [GitHub](https://github.com/mwojnars/hypertag) and [PyPI](https://pypi.org/project/hypertag-lang/).
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski)
 from [Paperity](https://paperity.org/).
@@ -941,7 +941,7 @@ Output:
 
 Variables can be imported from other Hypertag scripts and Python modules
 using an _import_ block. Objects of any type can be imported in this way, 
-including functions and classes:
+including functions and classes. Symbols can optionally be renamed using the `as` syntax:
 
     from python_module import $x, $y as z, $fun as my_function, $T as MyClass
     from hypertag_script import $name
@@ -959,6 +959,59 @@ Wildcard import is supported: `from PATH import *`.
 
 Importing an entire module (`import PATH`) is currently _not_ supported.
 
+Tags can be imported in a similar way as variables.
+Due to separation of [namespaces](#namespaces) (variables vs. tags), all symbols must be 
+prepended with either `$` (to denote a variable), or `%` (a tag):
+
+    from my.utils import $variable
+    from my.utils import %tag
+
+When importing [external tags](#external-tags) from a Python module,
+the tag name is looked up in a special module-level dictionary `__tags__`,
+which must be present and contain a given tag name for the import to succeed.
+The value of each entry should be an instance of `hypertag.Tag`.
+
+
+### Context
+
+Hypertag provides a special type of import block for declaring the "context" variables and/or tags 
+that can (and should) be passed by the caller to `runtime.translate()` or `runtime.render()` (see [Runtime](#runtime)) 
+when executing the script. These variables/tags constitute a **dynamic context** of script execution, for example:
+
+    context $width          # width [px] of the page
+    context $height         # height [px] of the page
+    
+    | Page dimensions imported from context are $width x $height
+
+This script can be rendered in the following way:
+
+```python
+html = HyperHTML().render(script, width = 500, height = 1000)
+print(html)
+```
+and the output is:
+
+    Page dimensions imported from context are 500 x 1000
+
+The _context block_ behaves similar to an import block, in that the declared 
+variables/tags get automatically introduced to the script's namespace at the point of the block's occurrence.
+Also, like in import blocks, a context block may declare multiple symbols at once, comma-separated,
+and each symbol on the list can optionally be renamed using the `as` syntax:
+
+    context $width as W, $height as H
+
+Importantly, unlike import blocks, a context block can only occur at the beginning of a script, i.e., 
+it can only be preceeded by comments or other context blocks (there can be multiple context blocks in a script).
+
+Context blocks constitute a _public interface_ of the script: all the variables and tags declared in these blocks
+are obligatory and must be present in the call to `translate()` or `render()`, otherwise an exception is raised.
+Any extra variables/tags passed by the caller are ignored.
+
+Note that the presence of context blocks in a script implies that this script can _no longer_ be imported 
+by other scripts, and it can only be used at the top level of a script execution hierarchy (!),
+otherwise there would be no way to supply a context.
+
+<!---
 HyperHTML supports also a special import path "~" (tilde), which denotes 
 the **dynamic context** of script execution: a dictionary of all variables that have
 been passed to the rendering method (`HyperHTML.render()`) as extra keyword arguments.
@@ -978,17 +1031,7 @@ print(html)
 and the output is:
 
     Page dimensions imported from the context: 500 x 1000
-
-Tags can be imported in a similar way as variables.
-Due to separation of [namespaces](#namespaces) (variables vs. tags), all symbols must be 
-prepended with either `$` (to denote a variable), or `%` (a tag):
-
-    from my.utils import $variable
-    from my.utils import %tag
-
-When importing tags ([external tags](#external-tags)) from a Python module,
-the tag name is looked up in a special module-level dictionary `__tags__`,
-which must be present and contain a given name for the import to succeed.
+--->
 
 
 ## Custom tags
@@ -1711,10 +1754,10 @@ The document:
 
 ## Runtime
 
-Execution of a Hypertag script is performed by a **runtime**, which is an instance of 
-`hypertag.Runtime` class. The execution constists of 3 phases:
+Execution of a Hypertag script is performed by a **runtime**: an instance of `hypertag.Runtime` class. 
+The execution constists of 3 phases:
 
-1. **parsing** a script to an Abstract Syntax Tree (AST); the syntactic and semantic analysis
+1. **parsing** of the script to an Abstract Syntax Tree (AST); the syntactic and semantic analysis
    of the script is performed;
 2. **translation** of the AST to a native [Document Object Model](#dom) (DOM), where 
    tagged and textual blocks are mapped to nodes of a DOM tree; during translation,

@@ -319,9 +319,11 @@ class Runtime:
     loaders  = None     # list of Module subclasses whose static load() is called in sequence to find the first one
                         # that is able to locate and load a module by a given path
     
+    default_loaders = [HyLoader, PyLoader]      # loaders to be used when no others are passed to __init__
     
-    def __init__(self):
-        self.loaders = [HyLoader, PyLoader]
+    
+    def __init__(self, loaders = None):
+        self.loaders = loaders or self.default_loaders
         self.loaders = [loader if isinstance(loader, Loader) else loader() for loader in self.loaders]
 
     def import_builtins(self):

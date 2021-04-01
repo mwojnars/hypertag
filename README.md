@@ -102,7 +102,7 @@ from hypertag import HyperHTML
 
 script = \
 """
-    from ~ import $blue
+    context $blue
     html: body:
         h1 style="color: $blue"
             / Example document with a <u>list of items</u>
@@ -339,6 +339,30 @@ Wildcard import is supported:
 
     from PATH import *
 
+
+If your script needs to accept external data to work on, it can use a _context block_ 
+to declare a list of input variables (_dynamic context_) that must be passed
+by the caller to the `render()` method:
+
+    context $width          # width [px] of the page
+    context $height         # height [px] of the page
+    
+    | Page dimensions imported from context are $width x $height
+
+This script can be rendered in the following way:
+
+```python
+html = HyperHTML().render(script, width = 500, height = 1000)
+print(html)
+```
+and the output is:
+
+    Page dimensions imported from context are 500 x 1000
+
+Context blocks, if present, constitute a _public interface_ of the script, 
+and so they must be placed at its beginning.
+    
+<!---
 A special import path `~` (tilde) denotes the _dynamic context_ of script execution: 
 a dictionary of all variables that have been passed to the rendering method 
 as extra keyword arguments.
@@ -356,6 +380,7 @@ print(html)
 and the output is:
 
     Page dimensions imported from the context: 500 x 1000
+--->
 
 
 ### Custom tags

@@ -419,11 +419,12 @@ class NODES(object):
             self.block = self.children[-1]
             
         def analyse(self, ctx):
-            super(NODES.xblock, self).analyse(ctx)
             
-            # check if we're still in the document prolog
+            # check if we're possibly moving out of the document prolog
             if ctx.in_prolog and self.block.type not in ('block_comment', 'block_context'):
                 ctx.in_prolog = False
+
+            super(NODES.xblock, self).analyse(ctx)
 
         def translate(self, state):
             margin, block = (c.translate(state) for c in self.children)
@@ -725,7 +726,7 @@ class NODES(object):
         at the beginning of a document (in document's prolog).
         """
         def analyse(self, ctx):
-            if not ctx.in_prolog: raise SyntaxErrorEx('context specifier(s) must be the first block(s) in a document (after comments)', self)
+            if not ctx.in_prolog: raise SyntaxErrorEx('context block(s) must be the first block(s) in a document (after comments)', self)
             super(NODES.xblock_import, self).analyse(ctx)
 
     class xcntx_import(node):
