@@ -115,6 +115,10 @@
       /* color: #d0d0d0; */
       color: #999;
     }
+    .highlight .nn {
+      /* color: #f4bf75; */
+      color: #f79a19;
+    }
     
     a {
       /* color: #3399cc; */
