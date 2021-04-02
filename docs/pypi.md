@@ -6,7 +6,7 @@ and removes the need for explicit closing tags. Hypertag provides:
 
 - Advanced control of rendering process with native [control blocks](http://hypertag.io/#control-blocks) 
   (_if_, _for_, _while_, _try_).
-- High level of modularity thanks to Python-like [imports](http://hypertag.io/#imports).
+- High level of modularity thanks to Python-like [imports](http://hypertag.io/#imports) and explicit [context](http://hypertag.io/#context) specification.
 - Unprecedented support for code reuse with native [custom tags](http://hypertag.io/#custom-tags).
 - Native [DOM](http://hypertag.io/#dom) representation and [DOM manipulation](http://hypertag.io/#dom-manipulation) during rendering.
 - Embedded [expressions](http://hypertag.io/#expressions) of any complexity.

@@ -107,6 +107,15 @@
       /* color: #aa759f; */
       color: #9f508f;
     }
+    .highlight .p, .highlight .pi {
+      /* color: #d0d0d0; */
+      color: #999;
+    }
+    .highlight .o, .highlight .ow {
+      /* color: #d0d0d0; */
+      color: #999;
+    }
+    
     a {
       /* color: #3399cc; */
       color: #0594db;
@@ -133,7 +142,7 @@ and removes the need for explicit closing tags. Hypertag provides:
 
 - Advanced control of rendering process with native [control blocks](#control-blocks) 
   (_if_, _for_, _while_, _try_).
-- High level of modularity thanks to Python-like [imports](#imports) and explicit script's [context](#context) specification.
+- High level of modularity thanks to Python-like [imports](#imports) and explicit [context](#context) specification.
 - Unprecedented support for code reuse with native [custom tags](#custom-tags).
 - Native [DOM](#dom) representation and [DOM manipulation](#dom-manipulation) during rendering.
 - Embedded [expressions](#expressions) of any complexity.
@@ -143,6 +152,7 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Built-in tags for [HTML5](#html-specific-symbols) generation and for [general](#hypertag-built-ins) purposes.
 - Integrated [Python built-ins](#python-built-ins).
 - Integrated [Django filters](#django-filters).
+- Django connector.
   
 If you are new to Hypertag, see the 
 **[Quick Start](https://github.com/mwojnars/hypertag#quick-start)** for a brief introduction.
@@ -949,9 +959,9 @@ including functions and classes. Symbols can optionally be renamed using the `as
     | fun(x) is equal $my_function(x)
     $ obj = MyClass(z)
 
-The HyperHTML standard runtime understands the same _package.module_ syntax of import paths
-as Python. This syntax can be applied to Python and Hypertag files alike:
-the latter must have the ".hy" extension in order to be recognized.
+The HyperHTML standard runtime recognizes the same _package.module_ syntax of import paths
+as Python. The "dotted" path syntax can be applied to Python and Hypertag files alike:
+the latter must have the ".hy" extension in order to be detected.
 The interpretation of import paths is runtime-specific, so some other (custom)
 runtime classes could parse these paths differently, for instance, to enable the import 
 of scripts from a DB instead of files, or from remote locations etc.
@@ -971,11 +981,21 @@ the tag name is looked up in a special module-level dictionary `__tags__`,
 which must be present and contain a given tag name for the import to succeed.
 The value of each entry should be an instance of `hypertag.Tag`.
 
+HyperHTML supports relative (`.PACKAGE.MODULE`) and absolute (`PACKAGE.MODULE`) import paths.
+In some cases, when relative paths are used, it may be necessary to pass the value of `__file__` or `__package__` 
+of the current module as a context variable to the `render()` method, for the path resolution to work correctly:
+
+```python
+html = HyperHTML().render(script, __file__ = __file__, __package__ = __package__)
+```
+
+It is allowed that import paths refer to folders that are _not_ valid Python packages (no `__init__.py` inside).
+
 
 ### Context
 
-Hypertag provides a special type of import block for declaring the "context" variables and/or tags 
-that can (and should) be passed by the caller to `runtime.translate()` or `runtime.render()` (see [Runtime](#runtime)) 
+Hypertag provides a special type of import block for declaring "context" variables and tags, 
+which can (and should) be passed by the caller to `runtime.translate()` or `runtime.render()` (see [Runtime](#runtime)) 
 when executing the script. These variables/tags constitute a **dynamic context** of script execution, for example:
 
     context $width          # width [px] of the page
@@ -1985,3 +2005,65 @@ There is a number of additional elements of Hypertag that have not been mentione
 There are some _gotcha!_ you need to keep in mind when coding with Hypertag:
 - So far, Hypertag hasn't been yet optimized for performance.
 --->
+
+
+## Django connector
+
+Hypertag fully integrates with Django. As described earlier, all of Django's [template filters](#django-filters) are available 
+for Hypertag scripts out of the box.
+There is also a Django-Hypertag backend class: 
+`hypertag.django.backend.Hypertag` - when put in `settings.py` of a Django project, this class allows Hypertag
+scripts to be found by the template discovery mechanism. In this way, Hypertag scripts can be loaded and rendered
+in a Django project just like standard Django's or Jinja2 templates.
+
+The Hypertag backend configuration should be put on the `TEMPLATES` list inside the project's `settings.py`:
+
+```python
+TEMPLATES = [
+    {
+        'BACKEND': 'hypertag.django.backend.Hypertag',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {},
+    },
+    # ... other engines here ...
+]
+```
+
+By default, Hypertag scripts are looked for in the `hypertag` subfolder of the Django project directory.
+Their file names must have `.hy` extension. 
+For example, to load a Hypertag script, `my_script.hy`, into a Django view function, `my_view()`, 
+and render it through Hypertag backend while setting a value of a [context variable](#context), `title`, you can use the following code:
+
+```python
+from django.template.loader import get_template
+
+def my_view(request):
+    template = get_template('my_script.hy')
+    context = {'title': 'Hypertag sample template'}
+    return template.render(context, request)
+```
+
+Note that when a Hypertag script [imports](#imports) other scripts, Hypertag's own loading mechanism is used, not Django's.
+Therefore, there is no need to tweak global Django settings to import scripts from outside the `hypertag` folder:
+the related scripts (imported by the top-level one) can be located in any folder or package that is accessible
+through a dotted path, absolute _or_ relative. It is also possible to import scripts from subfolders of `hypertag`
+by using a relative path. For example, the following import block, when placed in a top-level script:
+
+    from .users.profile import %photo_editor
+    
+will load a `photo_editor` tag from a `profile.hy` script located in `hypertag/users` subfolder.
+
+In some cases, when relative import paths are used, it may be necessary to pass `__file__` or `__package__` of the current module 
+to the `render()` method as a context variable, for the import path resolution to work correctly:
+
+```python
+    # (...)
+    context = {'title': 'Hypertag sample template', '__file__': __file__, '__package__': __package__}
+    return template.render(context, request)
+```
+
+
+
+
+
