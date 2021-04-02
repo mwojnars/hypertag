@@ -2009,14 +2009,14 @@ There are some _gotcha!_ you need to keep in mind when coding with Hypertag:
 
 ## Django connector
 
-Hypertag fully integrates with Django. As described earlier, all of Django's [template filters](#django-filters) are available 
-for Hypertag scripts out of the box.
-There is also a Django-Hypertag backend class: 
-`hypertag.django.backend.Hypertag` - when put in `settings.py` of a Django project, this class allows Hypertag
-scripts to be found by the template discovery mechanism. In this way, Hypertag scripts can be loaded and rendered
-in a Django project just like standard Django's or Jinja2 templates.
+Hypertag fully integrates with [Django](https://www.djangoproject.com/). 
+As described earlier, all of Django's [template filters](#django-filters) are available for Hypertag scripts out of the box.
+There is also a Django-Hypertag backend class: `hypertag.django.backend.Hypertag` - when put 
+in `settings.py` of a Django project, this class allows Hypertag scripts to be found 
+by the template discovery mechanism, so that Hypertag scripts can be loaded and rendered
+just like standard Django's or Jinja2 templates.
 
-The Hypertag backend configuration should be put on the `TEMPLATES` list inside the project's `settings.py`:
+The Hypertag backend configuration should be put on the `TEMPLATES` list inside Django project's `settings.py`:
 
 ```python
 TEMPLATES = [
@@ -2033,7 +2033,8 @@ TEMPLATES = [
 By default, Hypertag scripts are looked for in the `hypertag` subfolder of the Django project directory.
 Their file names must have `.hy` extension. 
 For example, to load a Hypertag script, `my_script.hy`, into a Django view function, `my_view()`, 
-and render it through Hypertag backend while setting a value of a [context variable](#context), `title`, you can use the following code:
+and render it through Hypertag backend while setting a value of a [context variable](#context), `title`, 
+you can use the following code:
 
 ```python
 from django.template.loader import get_template
