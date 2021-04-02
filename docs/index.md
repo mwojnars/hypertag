@@ -152,11 +152,11 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Embedded [expressions](#expressions) of any complexity.
 - Standard Python [operators](#operators) to manipulate arbitrary Python objects.
 - Custom [pipeline](#filters) operator (`:`) for chaining multiple functions as [filters](#filters).
-- Expression [qualifiers](#qualifiers) (`!?`) for creation of alternative paths of calculation and easy handling of edge cases.
+- Expression [qualifiers](#qualifiers) (`!?`) to create alternative paths of calculation and handle edge cases easily.
 - Built-in tags for [HTML5](#html-specific-symbols) generation and for [general](#hypertag-built-ins) purposes.
 - Integrated [Python built-ins](#python-built-ins).
 - Integrated [Django filters](#django-filters).
-- Django connector.
+- [Django connector](#django-connector).
   
 If you are new to Hypertag, see the 
 **[Quick Start](https://github.com/mwojnars/hypertag#quick-start)** for a brief introduction.
@@ -173,7 +173,7 @@ Install in Python 3:
 pip install hypertag-lang               # watch out the name, it is "hypertag-lang"
 ```
 
-Usage:
+Run:
 ```python
 from hypertag import HyperHTML
 html = HyperHTML().render(script)       # rendering of a Hypertag `script` to HTML
@@ -2015,7 +2015,7 @@ There are some _gotcha!_ you need to keep in mind when coding with Hypertag:
 
 Hypertag fully integrates with [Django](https://www.djangoproject.com/). 
 As described earlier, all of Django's [template filters](#django-filters) are available for Hypertag scripts out of the box.
-There is also a Django-Hypertag backend class: `hypertag.django.backend.Hypertag` - when put 
+There is also a Django-Hypertag **backend** class: `hypertag.django.backend.Hypertag` - when put 
 in `settings.py` of a Django project, this class allows Hypertag scripts to be found 
 by the template discovery mechanism, so that Hypertag scripts can be loaded and rendered
 just like standard Django's or Jinja2 templates.
@@ -2037,7 +2037,7 @@ TEMPLATES = [
 By default, Hypertag scripts are looked for in the `hypertag` subfolder of the Django project directory.
 Their file names must have `.hy` extension. 
 For example, to load a Hypertag script, `my_script.hy`, into a Django view function, `my_view()`, 
-and render it through Hypertag backend while setting a value of a [context variable](#context), `title`, 
+and render it through the Hypertag backend while setting a value of a [context variable](#context), `title`, 
 you can use the following code:
 
 ```python
@@ -2053,7 +2053,7 @@ Note that when a Hypertag script [imports](#imports) other scripts, Hypertag's o
 Therefore, there is no need to tweak global Django settings to import scripts from outside the `hypertag` folder:
 the related scripts (imported by the top-level one) can be located in any folder or package that is accessible
 through a dotted path, absolute _or_ relative. It is also possible to import scripts from subfolders of `hypertag`
-by using a relative path. For example, the following import block, when placed in a top-level script:
+by using a relative path. For example, the following import block, when placed in a top-level Hypertag script:
 
     from .users.profile import %photo_editor
     
