@@ -1,6 +1,6 @@
 # Change Log
 
-## [1.1.0] - 2021-04-02
+## [1.1.1], [1.1.0] - 2021-04-02
 
 - Added Django integration: a Hypertag backend (`hypertag.django.backend.Hypertag`) that can be plugged into a Django application.
 - Changed syntax for importing from dynamic context: added "context" blocks in place of "from ~ import ..." syntax.

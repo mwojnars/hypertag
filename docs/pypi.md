@@ -12,10 +12,11 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Embedded [expressions](http://hypertag.io/#expressions) of any complexity.
 - Standard Python [operators](http://hypertag.io/#operators) to manipulate arbitrary Python objects.
 - Custom [pipeline](http://hypertag.io/#filters) operator (`:`) for chaining multiple functions as [filters](http://hypertag.io/#filters).
-- Expression [qualifiers](http://hypertag.io/#qualifiers) (`!?`) for creation of alternative paths of calculation and easy handling of edge cases.
+- Expression [qualifiers](http://hypertag.io/#qualifiers) (`!?`) to create alternative paths of calculation and handle edge cases easily.
 - Built-in tags for [HTML5](http://hypertag.io/#html-specific-symbols) generation and for [general](http://hypertag.io/#hypertag-built-ins) purposes.
 - Integrated [Python built-ins](http://hypertag.io/#python-built-ins).
 - Integrated [Django filters](http://hypertag.io/#django-filters).
+- [Django connector](http://hypertag.io/#django-connector).
 
 More information:
 - **[Quick Start](https://github.com/mwojnars/hypertag#quick-start)**
