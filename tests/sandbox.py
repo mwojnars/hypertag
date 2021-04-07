@@ -168,10 +168,10 @@ if __name__ == '__main__':
         | $ord(s)
     """
     text = """
-        from hypertag.tests.sample4 import $x, $y, %G, %H
-        | $x, $y
-        G | abc
-        H | xyz
+    for i in ([1,2,3]*0):
+        | $i
+    else:
+        | Empty
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

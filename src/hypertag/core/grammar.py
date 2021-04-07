@@ -29,16 +29,18 @@ append           =  '...'                       # marks the block is a continuat
 block_control    =  block_assign / block_if / block_try / block_for / block_while
 
 block_try        =  try_long / try_short
-try_long         =  'try' generic_control? (nl 'else' generic_control?)*
+try_long         =  'try' generic_control? clause_else*
 try_short        =  '?' ws (block_struct / body_control)?       # short version of "try" block:  ?tag ... or ?|...
 
 block_assign     =  mark_eval ws targets ws op_inplace? '=' ws (embedding / expr_augment) inline_comment?
 op_inplace       =  ~"//|\%%|<<|>>|[-+*/&|^]"
 
 block_while      =  'while' clause_if
-block_for        =  'for' space targets space 'in' space tail_for
-block_if         =  'if' clause_if (nl 'elif' clause_if)* (nl 'else' generic_control?)?
+block_for        =  'for' space targets space 'in' space tail_for clause_else?
+block_if         =  'if' clause_if (nl 'elif' clause_if)* clause_else?
+
 clause_if        =  space tail_if
+clause_else      =  nl 'else' generic_control?
 
 targets          =  target (comma target)* (ws ',')?            # result object must be unpacked whenever at least one ',' was parsed
 target           =  ('(' ws targets ws ')') / var_def           # left side of assignment: a variable, or a tuple of variables/sub-tuples

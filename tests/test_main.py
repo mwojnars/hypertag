@@ -444,6 +444,35 @@ def test_010_for():
         for i in [1,2,3] |   $i
     """
     assert render(src).strip() == "1  2  3"
+    src = """
+        for i in [1,2,3]:
+            | $i
+        else:
+            | Empty
+    """
+    out = """
+        1
+        2
+        3
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        for i in ([1,2,3]*0):
+            | $i
+        else
+            | Empty
+    """
+    assert render(src).strip() == "Empty"
+    src = """
+        for i in ([1,2,3]*0) | $i
+        else / Empty
+    """
+    assert render(src).strip() == "Empty"
+    src = """
+        for i in [] / $i
+        else ! Empty
+    """
+    assert render(src).strip() == "Empty"
 
 def test_011_calls():
     src = """

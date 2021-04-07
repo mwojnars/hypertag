@@ -183,7 +183,6 @@ html = HyperHTML().render(script)       # rendering of a Hypertag `script` to HT
 ### Community
 (TODO)
 
-I dedicate this project to ....
 --->
 
 ## Acknowledgements
@@ -192,6 +191,13 @@ Hypertag was partially modeled on [Python's](https://www.python.org/) syntax, an
 was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
+
+<!---
+## Dedication
+
+I dedicate this project to my sons, Franciszek Józef and Brunon Piotr. ( - Marcin Wojnarski )
+--->
+
 
 <hr>
 
@@ -906,7 +912,7 @@ output:
     x=1 is accessible in a sibling of a control block
 
 
-## Literals
+## Primitives
 
 Hypertag supports the following literal expressions:
 

@@ -880,6 +880,11 @@ class NODES(object):
         # def render(self, state):
         #     return self.body.render(state)
         
+    class xclause_else(node):
+        def translate(self, state):
+            assert len(self.children) == 1
+            return self.children[0].translate(state)
+        
     class xblock_while(control_block):
         def _analyse_branches(self, ctx):
             self.children[0].analyse(ctx)
@@ -897,11 +902,13 @@ class NODES(object):
     class xblock_for(control_block):
         targets = None              # 1+ loop variables to assign to
         expr    = None              # loop expression that returns a sequence (iterable) to be looped over
-        body    = None
+        body    = None              # inner blocks of the loop, can be missing
+        else_   = None              # "else" clause, optional
         
         def setup(self):
             self.targets, self.expr = self.children[:2]
-            self.body = self.children[2] if len(self.children) == 3 else None
+            self.body = self.children[2] if len(self.children) >= 3 else None
+            self.else_ = self.children[-1] if self.children[-1].type == 'clause_else' else None
             assert isinstance(self.expr, NODES.expression)
             assert self.targets.type == 'targets'
             # assert self.targets.type == 'var', 'Support for multiple targets in <for> not yet implemented'
@@ -913,14 +920,21 @@ class NODES(object):
 
         def translate(self, state):
             out = []
+            empty = True
             sequence = self.expr.evaluate(state)
             for value in sequence:                  # translate self.body multiple times, once for each value in `sequence`
+                empty = False
                 self.targets.assign(state, value)
                 if self.body:
                     body = self.body.translate(state)
                     out += body.nodes
                 
-            out = DOM(*out)
+            # use the `else` clause if `sequence` was empty
+            if empty and self.else_:
+                out = self.else_.translate(state)
+            else:
+                out = DOM(*out)
+                
             out.set_indent(state.indentation)
             return out
 
