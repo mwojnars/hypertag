@@ -700,7 +700,6 @@ known from Python. The list is ordered by decreasing operator priority:
     X if TEST else Y            - logical
 
 Inside the ternary `if-else` operator, the `else` clause is optional and defaults to `else None`.
-
 Hypertag defines also a number of custom operators: binary, prefix unary, and postfix unary - 
 they are described below.
 
@@ -709,19 +708,14 @@ they are described below.
 
 Hypertag's custom binary operators include:
 
-- The _pipeline_ operator (`:`). It allows functions and other callables be used as 
+- The _pipeline_ operator (`:`): allows functions and other callables be used as 
   chained _filters_. This operator is described in detail in the [Filters](#filters) section.
-- The _concatenation_ operator. It allows sub-expressions to be put one after another, with only 
-  a whitespace as a separator, like in `EXPR1 EXPR2 EXPR3 ...` The sub-expressions are then
-  converted to strings through `str(EXPR)` and concatenated.
-  The programmer must ensure that `str(EXPR)` is a valid call for each sub-expression.
   
-<!---
-If multiple expressions are put 
-one after another separated by 1+ whitespace (a space is the operator): EXPR1 EXPR2 EXPR3 ...
-their values get automatically converted to strings through `str(EXPR)` and concatenated.
-The programmer must ensure that calling str(...) is a valid operation for each sub-expression.
---->
+- The _concatenation_ operator: allows subexpressions to be put one after another, with only 
+  a whitespace as a separator, like in `EXPR1 EXPR2 EXPR3 ...` The subexpressions are then
+  converted to strings through `str(EXPR)` and concatenated.
+  The programmer must ensure that `str(EXPR)` is a valid call for each subexpression.
+  
 The concatenation operator is an extension of the Python syntax for joining literal strings, 
 like in `'Hypertag '  "is"   ' cool'` which is converted by Python parser to a single string:
 `'Hypertag is cool'`. In Python, this works for literals only, while in Hypertag, 
@@ -734,7 +728,7 @@ arithmetic and bitwise must be enclosed in parentheses to avoid ambiguity of the
 which in Hypertag serves as a pipeline operator, but in dictionaries and slices plays a role
 of a field separator.
 
-### Unary prefix operators
+### Non-standard prefix operators
 
 There are two unary prefix operators that identify variables and tags inside expressions:
 
@@ -744,7 +738,7 @@ There are two unary prefix operators that identify variables and tags inside exp
   so developers may forget where exactly it is obligatory and where it can be omitted. 
   With the variable embedding operator, the parser is more forgiving for unnecessary uses of the `$` character inside expressions.
   
-- The _tag embedding_ (`%`) operator allows a tag (`%TAG`, without space) to be put inside an expression, 
+- The _tag embedding_ (`%`) operator allows tags (`%TAG`, without space) to be put inside expressions, 
   which is not possible otherwise. This can be used, for example, to directly invoke tag expansion,
   like in `%div('this is body')`, passing a plain-text _body_ string and skipping the creation of an intermediate DOM
   as would be the case if a full-blown [tagged block](#tagged-blocks) were used.
@@ -752,23 +746,31 @@ There are two unary prefix operators that identify variables and tags inside exp
   and can be passed positional and keyword arguments, which are interpreted as tag attributes; 
   the first postitional argument is always interpreted as a _body_ attribute, even for a void tag.
 
-  An embedded tag constitutes an ordinary expression, and as such, it can occur as a part of a larger expression, 
-  be used as an attribute value, be inserted into a text block, etc.:
-  ```
-  / { %div('plain text').upper() }
-  ```
+A tag embedding constitutes an ordinary expression, and as such, it can occur as a part of a larger expression, 
+be used as an attribute value, be inserted into a text block, etc. For example, the following markup block:
+```
+/ { %div('plain text').upper() }
+```
+is rendered to:
+```
+<DIV>PLAIN TEXT</DIV>
+```
 
-### Unary postfix operators
+### Non-standard postfix operators
 
 Hypertag defines two postfix operators, called _qualifiers_:
 
 - The _optional expression_ qualifier (`?`) indicates that a given subexpression can be ignored:
   if it evaluates to a false value (`''`, `None`, `False` etc.), or raises an exception, its result shall be replaced with `''`,
-  and any exceptions (instances of `Exception`) raised during evaluation should be silently dismissed.
+  and any exceptions (instances of `Exception` or its subclasses) raised during evaluation should be silently dismissed.
+  Note that Python's special exceptions that inherit directly from `BaseException` rather than `Exception` are passed uncaught:
+  `SystemExit`, `KeyboardInterrupt`, `GeneratorExit`.
   
 - The _obligatory expression_ qualifier (`!`) indicates that a given subexpression must evaluate 
   to a true value (non-empty, not false), otherwise a `FalseValueEx` exception from `hypertag.core.errors` will be raised.
 
+Qualifiers can be put at the end of atomic expressions (`X?`, `X!`, no space),
+or right after expression embeddings (`{...}?`, `{...}!`, `$X?`, `$X!`).
 Qualifier are often combined with ["try-else"](#try-block) blocks.
 Examples of use can be found in the [Qualifiers](#qualifiers) section.
 
