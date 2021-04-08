@@ -198,7 +198,7 @@ _I dedicate this project to my sons, Franciszek Józef and Brunon Piotr._ &nbsp;
 
 <!--<p style='text-align:right'> (Marcin Wojnarski)</p>-->
 
-
+<br>
 <hr>
 
 # Language Reference
@@ -730,7 +730,7 @@ of a field separator.
 
 ### Non-standard prefix operators
 
-There are two unary prefix operators, that identify variables and tags inside expressions:
+There are two unary prefix operators that identify variables and tags inside expressions:
 
 - The _variable embedding_ (`$`) operator can precede a variable name (`$VAR`, without space) in an expression,
   which is equivalent to a normal occurrence of the same name without a leading `$` character.
@@ -758,7 +758,7 @@ is rendered to:
 
 ### Non-standard postfix operators
 
-Hypertag defines two postfix operators, called _qualifiers_:
+Hypertag defines two postfix operators called _qualifiers_:
 
 - The _optional expression_ qualifier (`?`) indicates that a given subexpression can be ignored:
   if it evaluates to a false value (`''`, `None`, `False` etc.), or raises an exception, its result shall be replaced with `''`,
@@ -771,7 +771,7 @@ Hypertag defines two postfix operators, called _qualifiers_:
 
 Qualifiers can be put at the end of atomic expressions (`X?`, `X!`, no space),
 or right after expression embeddings (`{...}?`, `{...}!`, `$X?`, `$X!`).
-Qualifier are often combined with ["try-else"](#try-block) blocks.
+Qualifiers are often combined with ["try-else"](#try-block) blocks.
 Examples of use can be found in the [Qualifiers](#qualifiers) section.
 
   
@@ -1397,7 +1397,7 @@ The blocks are:
 - **for-in-else**
 - **while-else**
 
-### "If", "for", "while" blocks
+### "if", "for", "while" blocks
 
 The syntax of "if", "for", "while" blocks is analogous to what it is in Python.
 Both inline and outline body is supported, although the former comes with restrictions:
@@ -1482,7 +1482,7 @@ Note that Hypertag does _not_ provide equivalents for Python's loop control keyw
 
 
 
-### "Try" block
+### "try" block
 
 The "try" block differs from the same-named Python statement.
 It consists of a single "try" clause plus any number (possibly none) of "else" clauses.
@@ -1534,7 +1534,7 @@ The code below renders empty string instead of raising an exception:
 
 ### Qualifiers
 
-The "try" block is particularly useful when combined with **expression qualifiers**:
+The "try" block is particularly useful when combined with [expression qualifiers](#non-standard-postfix-operators):
 "optional" (`?`) and "obligatory" (`!`), placed at the end of (sub)expressions to mark 
 that a given piece of calculation either:
 
@@ -1545,19 +1545,19 @@ Together, these language constructs enable fine-grained control over data post-p
 sanitization and display.
 They can be used to verify the availability of particular elements of input data
 (keys in dictionaries, attributes of objects) and to easily create alternative paths 
-of calculation that will handle multiple edge cases at once.
+of calculation that will handle multiple edge cases at once:
 
     | Price of Opel is {cars['opel']? or cars['audi'] * 0.8}
 
 In the above code, the price of Opel is not present in the dictionary, but thanks 
 to the "optional" qualifier `?`, a KeyError is caught early, and a fallback is used 
-to approximate the price from another entry. The output:
+to approximate the price from another entry. The output is:
 
     Price of Opel is 64000.0
 
 With the "obligatory" qualifier `!` one can verify that a variable has a non-default 
 (non-empty) value, and adapt the displayed message accordingly, with no need for 
-a more verbose if-else test:
+more verbose if-else tests:
 
     %display name='' price=0
         try  | Product "$name!" costs {price}!.
@@ -1589,6 +1589,7 @@ When passed `$products=[]`, the above code outputs:
     No products currently available.
 
 Qualifiers can be placed after all atomic expressions and embeddings, no space is allowed.
+More details can be found in the [Operators](#non-standard-postfix-operators) section.
 
 
 ## DOM
