@@ -194,7 +194,7 @@ was inspired by indentation-based templating languages:
 
 <h3 style='font-size:24px'>Dedication</h3>
 
-_I dedicate this project to my sons, Franciszek Józef and Brunon Piotr._ &nbsp; - Marcin Wojnarski
+_I dedicate this project to my sons, Franciszek Józef and Brunon Piotr._ &nbsp;&nbsp; - Marcin Wojnarski
 
 <!--<p style='text-align:right'> (Marcin Wojnarski)</p>-->
 
@@ -1389,7 +1389,7 @@ After a new tag is implemented, it should be added to the special module-level d
 ## Control blocks
 
 Control blocks of multiple types are available in Hypertag to help you manipulate input data
-directly inside the document without going back and forth between Python and presentation code.
+directly in a document without going back and forth between Python and presentation code.
 The blocks are:
 
 - **if-elif-else**
