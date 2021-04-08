@@ -911,6 +911,54 @@ def test_018_while():
         while False / $i
     """
     assert render(src).strip() == ""
+    src = """
+        $i = 3
+        while i > 0:
+            | $i
+            $i -= 1
+        else:
+            | Empty
+    """
+    out = """
+        3
+        2
+        1
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+        $i = 3
+        while i > 5:
+            | $i
+            $i -= 1
+        else | Empty
+    """
+    assert render(src).strip() == "Empty"
+    src = """
+        $i = 3
+        while i > 5:
+            | $i
+            $i -= 1
+        else
+            $i = 10
+        | $i
+    """
+    assert render(src).strip() == "10"
+    src = """
+        $i = 3
+        while i > 0:
+            | $i
+            $i -= 1
+        else
+            $i = 10
+        | $i
+    """
+    out = """
+        3
+        2
+        1
+        0
+    """
+    assert render(src).strip() == out.strip()
     
 def test_019_inplace_assign():
     src = """

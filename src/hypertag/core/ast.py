@@ -775,7 +775,7 @@ class NODES(object):
             # local_slots = []
             # new_symbols = []
             
-            for i, branch in enumerate(self.children):
+            for branch in self.children:
                 position = ctx.position()
                 branch.analyse(ctx)
                 symbols = ctx.asdict(position)          # top-level symbols declared in this branch...
@@ -886,16 +886,25 @@ class NODES(object):
             return self.children[0].translate(state)
         
     class xblock_while(control_block):
-        def _analyse_branches(self, ctx):
-            self.children[0].analyse(ctx)
+        # def _analyse_branches(self, ctx):
+        #     self.children[0].analyse(ctx)
         def translate(self, state):
             out = []
+            empty = True
             clause = self.children[0]
+            else_  = self.children[1] if len(self.children) > 1 else None
+            
             while clause.test.evaluate(state):
+                empty = False
                 body = clause.translate(state)
                 out += body.nodes
-            # return DOM(*out), 0
-            out = DOM(*out)
+
+            # use the `else` clause if `sequence` was empty
+            if empty and else_:
+                out = else_.translate(state)
+            else:
+                out = DOM(*out)
+
             out.set_indent(state.indentation)
             return out
         
@@ -922,6 +931,7 @@ class NODES(object):
             out = []
             empty = True
             sequence = self.expr.evaluate(state)
+            
             for value in sequence:                  # translate self.body multiple times, once for each value in `sequence`
                 empty = False
                 self.targets.assign(state, value)

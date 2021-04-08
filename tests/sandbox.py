@@ -168,10 +168,13 @@ if __name__ == '__main__':
         | $ord(s)
     """
     text = """
-    for i in ([1,2,3]*0):
+    $i = 3
+    while i > 0:
         | $i
-    else:
-        | Empty
+        $i -= 1
+    else
+        $i = 10
+    | $i
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)
