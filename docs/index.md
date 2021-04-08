@@ -192,11 +192,11 @@ was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
-### Dedication
+<h2>Dedication</h2>
 
-I dedicate this project to my sons, Franciszek Józef and Brunon Piotr. 
+I dedicate this project to my sons, Franciszek Józef and Brunon Piotr. &nbsp; (-Marcin Wojnarski)
 
-<p style='text-align:right'> (Marcin Wojnarski)</p>
+<!--<p style='text-align:right'> (Marcin Wojnarski)</p>-->
 
 
 <hr>
@@ -668,23 +668,25 @@ The name repeated 3 times is: AlaAlaAla
 The third character of the name is: "a"
 ```
 
+Expressions may contain [primitives](#primitives): literal strings, numbers, booleans, collections, `None`.
 Escape strings: `{%raw%}{{{%endraw%}`, `{%raw%}}}{%endraw%}`, `$$` can be used inside 
 text blocks and strings to produce `{`, `}`, `$`, respectively.
 
-Assignment blocks support _augmented_ assignments, where multiple variables are assigned to
+Assignment blocks support _augmented_ assignments, where multiple variables are assigned to,
 all at once:
 
     $ a, (b, c) = [1, (2, 3)]
 
-as well as _in-place_ assignments:
+There are also _in-place_ assignments:
 
     $ x += 5
     $ y *= 2
 
-### Operators
+
+## Operators
 
 Each Hypertag variable points to a Python object and can be used with all the standard operators
-known from Python. The list is ordered according to a decreasing operator priority:
+known from Python. The list is ordered by decreasing operator priority:
 
     . [] ()                     - tail operators (member access, indexing, function call)
     ** * / // %                 - arithmetic 
@@ -699,11 +701,17 @@ known from Python. The list is ordered according to a decreasing operator priori
 
 Inside the ternary `if-else` operator, the `else` clause is optional and defaults to `else None`.
 
-Hypertag defines also a few custom operators:
+Hypertag defines also a number of custom operators: binary, prefix unary, and postfix unary - 
+they are described below.
 
-- The _pipeline_ operator (`:`) allows functions and other callables be used as 
+
+### Non-standard binary operators
+
+Hypertag's custom binary operators include:
+
+- The _pipeline_ operator (`:`). It allows functions and other callables be used as 
   chained _filters_. This operator is described in detail in the [Filters](#filters) section.
-- The _concatenation_ operator allows sub-expressions to be put one after another, with only 
+- The _concatenation_ operator. It allows sub-expressions to be put one after another, with only 
   a whitespace as a separator, like in `EXPR1 EXPR2 EXPR3 ...` The sub-expressions are then
   converted to strings through `str(EXPR)` and concatenated.
   The programmer must ensure that `str(EXPR)` is a valid call for each sub-expression.
@@ -726,24 +734,45 @@ arithmetic and bitwise must be enclosed in parentheses to avoid ambiguity of the
 which in Hypertag serves as a pipeline operator, but in dictionaries and slices plays a role
 of a field separator.
 
-There are also two special unary prefix operators:
+### Unary prefix operators
 
-- The _variable embedding_ (`$`) operator can precede a variable name (`$VAR`, without space) inside an expression,
-  which is equivalent to an occurrence of the same variable without the `$` character.
-  This operator is provided for convenience, to avoid syntax errors. The dollar sign
-  is obligatory as a variable marker in some other places in a script and developers may forget where exactly 
-  it can be omitted. With the variable embedding operator, the parser is more forgiving for unnecessary uses of the `$` character.
+There are two unary prefix operators that identify variables and tags inside expressions:
+
+- The _variable embedding_ (`$`) operator can precede a variable name (`$VAR`, without space) in an expression,
+  which is equivalent to a normal occurrence of the same name without a leading `$` character.
+  The variable embedding operator is provided for convenience. The dollar sign as a special symbol is obligatory in some other places in a script, 
+  so developers may forget where exactly it is obligatory and where it can be omitted. 
+  With the variable embedding operator, the parser is more forgiving for unnecessary uses of the `$` character inside expressions.
   
-- The _tag embedding_ (`%`) operator allows tags to be put inside expressions (`%TAG`, without space), for example,
-  to invoke tag expansion on a plain-text string without creation of an intermediate DOM,
-  like in `%div('plain text')` expression that can be placed in a text block:
-  ```
-  / { %div('plain text').upper() }
-  ```
+- The _tag embedding_ (`%`) operator allows a tag (`%TAG`, without space) to be put inside an expression, 
+  which is not possible otherwise. This can be used, for example, to directly invoke tag expansion,
+  like in `%div('this is body')`, passing a plain-text _body_ string and skipping the creation of an intermediate DOM
+  as would be the case if a full-blown [tagged block](#tagged-blocks) were used.
   Inside expressions, tags are callable. They behave like functions (the call invokes tag expansion) 
   and can be passed positional and keyword arguments, which are interpreted as tag attributes; 
   the first postitional argument is always interpreted as a _body_ attribute, even for a void tag.
 
+  An embedded tag constitutes an ordinary expression, and as such, it can occur as a part of a larger expression, 
+  be used as an attribute value, be inserted into a text block, etc.:
+  ```
+  / { %div('plain text').upper() }
+  ```
+
+### Unary postfix operators
+
+Hypertag defines two postfix operators, called _qualifiers_:
+
+- The _optional expression_ qualifier (`?`) indicates that a given subexpression can be ignored:
+  if it evaluates to a false value (`''`, `None`, `False` etc.), or raises an exception, its result shall be replaced with `''`,
+  and any exceptions (instances of `Exception`) raised during evaluation should be silently dismissed.
+  
+- The _obligatory expression_ qualifier (`!`) indicates that a given subexpression must evaluate 
+  to a true value (non-empty, not false), otherwise a `FalseValueEx` exception from `hypertag.core.errors` will be raised.
+
+Qualifier are often combined with ["try-else"](#try-block) blocks.
+Examples of use can be found in the [Qualifiers](#qualifiers) section.
+
+  
 
 ## Filters
 

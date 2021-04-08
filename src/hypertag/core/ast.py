@@ -15,7 +15,7 @@ from parsimonious.exceptions import IncompleteParseError
 from hypertag.nifty.util import ObjDict
 from hypertag.nifty.parsing import ParsimoniousTree as BaseTree
 
-from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, MissingValueEx, NameErrorEx, \
+from hypertag.core.errors import SyntaxErrorEx, ValueErrorEx, TypeErrorEx, FalseValueEx, NameErrorEx, \
     UnboundLocalEx, UndefinedTagEx, NotATagEx, NoneStringEx, VoidTagEx, ImportErrorEx
 from hypertag.core.grammar import grammar, MARK_TAG, MARK_VAR, TAG, VAR, IS_TAG
 from hypertag.core.xml_chars import XML_StartChar, XML_Char, XML_EndChar
@@ -1275,7 +1275,7 @@ class NODES(object):
             
             # `val` is false ... check qualifiers to undertake appropriate action
             if self.qualifier == '?': return ''
-            if self.qualifier == '!': raise MissingValueEx("Obligatory expression evaluates to a false value (%s)" % repr(val), self)
+            if self.qualifier == '!': raise FalseValueEx("Obligatory expression evaluates to a false value (%s)" % repr(val), self)
             return val
 
         def _eval_inner_qualified(self, state):
@@ -1823,7 +1823,7 @@ class NODES(object):
     #     Values of the original nodes (strings to be concatenated) are retrieved from their render().
     #     """
     #     value = None        # pre-rendered output of the compactified nodes
-    #     ex = None           # if MissingValueEx exception was caught during rendering, it's stored here as an (exception, traceback) pair
+    #     ex = None           # if FalseValueEx exception was caught during rendering, it's stored here as an (exception, traceback) pair
     #
     #     def __init__(self, node, state):
     #         self.tree = node.tree
@@ -1831,7 +1831,7 @@ class NODES(object):
     #         self.pos = node.pos
     #         try:
     #             self.value = node.render(state)
-    #         except MissingValueEx as ex:
+    #         except FalseValueEx as ex:
     #             self.ex = (ex, sys.exc_info()[2])
     #
     #     def merge(self, node, state, sep):
@@ -1840,7 +1840,7 @@ class NODES(object):
     #         try:
     #             nodeValue = node.render(state)
     #             self.value += sep + nodeValue
-    #         except MissingValueEx as ex:
+    #         except FalseValueEx as ex:
     #             self.ex = (ex, sys.exc_info()[2])
     #
     #     def render(self, state):

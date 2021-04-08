@@ -50,7 +50,7 @@ class ImportErrorEx(HError, ImportError):               pass
 class ModuleNotFoundEx(ImportErrorEx):                  pass
 class ParseErrorEx(HError):                             pass
 
-class MissingValueEx(HError):
+class FalseValueEx(HError):
     """
     Empty (false) value was returned by an expression marked with "!" (obligatory) qualifier.
     Typically, this exception is caught at a higher level with a "try" block.
