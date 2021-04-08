@@ -1,3 +1,4 @@
+from six import text_type
 from xml.sax.saxutils import quoteattr
 
 from hypertag.core.errors import VoidTagEx, TypeErrorEx
@@ -33,13 +34,13 @@ class Tag:
         """
         raise NotImplementedError
 
-    def __call__(self, body_string = '', *attrs, **kwattrs):
+    def __call__(self, body_string = None, *attrs, **kwattrs):
         """
         Wrapper around expand() to let the tag be used like a function and to allow its direct rendering,
         without an intermediate DOM. This method can be used as a shortcut inside Hypertag expressions
         to skip DOM creation entirely.
         """
-        body = DOM.Text(body_string) if body_string else DOM()
+        body = DOM.Text(text_type(body_string)) if body_string is not None else DOM()
         return self.expand(body, attrs, kwattrs)
         
 

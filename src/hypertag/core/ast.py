@@ -127,9 +127,9 @@ class EmbeddedHypertag:
         self.caller = caller
         self.state  = state
         
-    def __call__(self, body_string = '', *attrs, **kwattrs):
+    def __call__(self, body_string = None, *attrs, **kwattrs):
         
-        body = DOM.Text(body_string) if body_string else DOM()
+        body = DOM.Text(text_type(body_string)) if body_string is not None else DOM()
         dom  = self.hypertag.expand(body, attrs, kwattrs, self.state, self.caller)
         dom.set_indent('')
         return dom.render()

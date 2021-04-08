@@ -167,15 +167,13 @@ if __name__ == '__main__':
         #import *
         | $ord(s)
     """
+    # text = """
+    # for item in []:
+    #     p | $item
+    # else:
+    #     | No item found.
+    # """
     text = """
-    $i = 3
-    while i > 5:
-        | $i
-        $i -= 1
-    else
-        $i = 10
-    | {i % 3}
-    
     from hypertag.tests.sample2 import %G
     %H | hypertag
     / {%div('kot', id=5)}
@@ -188,7 +186,12 @@ if __name__ == '__main__':
     link | Ala
     link
         | kot
-    / {%link('pies')}
+    b / ({%link('pies')})
+    
+    / {%div('plain text').upper()}
+    
+    %t x | {10+x}
+    | { %t(x=5) }
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

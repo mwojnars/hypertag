@@ -192,11 +192,11 @@ was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
-<!---
-## Dedication
+### Dedication
 
-I dedicate this project to my sons, Franciszek Józef and Brunon Piotr. ( - Marcin Wojnarski )
---->
+I dedicate this project to my sons, Franciszek Józef and Brunon Piotr. 
+
+<p style='text-align:right'> (Marcin Wojnarski)</p>
 
 
 <hr>
@@ -725,6 +725,24 @@ Note that inside dictionaries `{...}` and array slices `[a:b:c]`, operators othe
 arithmetic and bitwise must be enclosed in parentheses to avoid ambiguity of the colon `:`,
 which in Hypertag serves as a pipeline operator, but in dictionaries and slices plays a role
 of a field separator.
+
+There are also two special unary prefix operators:
+
+- The _variable embedding_ (`$`) operator can precede a variable name (`$VAR`, without space) inside an expression,
+  which is equivalent to an occurrence of the same variable without the `$` character.
+  This operator is provided for convenience, to avoid syntax errors. The dollar sign
+  is obligatory as a variable marker in some other places in a script and developers may forget where exactly 
+  it can be omitted. With the variable embedding operator, the parser is more forgiving for unnecessary uses of the `$` character.
+  
+- The _tag embedding_ (`%`) operator allows tags to be put inside expressions (`%TAG`, without space), for example,
+  to invoke tag expansion on a plain-text string without creation of an intermediate DOM,
+  like in `%div('plain text')` expression that can be placed in a text block:
+  ```
+  / { %div('plain text').upper() }
+  ```
+  Inside expressions, tags are callable. They behave like functions (the call invokes tag expansion) 
+  and can be passed positional and keyword arguments, which are interpreted as tag attributes; 
+  the first postitional argument is always interpreted as a _body_ attribute, even for a void tag.
 
 
 ## Filters
@@ -1345,19 +1363,19 @@ The blocks are:
 
 - **if-elif-else**
 - **try-else**
-- **for-in**
-- **while**
+- **for-in-else**
+- **while-else**
 
 ### "If", "for", "while" blocks
 
-The semantics of "if", "for", "while" blocks is analogous to what it is in Python.
+The syntax of "if", "for", "while" blocks is analogous to what it is in Python.
 Both inline and outline body is supported, although the former comes with restrictions:
 the leading expression (a condition in "if/while", a collection in "for") may need to be
 enclosed in `(...)` or `{...}` to avoid ambiguity of special symbols `|/!`,
-which can be interpreted both as operators inside the expressions, and as markers of inline body.
+which can be interpreted both as operators inside the expressions and markers of inline body.
 Trailing colons in clause headlines are optional.
 
-An example "if" block with an outline body may look like this:
+An example "if" block with an outline body looks like this:
 
     $size = 5
     if size > 10      
@@ -1405,6 +1423,33 @@ letter "a"
 letter "b"
 letter "c"
 ```
+
+Like in Python, loops can be followed by an optional `else` clause,
+however, the semantics is very _different_ to what it is in Python.
+Hypertag's `else` was inspired by Django's `empty` clause of the `for ... empty ... endfor` construct
+and its role is to provide a fallback when _no iteration_ of the loop was executed, either due to emptiness
+of a collection (inside `for` blocks), or due to falseness of a condition right from the beginning of a `while` loop.
+
+This is quite opposite to the Python's semantics of `else`, which is based on the loop's termination cause:
+the statement executes only after the loop completes normally (no `break` was encountered).
+The Python's semantics seems confusing to many and is rarely used, therefore Hypertag adopts a different, 
+more intuitive and probably more useful approach. Example:
+
+```
+    for item in []:
+        p | $item
+    else:
+        | No item found.
+```
+
+output:
+```
+No item found.
+```
+
+Note that Hypertag does _not_ provide equivalents for Python's loop control keywords: `break` and `continue`.
+
+
 
 ### "Try" block
 

@@ -1516,14 +1516,14 @@ def test_031_embedded_tags():
         link | Ala
         link
             | kot
-        / {%link('pies')}
+        b / ({%link('pies')})
     """
     out = """
         <a href="#">Ala</a>
         <a href="#">
         kot
         </a>
-        <a href="#">pies</a>
+        <b>(<a href="#">pies</a>)</b>
     """
     assert render(src).strip() == out.strip()
     src = r"""
@@ -1540,6 +1540,12 @@ def test_031_embedded_tags():
         H is: hypertag .
     """
     assert render(src).strip() == out.strip()
+    src = r"""
+        %f @s
+            @s
+        | {10 % int(%f('3'))}
+    """
+    assert render(src).strip() == "1"
 
 
 #####################################################################################################################################################
