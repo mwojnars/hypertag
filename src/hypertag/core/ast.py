@@ -96,7 +96,7 @@ class Hypertag:
     def expand(self, body, attrs, kwattrs, state, caller):
         raise NotImplementedError
 
-class Imported(Hypertag):
+class ImportedHypertag(Hypertag):
     """
     Wrapper around an imported hypertag. Stores the global state of the imported module,
     so that it can replace the state of the importing module when expand() of the imported hypertag is called.
@@ -111,6 +111,28 @@ class Imported(Hypertag):
         
         module_state = State(self.module_symbols)
         return self.hypertag.expand(body, attrs, kwattrs, module_state, caller)
+
+class EmbeddedHypertag:
+    """
+    Wrapper around an imported or locally defined hypertag, for use inside expressions.
+    Stores the current state of translation from the place of occurrence for subsequent expansion,
+    plus the parent x* node of the AST for debugging.
+    Allows the inner hypertag be called like a function through __call__():
+    equivalent of Tag.__call__() for external tags.
+    """
+    def __init__(self, hypertag, state, caller):
+        
+        assert isinstance(hypertag, Hypertag)
+        self.hypertag = hypertag
+        self.caller = caller
+        self.state  = state
+        
+    def __call__(self, body_string = '', *attrs, **kwattrs):
+        
+        body = DOM.Text(body_string) if body_string else DOM()
+        dom  = self.hypertag.expand(body, attrs, kwattrs, self.state, self.caller)
+        dom.set_indent('')
+        return dom.render()
 
 
 #####################################################################################################################################################
@@ -687,9 +709,9 @@ class NODES(object):
         def analyse(self, ctx):
             module = self._import(self.path)
 
-            # exclude private symbols AND wrap up all native tag definitions within Imported
+            # exclude private symbols AND wrap up all native tag definitions within ImportedHypertag
             # to preserve original runtime state of their module, for expand()
-            symbols = {name: Imported(value, module.state) if (IS_TAG(name) and isinstance(value, Hypertag)) else value
+            symbols = {name: ImportedHypertag(value, module.state) if (IS_TAG(name) and isinstance(value, Hypertag)) else value
                        for name, value in module.symbols.items() if name[1] != '_'}
             
             self.slots = {symbol: ValueSlot(symbol, value, ctx) for symbol, value in symbols.items()}
@@ -712,7 +734,7 @@ class NODES(object):
             value = module.symbols[symbol]
             
             if IS_TAG(symbol) and isinstance(value, Hypertag):
-                value = Imported(value, module.state)
+                value = ImportedHypertag(value, module.state)
             
             self.slot = ValueSlot(rename, value, ctx)
             ctx.push(rename, self.slot)
@@ -1289,6 +1311,31 @@ class NODES(object):
     class xexpr_augment(expression_root): pass
     class xexpr_bitwise(expression_root): pass
     
+    class xtag_use(expression):
+        """Occurrence of a tag inside an expression: %TAG."""
+        symbol = None
+        slot   = None           # Slot that identifies this tag inside `state` for read access
+        
+        def setup(self):
+            self.symbol = self.text()
+        
+        def analyse(self, ctx):
+            self.slot = ctx.get(self.symbol)
+            if self.slot is None: raise NameErrorEx("tag '%s' is not defined" % self.symbol, self)
+            assert isinstance(self.slot, Slot), "not a slot: %s in %s" % (type(self.slot), self.symbol)
+            
+        def evaluate(self, state):
+            try:
+                tag = self.slot.get(state)
+                if isinstance(tag, Hypertag):
+                    return EmbeddedHypertag(tag, state, self)
+                else:
+                    return tag
+                
+            except KeyError:
+                raise UnboundLocalEx("tag '%s' referenced before declaration or assignment" % self.symbol, self)
+
+
     class variable(expression):
         """Common code for both a variable's definition (xvar_def) and a variable's occurrence (xvar_use)."""
         name  = None
@@ -1305,7 +1352,7 @@ class NODES(object):
         
         def setup(self):
             self.name = self.text()
-            if self.name[0] == '$':                     # preceeding $ is allowed inside {...} and should be truncated here
+            if self.name[0] == MARK_VAR:            # preceeding $ is allowed inside {...} and should be truncated here
                 self.name = self.name[1:]
         
         def analyse(self, ctx):

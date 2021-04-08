@@ -179,6 +179,7 @@ expr_bitwise =  or_expr ''                  # reduced form of an expression: onl
 
 subexpr      =  '(' ws expr ws ')'
 
+tag_use      =  mark_def name_id ''                           # occurrence (use) of a tag inside an expression
 var_use      =  mark_eval? name_id ''                         # occurrence (use) of a variable; $ is allowed inside {...} for convenience
 tuple        =  '(' ws ((expr comma)+ (expr ws)?)? ')'
 list         =  '[' ws (expr comma)* (expr ws)? ']'
@@ -186,7 +187,7 @@ set          =  '{' ws expr (comma expr)* ws (',' ws)? '}'    # obligatory min. 
 dict         =  '{' ws (dict_pair comma)* (dict_pair ws)? '}'
 dict_pair    =  expr_bitwise ws ':' ws expr                   # here, `expr_bitwise` is used instead of `expr` to avoid ambiguity with pipeline operator
 
-atom         =  literal / var_use / subexpr / tuple / list / dict / set
+atom         =  literal / var_use / tag_use / subexpr / tuple / list / dict / set
 factor_var   =  var_use trailer* qualifier?                   # reduced form of `factor`: a variable with optional trailer, no spaces allowed
 factor_strict=  atom trailer* qualifier?                      # reduced form of `factor`: no spaces allowed before the trailer
 factor_filt  =  atom trailer_filt*                            # reduced form of `factor`: no function call () allowed; for use as filter function in `pipeline`

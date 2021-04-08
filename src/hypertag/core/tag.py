@@ -1,5 +1,7 @@
 from xml.sax.saxutils import quoteattr
+
 from hypertag.core.errors import VoidTagEx, TypeErrorEx
+from hypertag.core.dom import DOM
 
 
 ########################################################################################################################################################
@@ -25,11 +27,21 @@ class Tag:
         :param body: DOM of a translated body of tag occurrence, possibly empty; if a tag is void and does not expect a body,
                      but a non-empty body was passed, the tag should raise VoidTagEx
         :param attrs: list/tuple of positional attributes
-        :param kwattrs: dict of keyword attributes; attributes are guaranteed to have valid XML names, but NOT necessarily valid Python names
-        :return: string
+        :param kwattrs: dict of keyword attributes; attributes are guaranteed to have valid XML names,
+                        but NOT necessarily valid Python names
+        :return: a string
         """
         raise NotImplementedError
 
+    def __call__(self, body_string = '', *attrs, **kwattrs):
+        """
+        Wrapper around expand() to let the tag be used like a function and to allow its direct rendering,
+        without an intermediate DOM. This method can be used as a shortcut inside Hypertag expressions
+        to skip DOM creation entirely.
+        """
+        body = DOM.Text(body_string) if body_string else DOM()
+        return self.expand(body, attrs, kwattrs)
+        
 
 ########################################################################################################################################################
 

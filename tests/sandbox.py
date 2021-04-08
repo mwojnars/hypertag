@@ -169,12 +169,26 @@ if __name__ == '__main__':
     """
     text = """
     $i = 3
-    while i > 0:
+    while i > 5:
         | $i
         $i -= 1
     else
         $i = 10
-    | $i
+    | {i % 3}
+    
+    from hypertag.tests.sample2 import %G
+    %H | hypertag
+    / {%div('kot', id=5)}
+    / G is: {%G()} .
+    / H is: {%H()} .
+    
+    %link @text
+        a href='#' @text
+    
+    link | Ala
+    link
+        | kot
+    / {%link('pies')}
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

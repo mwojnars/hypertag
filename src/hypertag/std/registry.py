@@ -17,7 +17,7 @@ class Registry:
         if isinstance(obj, type):           # instantiate tag classes
             tag  = obj()
             name = tag.name
-        elif callable(obj):
+        elif isfunction(obj):
             tag  = TagFunction(obj)
             name = obj.__name__
         else:

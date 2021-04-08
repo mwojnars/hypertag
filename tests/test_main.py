@@ -1508,6 +1508,39 @@ def test_030_context():
             context $s
         """)
 
+def test_031_embedded_tags():
+    src = r"""
+        %link @text
+            a href='#' @text
+        
+        link | Ala
+        link
+            | kot
+        / {%link('pies')}
+    """
+    out = """
+        <a href="#">Ala</a>
+        <a href="#">
+        kot
+        </a>
+        <a href="#">pies</a>
+    """
+    assert render(src).strip() == out.strip()
+    src = r"""
+        from hypertag.tests.sample2 import %G
+        %H | hypertag
+        / {%div('kot', id=5)}
+        / G is: {%G()} .
+        / H is: {%H()} .
+    """
+    out = """
+        <div id="5">kot</div>
+        G is: 24
+        135 .
+        H is: hypertag .
+    """
+    assert render(src).strip() == out.strip()
+
 
 #####################################################################################################################################################
 
