@@ -192,9 +192,9 @@ was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
-<h2>Dedication</h2>
+<h3 style='font-size:24px'>Dedication</h2>
 
-I dedicate this project to my sons, Franciszek Józef and Brunon Piotr. &nbsp; (-Marcin Wojnarski)
+_I dedicate this project to my sons, Franciszek Józef and Brunon Piotr._ &nbsp; - Marcin Wojnarski
 
 <!--<p style='text-align:right'> (Marcin Wojnarski)</p>-->
 
@@ -742,7 +742,7 @@ There are two unary prefix operators that identify variables and tags inside exp
   which is not possible otherwise. This can be used, for example, to directly invoke tag expansion,
   like in `%div('this is body')`, passing a plain-text _body_ string and skipping the creation of an intermediate DOM
   as would be the case if a full-blown [tagged block](#tagged-blocks) were used.
-  Inside expressions, tags are callable. They behave like functions (the call invokes tag expansion) 
+  Inside expressions, tags are callable (the call invokes tag expansion) 
   and can be passed positional and keyword arguments, which are interpreted as tag attributes; 
   the first postitional argument is always interpreted as a _body_ attribute, even for a void tag.
 
