@@ -192,7 +192,7 @@ was inspired by indentation-based templating languages:
 [Slim](http://slim-lang.com/), [Plim](https://plim.readthedocs.io/en/latest/index.html),
 [Shpaml](http://shpaml.com/), [Haml](https://haml.info/).
 
-<h3 style='font-size:24px'>Dedication</h2>
+<h3 style='font-size:24px'>Dedication</h3>
 
 _I dedicate this project to my sons, Franciszek Józef and Brunon Piotr._ &nbsp; - Marcin Wojnarski
 
@@ -730,7 +730,7 @@ of a field separator.
 
 ### Non-standard prefix operators
 
-There are two unary prefix operators that identify variables and tags inside expressions:
+There are two unary prefix operators, that identify variables and tags inside expressions:
 
 - The _variable embedding_ (`$`) operator can precede a variable name (`$VAR`, without space) in an expression,
   which is equivalent to a normal occurrence of the same name without a leading `$` character.
