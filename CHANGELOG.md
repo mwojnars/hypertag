@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.1.3] - 2021-04-10
+
+- Syntax extended: loops may have an `else` clause.
+- Syntax extended: tags can be referenced inside expressions using the _tag embedding_ operator `%`.
+
 ## [1.1.2], [1.1.0] - 2021-04-02
 
 - Added Django integration: a Hypertag backend (`hypertag.django.backend.Hypertag`) that can be plugged into a Django application.
