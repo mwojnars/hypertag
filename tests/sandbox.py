@@ -241,5 +241,6 @@ if __name__ == '__main__':
     
 # TODO:
 # - czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
+# - Markdown/Textile/Sass/Scss blocks
 # - Runtime & Loader: detection of circular imports
 # - Python's "bitwise not" operator (~)

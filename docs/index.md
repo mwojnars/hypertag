@@ -159,7 +159,7 @@ and removes the need for explicit closing tags. Hypertag provides:
 - [Django connector](#django-connector).
   
 If you are new to Hypertag, see the 
-**[Quick Start](https://github.com/mwojnars/hypertag#quick-start)** for a brief introduction.
+[**Quick Start**](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
 The source code is available on [GitHub](https://github.com/mwojnars/hypertag) and [PyPI](https://pypi.org/project/hypertag-lang/).
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski)
@@ -194,7 +194,7 @@ was inspired by indentation-based templating languages:
 
 <h3 style='font-size:24px'>Dedication</h3>
 
-_I dedicate this project to my sons, Franciszek Józef and Brunon Piotr._ &nbsp;&nbsp; - Marcin Wojnarski
+_I dedicate this project to my sons, Franciszek Józef and Brunon Piotr._ &nbsp;&nbsp; -- Marcin Wojnarski
 
 <!--<p style='text-align:right'> (Marcin Wojnarski)</p>-->
 
