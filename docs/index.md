@@ -149,8 +149,8 @@ and removes the need for explicit closing tags. Hypertag provides:
 - High level of modularity thanks to Python-like [imports](#imports) and explicit [context](#context) specification.
 - Unprecedented support for code reuse with native [custom tags](#custom-tags).
 - Native [DOM](#dom) representation and [DOM manipulation](#dom-manipulation) during rendering.
-- Embedded [expressions](#expressions) of any complexity.
-- Standard Python [operators](#operators) to manipulate arbitrary Python objects.
+- Embedded [compound expressions](#expressions).
+- All Python [operators](#operators) to manipulate arbitrary Python objects.
 - Custom [pipeline](#filters) operator (`:`) for chaining multiple functions as [filters](#filters).
 - Expression [qualifiers](#qualifiers) (`!?`) to create alternative paths of calculation and handle edge cases easily.
 - Built-in tags for [HTML5](#html-specific-symbols) generation and for [general](#hypertag-built-ins) purposes.
@@ -2146,9 +2146,9 @@ In some cases, when relative import paths are used, it may be necessary to pass 
 to the `render()` method as a context variable, for the import path resolution to work correctly:
 
 ```python
-    # (...)
-    context = {'title': 'Hypertag sample template', '__file__': __file__, '__package__': __package__}
-    return template.render(context, request)
+# (...)
+context = {'title': 'Hypertag sample template', '__file__': __file__, '__package__': __package__}
+return template.render(context, request)
 ```
 
 

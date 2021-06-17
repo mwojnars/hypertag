@@ -101,16 +101,21 @@ class ImportedHypertag(Hypertag):
     Wrapper around an imported hypertag. Stores the global state of the imported module,
     so that it can replace the state of the importing module when expand() of the imported hypertag is called.
     """
-    def __init__(self, hypertag, module_symbols):
+    def __init__(self, hypertag, module_state):
         
         assert isinstance(hypertag, Hypertag)
+        assert isinstance(module_state, State)
         self.hypertag = hypertag
-        self.module_symbols = module_symbols
+        self.module_state = module_state
         
     def expand(self, body, attrs, kwattrs, state, caller):
         
-        module_state = State(self.module_symbols)
-        return self.hypertag.expand(body, attrs, kwattrs, module_state, caller)
+        # module_state = State(self.module_state.values)          # module's terminal state is copied anew on every tag expansion
+
+        # module's terminal state is NOT copied on subsequent expansions, which means that
+        # stored values of local symbols may change after the call below;
+        # TODO: make sure that values of local variables are cleared after expansion of an <xblock_def> block
+        return self.hypertag.expand(body, attrs, kwattrs, self.module_state, caller)
 
 class EmbeddedHypertag:
     """
@@ -389,19 +394,16 @@ class NODES(object):
         
         def analyse(self, ctx):
             self.slots_in = {symbol: ValueSlot(symbol, value, ctx) for symbol, value in self.globals.items()}
-            ctx.pushall(self.slots_in)
+            # ctx.pushall(self.slots_in)   -- not needed because each symbol is pushed to `ctx` during ValueSlot() creation
             position = ctx.position()
             for c in self.children: c.analyse(ctx)
             self.slots_out = ctx.asdict(position)           # pull newly defined top-level symbols from the tree
 
         def translate(self, state):
             """
-            Because <xdocument> is the root of every AST, its translate() is unusual, in that it returns a triple:
+            Because <xdocument> is the root of every AST its translate() is unusual in that it returns a pair:
             - DOM.Root node of the final DOM generated as a result of translation of the entire AST
             - dict of top-level symbols indexed by their names: {symbol_name: value}
-            - dict of top-level symbols indexed by slots: {slot: value}, for use as an initial state
-              in case some hypertags get imported by other Hypertag documents and need to be expanded
-              in the original (final) state of the model they were defined in
             """
             for slot in self.slots_in.values(): slot.set_value(state)
             nodes = [c.translate(state) for c in self.children]
@@ -409,17 +411,15 @@ class NODES(object):
             hroot.indent = ''       # fix indent to '' instead of '\n' after all child indents have been relativized
             
             # pull actual values of top-level output symbols
-            symbols   = {}
-            state_out = {}
+            symbols = {}
             for symbol, slot in self.slots_out.items():
                 try:
-                    symbols[symbol] = value = slot.get(state)
-                    state_out[slot] = value
+                    symbols[symbol] = slot.get(state)
                     
-                except KeyError:            # some top-level slots may remain uninitialized if defined inside a control block (if/for/...)
+                except KeyError:    # some top-level slots may remain uninitialized if defined inside a control block (if/for/...)
                     continue
                     
-            return hroot, symbols, state_out
+            return hroot, symbols
 
         # def compactify(self, state):
         #     # if DEBUG: print("compact", "DOC", state)
@@ -606,7 +606,7 @@ class NODES(object):
 
             symbol = TAG(self.name)
             self.slot = ValueSlot(symbol, self, ctx)
-            ctx.push(symbol, self.slot)
+            # ctx.push(symbol, self.slot)
             
         def translate(self, state):
             self.slot.set_value(state)
@@ -715,7 +715,7 @@ class NODES(object):
                        for name, value in module.symbols.items() if name[1] != '_'}
             
             self.slots = {symbol: ValueSlot(symbol, value, ctx) for symbol, value in symbols.items()}
-            ctx.pushall(self.slots)
+            # ctx.pushall(self.slots)
 
         def translate(self, state):
             for slot in self.slots.values(): slot.set_value(state)
@@ -737,7 +737,7 @@ class NODES(object):
                 value = ImportedHypertag(value, module.state)
             
             self.slot = ValueSlot(rename, value, ctx)
-            ctx.push(rename, self.slot)
+            # ctx.push(rename, self.slot)
 
         def translate(self, state):
             self.slot.set_value(state)
@@ -763,7 +763,7 @@ class NODES(object):
             if symbol not in context: raise ImportErrorEx("symbol '%s' not found in context" % symbol, self)
             value = context[symbol]
             self.slot = ValueSlot(rename, value, ctx)
-            ctx.push(rename, self.slot)
+            # ctx.push(rename, self.slot)
 
         def translate(self, state):
             self.slot.set_value(state)
@@ -2014,7 +2014,8 @@ class HypertagAST(BaseTree):
         
         self.analyse(__builtins__)
         
-        dom, symbols, state = self.root.translate(State())        # calls NODES.xdocument.translate(), see there for description of returned objects
+        state = State()
+        dom, symbols = self.root.translate(state)           # calls NODES.xdocument.translate(), see there for description of returned objects
         assert isinstance(dom, DOM.Root)
         # print('top-level symbols: {symbols}')
         

@@ -18,7 +18,7 @@ MIN_RECURSION_LIMIT = 20000
 sys.setrecursionlimit(max(sys.getrecursionlimit(), MIN_RECURSION_LIMIT))
 
 
-def _join_path(base, path, sep = '.', ext = None):
+def join_path(base, path, sep = '.', ext = None):
     """
     Convert a relative import `path` to an absolute one by appending it to an absolute `base` path.
     The `base` can be any type of path: a file path (slash-separated) or an import path (dot-separated) -
@@ -106,9 +106,10 @@ class PyModule(Module):
 class HyModule(Module):
     """Wrapper around a Hypertag script to be executed (translated). Stores results of translation."""
     
-    script = None       # plain text of the Hypertag script
-    dom    = None       # output DOM produced by translation
-    state  = None       # internal State at the end of translation; needed when hypertags from this module are to be expanded
+    script  = None      # plain text of the Hypertag script
+    dom     = None      # output DOM produced by translation
+    symbols = None      # dict of output symbols produced during script parsing, {name: value}
+    state   = None      # local State at the end of translation; needed when hypertags from this module are to be expanded
     
     def translate(self, builtins, __tags__, **variables):
     
@@ -170,7 +171,7 @@ class Loader:
     def _make_absolute(path, referrer):
         """Utility method for internal purposes: converting a python import path to an absolute path."""
         if path[:1] != '.': return path                 # `path` is absolute, return it unchanged
-        return _join_path(referrer.package, path)       # `path` is relative, convert it to an absolute one
+        return join_path(referrer.package, path)        # `path` is relative, convert it to an absolute one
         
         
 class PyLoader(Loader):
@@ -286,7 +287,7 @@ class HyLoader(Loader):
     def _join_path(self, root, path):
         """Convert a python import `path` (with dots) to a file path (with slashes) and append to a root folder's path."""
         
-        return _join_path(root, path, PATH_SEP, self.SCRIPT_EXTENSION)
+        return join_path(root, path, PATH_SEP, self.SCRIPT_EXTENSION)
         
 
 #####################################################################################################################################################
@@ -302,7 +303,7 @@ class Runtime:
     Modules are identified by "paths". The meaning of a particular path is determined by its loader.
     """
 
-    # list of modules to be imported automatically into a script upon startup of translation (built-in symbols)
+    # list of module paths to be imported automatically into a script upon startup of translation (built-in symbols)
     BUILTINS = ['builtins', 'hypertag.builtins']
     
     # cached dict of built-in symbols, to avoid recalculation for every new AST
@@ -337,7 +338,7 @@ class Runtime:
                 module = self.import_module(path, RootModule(), None)
                 self._builtins.update(module.symbols)
                 
-        return self._builtins
+        return dict(self._builtins)
         
     def import_module(self, path, referrer, ast_node):
         """Import symbols that are defined in a module identified by `path`. Return as an instance of Module."""
@@ -351,6 +352,7 @@ class Runtime:
         raise ModuleNotFoundEx("import path not found '%s', try setting __package__ or __file__ when calling render()" % path, ast_node)
         
     def translate(self, __script__, __file__ = None, __package__ = None, __tags__ = None, **variables):
+        """Parse a given script, translate to a DOM tree, and return wrapped up in a HyModule instance."""
         
         builtins = self.import_builtins()
         builtins[VAR('__file__')]    = __file__

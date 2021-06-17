@@ -1360,6 +1360,13 @@ def test_024_import():
     """
     assert render(src, **FILE_PKG).strip() == out.strip()
 
+    src = """
+        $item = 5
+        from hypertag.tests.sample3 import %print_data
+        print_data $item
+    """
+    assert render(src).strip() == "<h2><b>Data</b></h2>"
+
 def test_025_empty_control():
     """
     Empty control blocks (missing body) are considered by Hypertag as syntactically correct.

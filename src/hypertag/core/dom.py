@@ -382,7 +382,8 @@ class DOM:
             if skip is not None and skip(self): return
             if order == 'preorder': yield self
             if self.body:
-                for node in self.body.walk(skip, order): yield node
+                yield from self.body.walk(skip, order)
+                # for node in self.body.walk(skip, order): yield node
             if order == 'postorder': yield self
 
         def alter(self, transform, skip = None, order = 'preorder'):

@@ -354,7 +354,7 @@ class Context(MultiDict):
 
 class State:
     """
-    State of translation/rendering, as a dict of variables nodes and their current values.
+    State of translation/rendering, as a dict of Slots and their current values.
     Substitute for a Stack when keeping a history of frames is not necessary and values can be indexed
     by nodes of an AST instead of integer positions in a stack. State class resembles Context more than Stack.
     """
