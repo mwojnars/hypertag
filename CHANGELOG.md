@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.1.4] -
+
+- Bug fix in the import of hypertags from other scripts: local state now includes 
+  all local symbols, not just the output ones.
+
 ## [1.1.3] - 2021-04-10
 
 - Syntax extended: loops may have an `else` clause.
