@@ -24,7 +24,7 @@ def join_path(base, path, sep = '.', ext = None):
     The `base` can be any type of path: a file path (slash-separated) or an import path (dot-separated) -
     the `sep` argument determines what character is treated as a separator; the same character is inserted
     in the result instead of dots, in the `path` part of the output string. If `ext` is provided,
-    it is appended as a file extension of the output path.
+    it is appended as a file extension of the output path; it should start with a dot '.'.
     """
     if base is None: return None
     
@@ -44,7 +44,7 @@ def join_path(base, path, sep = '.', ext = None):
         path = path[1:]
 
     fullpath = base + sep + path.replace('.', sep)
-    if ext: fullpath += '.' + ext
+    if ext: fullpath += ext
     
     return fullpath
 
@@ -218,7 +218,7 @@ class HyLoader(Loader):
     HyLoader does not check the existence of __init__.py on directory paths to scripts.
     """
     
-    SCRIPT_EXTENSION = 'hy'         # default file extension of Hypertag scripts
+    SCRIPT_EXTENSION = '.hy'         # default file extension of Hypertag scripts
 
     def __init__(self, resolve = None):
         super(HyLoader, self).__init__()
@@ -253,7 +253,7 @@ class HyLoader(Loader):
                 if package_path.endswith('.py'):
                     package_path = os.path.dirname(package_path)            # truncate /__init__.py part of a package file path
                 
-                location = package_path + PATH_SEP + filename + '.' + self.SCRIPT_EXTENSION
+                location = package_path + PATH_SEP + filename + self.SCRIPT_EXTENSION
                 python_path = package_path + '.' + filename
                 if location and not os.path.exists(location):
                     location = python_path = None
