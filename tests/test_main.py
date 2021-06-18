@@ -1554,6 +1554,17 @@ def test_031_embedded_tags():
     """
     assert render(src).strip() == "1"
 
+def test_032_qualifiers_embedding():
+    """
+    Special cases of a qualifier following an embedded expression {...} - this may cause problems
+    because the resulting expression is composed of two nodes in the AST, not one.
+    """
+    assert render("a href={0}?").strip() == '<a href=""></a>'
+    assert render("a .{'a'}?").strip() == '<a class="a"></a>'
+    assert render("a .{'a'}!").strip() == '<a class="a"></a>'
+    assert render("a #{'a'}?").strip() == '<a id="a"></a>'
+    assert render("$ x = {1}?").strip() == ''
+    
 
 #####################################################################################################################################################
 

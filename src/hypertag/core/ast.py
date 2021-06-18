@@ -866,7 +866,8 @@ class NODES(object):
         def _select_branch(self, state):
             for i, branch in enumerate(self.children):
                 try:
-                    return branch.translate(state), i
+                    body = branch.translate(state)
+                    return body, i
                 except Exception as ex:
                     pass
             return DOM(), -1
@@ -990,6 +991,9 @@ class NODES(object):
         }
         
         def setup(self):
+            if self.children[-1].type == 'qualifier':
+                self.children = self.children[:-1]
+                
             assert 2 <= len(self.children) <= 3
             self.targets  = self.children[0]
             self.expr     = self.children[-1]
@@ -1220,9 +1224,10 @@ class NODES(object):
     
     class xattr_named(attribute):
         def setup(self):
-            assert len(self.children) == 2
+            assert 2 <= len(self.children) <= 3 and isinstance(self.children[1], NODES.expression)
             self.name = self.children[0].value          # <name_xml>
             self.expr = self.children[1]
+            # there can be a qualifier as self.children[2]; its existence is already taken into account by self.children[1]
             
     class xattr_unnamed(attribute):
         def setup(self):
@@ -1234,9 +1239,10 @@ class NODES(object):
             symbol = self.fulltext[self.pos[0]]
             assert symbol in '.#'
             self.name = 'class' if symbol == '.' else 'id'
-            assert len(self.children) == 1
-            self.expr = self.children[-1]
-        
+            assert 1 <= len(self.children) <= 2 and isinstance(self.children[0], NODES.expression)
+            self.expr = self.children[0]
+            # there can be a qualifier as self.children[1]; its existence is already taken into account by self.children[0]
+
     class xkwarg(node):
         name = None
         expr = None
