@@ -1616,6 +1616,39 @@ def test_101_varia():
     """
     assert render(src).strip() == out.strip()
 
+def test_102_bugfix_try_indent():
+    """The examples below raised an exception due to skipped dedenting after exception raised inside a try block."""
+    src = """
+    html
+        h2
+        table
+            try
+                a href={int('a')}
+            try
+                a href={int('b')}
+    """
+    out = """
+    <html>
+        <h2></h2>
+        <table></table>
+    </html>
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+ tr
+    try
+        | {int('a')}
+    | x
+    try
+        | {int('b')}
+    """
+    out = """
+ <tr>
+    x
+ </tr>
+    """
+    assert render(src).strip() == out.strip()
+    
 
 #####################################################################################################################################################
 #####

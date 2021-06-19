@@ -1054,9 +1054,15 @@ class NODES(object):
 
     class body(node):
         def translate(self, state):
-            return DOM(n.translate(state) for n in self.children)
-            # return self._translate_all(self.children, state)
-    
+            indent = state.indentation
+            try:
+                return DOM(n.translate(state) for n in self.children)
+                # return self._translate_all(self.children, state)
+            finally:
+                # if an intermediate child node raised an exception, we need to revert the indentation
+                # manually to make up for missing calls to NODES.dedent.translate()
+                state.indentation = indent
+                
     class xbody_control(body): pass
     class xbody_struct (body): pass
 
