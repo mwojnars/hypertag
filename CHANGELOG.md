@@ -1,6 +1,6 @@
 # Change Log
 
-## [1.1.4] -
+## [1.1.4] - 2021-07-20
 
 - Bug fix: exception raised in a "try" block caused "dedent" operations to be skipped,
   leading to incorrect calculation of indentations of subsequent blocks.
