@@ -668,7 +668,6 @@ class NODES(object):
             # append `body` to `state`
             if self.attr_body:
                 self.attr_body.assign(state, body)
-                # state[self.attr_body] = body
             elif body:
                 raise VoidTagEx("non-empty body passed to a void hypertag '%s'" % self.name, caller)
             

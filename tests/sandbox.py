@@ -193,6 +193,13 @@ if __name__ == '__main__':
     %t x | {10+x}
     | { %t(x=5) }
     """
+    text = """
+    %f x
+        | this is x: $x
+        if x > 0:
+           f (x-1)
+    f 5
+    """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)
     tree = HypertagAST(text, root, verbose = True)
