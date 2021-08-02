@@ -269,6 +269,20 @@ def test_006_if():
         if True | true
     """
     assert render(src).strip() == "true"
+    src = """
+        if (1 != 2)
+            | yes
+    """                     # the non-equal comparison != must be placed in parentheses to avoid ambiguity with verbatim block mark (!)
+    assert render(src).strip() == "yes"
+    src = """
+        if (1 != 2) ! yes
+    """
+    assert render(src).strip() == "yes"
+    src = """
+        if 1 <> 2
+            | yes
+    """                     # non-standard operator <> can be used instead of != to avoid ambiguity with verbatim block mark (!)
+    assert render(src).strip() == "yes"
 
 def test_007_variables():
     src = """

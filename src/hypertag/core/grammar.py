@@ -246,7 +246,7 @@ op_shift     =  '<<' / '>>'
 op_empty     =  '?' / '!'
 
 not          =  'not'
-op_comp      =  ~"==|!=|>=|<=|<|>|not\s+in|is\s+not|in|is"
+op_comp      =  ~"==|!=|<>|>=|<=|<|>|not\s+in|is\s+not|in|is"
 
 ###  IDENTIFIERS
 

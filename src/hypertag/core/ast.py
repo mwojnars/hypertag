@@ -1376,7 +1376,7 @@ class NODES(object):
                 self.slot_read = slot
             
             if self.write:
-                if slot and slot.depth == ctx.regular_depth:
+                if slot and slot.depth == ctx.regular_depth:    # TODO: check this and decide what semantics to choose (!)
                     self.slot_write = slot
                 else:
                     self.slot_write = Slot(symbol, ctx)
@@ -1512,7 +1512,7 @@ class NODES(object):
         apply = None        # corresponding function from 'operator' module
         
         ops = ['+ add', '- sub', '** pow', '* mul', '// floordiv', '% mod', '<< lshift', '>> rshift', '& and_', '| or_', '^ xor',
-               '< lt', '> gt', '== eq', '>= ge', '<= le', '!= ne', 'is is_', 'is not is_not']
+               '< lt', '> gt', '== eq', '>= ge', '<= le', '!= ne', '<> ne', 'is is_', 'is not is_not']
         ops = [m.rsplit(' ', 1) for m in ops]
         ops = {op: getattr(operator, fun) for op, fun in ops}
         

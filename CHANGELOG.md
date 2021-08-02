@@ -1,5 +1,10 @@
 # Change Log
 
+## *upcoming*
+
+- Non-standard operator `<>` can be used as an alternative for `!=` 
+  to avoid ambiguity with a verbatim block mark (`!`) inside `if` blocks.
+
 ## [1.1.4] - 2021-07-20
 
 - Bug fix: exception raised in a "try" block caused "dedent" operations to be skipped,

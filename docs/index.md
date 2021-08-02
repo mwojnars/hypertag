@@ -77,6 +77,7 @@
       border: 1px solid #ddd;
     }
     code {
+      font-family: monospace, serif; 
       /* background: #333; */
       /* background: #444; */
       background: #f0f3f6;
@@ -707,6 +708,10 @@ they are described below.
 ### Non-standard binary operators
 
 Hypertag's custom binary operators include:
+
+- The non-standard operator `<>` can be used instead of `!=`
+  to avoid ambiguity with a verbatim block mark (`!`) inside `if` blocks
+  when testing for inequality.
 
 - The _pipeline_ operator (`:`): allows functions and other callables be used as 
   chained _filters_. This operator is described in detail in the [Filters](#filters) section.
@@ -1611,19 +1616,20 @@ of the script's syntax tree (AST). Whenever a hypertag declares a
 [_body attribute_](#body-attribute) (`@`), this attribute's value
 (an actual body from the place of occurrence) is passed to the tag
 as an _already-translated_ DOM of a particular subtree. This gives hypertags an exceptional
-capability to actively _manipulate_ (introspect, truncate, rearrange) the provided subtree 
+ability to _manipulate_ (actively introspect, truncate, rearrange) the provided subtree 
 before it gets merged into the formal body of the hypertag. 
 Possible applications include:
 
-- automated generation of a [Table of Contents](#example-toc-generation) of the document;
+- automated generation of a [Table of Contents](#example-toc-generation) of a document;
 - automated generation of a list of resources (CSS files, JS files etc.) that are required
-  by different HTML components used inside the document, with deduplication of the list 
+  by different HTML components used inside a document, with deduplication of the list 
   and its placement in a predefined location (the `<meta>` section) of the final output;
 - automated calculation of (approximate) sizes of particular blocks of contents
   (e.g., length of text), to adapt CSS styles of top-level HTML elements and provide better
-  user experience without client-side Javascript.
+  user experience without client-side Javascript;
+- many more...
 
-All these can be done directly in Hypertag, without falling back to Python code.
+All these can be done directly in Hypertag without falling back to Python code.
 
 The details of the [DOM structure](#dom-structure) and [manipulation](#dom-manipulation)
 are discussed in next subsections. We also show how to generate a 
@@ -1685,10 +1691,10 @@ is translated to the DOM:
         <Text>
       <Text>
 
-As you can notice, all text blocks are converted to `Text` nodes.
+As you can notice, all text blocks get converted to `Text` nodes.
 Vertical whitespace surrounding or separating the blocks is also encoded as `Text`.
 Control blocks (`for`) are replaced with the result of their execution.
-Expressions are replaced with their values (`row1` etc.).
+Expressions are evaluated and replaced with their values (`row1` etc.).
 Tags and their attributes are preserved. All positional attributes of hypertags
 (but not of external tags) are converted to keyword attributes.
 Chained tags (`li : i`) are mapped onto separate parent-child nodes in the DOM.

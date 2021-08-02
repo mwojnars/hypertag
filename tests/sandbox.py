@@ -109,6 +109,20 @@ if __name__ == '__main__':
         
     """
     text = """
+    % tableRow @info name price='UNKNOWN'
+        tr
+            td | $name
+            td | $price
+            td
+               @ info           # inline form can be used as well:  td @ info
+            / $info
+            / $info.render()
+
+    tableRow 'Porsche' '200,000'
+        img src="porsche.jpg"
+        / If you insist on <s>air conditioning</s>, 🤔
+    """
+    text = """
     %toc @document
         for heading in document['h2']
             $ id = heading.get('id', '')
@@ -138,67 +152,68 @@ if __name__ == '__main__':
         p  | text...
         
         p : i | Contents...
-    
-    % tableRow @info name price='UNKNOWN'
-        tr
-            td | $name
-            td | $price
-            td
-               @ info           # inline form can be used as well:  td @ info
-            / $info
-            / $info.render()
-
-    tableRow 'Porsche' '200,000'
-        img src="porsche.jpg"
-        / If you insist on <s>air conditioning</s>, 🤔
     """
     
-    ctx  = {'x': 10, 'y': 11, 's': "A"}
-    text = """
-        context $x            # variable "x"
-        context $y as z       -- variable "y" renamed internally to "z"
-        | {x + z}
-    """
-    text = """
-        context $s
-        from builtins import *
-        from builtins import $ord
-        #from ~ import *
-        #import *
-        | $ord(s)
-    """
+    # ctx  = {'x': 10, 'y': 11, 's': "A"}
     # text = """
-    # for item in []:
-    #     p | $item
-    # else:
-    #     | No item found.
+    #     context $x            # variable "x"
+    #     context $y as z       -- variable "y" renamed internally to "z"
+    #     | {x + z}
+    # """
+    # text = """
+    #     context $s
+    #     from builtins import *
+    #     from builtins import $ord
+    #     #from ~ import *
+    #     #import *
+    #     | $ord(s)
+    # """
+    # text = """
+    # from hypertag.tests.sample2 import %G
+    # %H | hypertag
+    # / {%div('kot', id=5)}
+    # / G is: {%G()} .
+    # / H is: {%H()} .
+    #
+    # %link @text
+    #     a href='#' @text
+    #
+    # link | Ala
+    # link
+    #     | kot
+    # b / ({%link('pies')})
+    #
+    # / {%div('plain text').upper()}
+    #
+    # %t x | {10+x}
+    # | { %t(x=5) }
+    # """
+    # text = """
+    # %f x
+    #     | this is x: $x
+    #     if x > 0:
+    #        f (x-1)
+    # f 5
     # """
     text = """
-    from hypertag.tests.sample2 import %G
-    %H | hypertag
-    / {%div('kot', id=5)}
-    / G is: {%G()} .
-    / H is: {%H()} .
-    
-    %link @text
-        a href='#' @text
-    
-    link | Ala
-    link
-        | kot
-    b / ({%link('pies')})
-    
-    / {%div('plain text').upper()}
-    
-    %t x | {10+x}
-    | { %t(x=5) }
+        $c = 0
+        p
+            for x in [1,2,3]:
+                | $c
+                $c = x
     """
     text = """
-    %f x
-        | this is x: $x
-        if x > 0:
-           f (x-1)
-    f 5
+        $c = 0
+        %H
+            for x in [1,2,3]:
+                $c = x
+                | $c
+        H
+        | $c
+    """
+    text = """
+    if 1 <> 2
+        | yes
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)
