@@ -709,9 +709,10 @@ they are described below.
 
 Hypertag's custom binary operators include:
 
-- The non-standard operator `<>` can be used instead of `!=`
-  to avoid ambiguity with a verbatim block mark (`!`) inside `if` blocks
-  when testing for inequality.
+- The inequality operator `<>` can be used instead of `!=`
+  to avoid ambiguity with a verbatim block mark (`!`) inside `if` blocks.
+  When using the standard `!=`, the test expression must typically be
+  enclosed in parentheses.
 
 - The _pipeline_ operator (`:`): allows functions and other callables be used as 
   chained _filters_. This operator is described in detail in the [Filters](#filters) section.
