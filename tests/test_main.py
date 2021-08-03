@@ -1435,6 +1435,17 @@ def test_026_attributes():
         yes-2True
     """
     assert render(src).strip() == out.strip()
+    src = """
+        p .scroll.box.atomic | kot
+        p.scroll.box.atomic#id class="other" | kot
+        p#id | pies
+    """
+    out = """
+        <p class="scroll box atomic">kot</p>
+        <p class="scroll box atomic other" id="id">kot</p>
+        <p id="id">pies</p>
+    """
+    assert render(src).strip() == out.strip()
 
 def test_027_pipelines():
     

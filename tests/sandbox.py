@@ -212,8 +212,9 @@ if __name__ == '__main__':
         | $c
     """
     text = """
-    if 1 <> 2
-        | yes
+    p .scroll.box.atomic | kot
+    p.scroll.box.atomic#id class="other" | kot
+    p#id | pies
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

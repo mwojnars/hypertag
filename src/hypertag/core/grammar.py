@@ -72,7 +72,7 @@ rename           =  space 'as' space name_id
 block_struct     =  (tags_expand generic_struct) / body_text    # text block is a special case of a structural block (!), in this case block_struct gets
                                                                 # reduced after parsing to the underlying block_verbat/_normal/_markup
 tags_expand      =  null / (tag_expand (ws mark_struct ws tag_expand)*)
-tag_expand       =  name_id attrs_val?
+tag_expand       =  name_id attrs_val
 
 special_tag      =  pass ''   #/ break_tag / continue_tag
 
@@ -145,11 +145,11 @@ embedding_eval   =  mark_eval !mark_eval expr_var
 ###  ATTRIBUTES of tags
 
 # actual attributes as passed to a tag
-attrs_val        =  (space (attr_val / attr_short))+       #/ ws '(' attr_val (',' ws attr_val)* ')'
+attrs_val        =  attr_short* (space (attr_val / attr_short+))*       #/ ws '(' attr_val (',' ws attr_val)* ')'
 attr_val         =  attr_named / attr_unnamed
 
-attr_short       =  ('.' / '#') (attr_short_lit / embedding)        # shorthands: .class for class="class", #id for id="id" ... or #{var} or #$var
-attr_short_lit   =  ~"[a-z0-9_-]+"i                                 # shorthand literal value MAY contain "-", unlike python identifiers!
+attr_short       =  ('.' / '#') (attr_short_lit / embedding)        # shortcuts: .class for class="class", #id for id="id" ... or #{var} or #$var
+attr_short_lit   =  ~"[a-z0-9_-]+"i                                 # shortcut literal value MAY contain "-", unlike python identifiers!
 attr_named       =  name_xml ws '=' ws value_of_attr                # name="value" OR name=value OR name=$(...)
 attr_unnamed     =  value_of_attr ''
 value_of_attr    =  embedding / expr_strict

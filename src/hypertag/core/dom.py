@@ -49,9 +49,11 @@ def get_indent(text):
     that is shared by ALL non-empty lines in `text`, including the 1st line (if it contains a non-whitespace).
     """
     lines = text.split('\n')
-    lines = list(filter(None, [l if l.strip() else '' for l in lines]))          # filter out empty lines
+    lines = list(filter(None, [l.rstrip() for l in lines]))             # filter out empty or whitespace-only lines
+    # lines = list(filter(None, [l if l.strip() else '' for l in lines]))          # filter out empty lines
     if not lines: return ''
 
+    # iterate over columns (!) of `text`, from left to right
     for i, column in enumerate(zip(*lines)):        # zip() only eats up as many characters as the shortest line
         if not column[0].isspace() or min(column) != max(column):
             return lines[0][:i]
