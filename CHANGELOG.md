@@ -6,7 +6,8 @@
   to avoid ambiguity with a verbatim block mark (`!`) inside `if` blocks.
 - Shortcut attribute values `.CLS` and `#ID` no longer need to be surrounded 
   by spaces, so `div#main.left.top` is now correct.
-
+- The *if-else* operator returns "" (empty string) rather than None
+  when the *else* branch is missing.
 
 ## [1.1.4] - 2021-07-20
 
