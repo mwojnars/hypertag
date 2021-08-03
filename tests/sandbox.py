@@ -212,8 +212,11 @@ if __name__ == '__main__':
         | $c
     """
     text = """
-        | abc{'...' if len('kot')>10}
-        | abc{'...' if len('kot')>0}
+        | {"ab cd ef gh" : truncate(7)}
+        | {"abcdefgh" : truncate(7)}
+        | {"a b cdefgh" : crop(9)}
+        | {"a b cdefgh" : crop(9, maxdrop=2)}
+        | {"abc def ghi jkl mno pqr" : truncate(9, maxdrop=2)}
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

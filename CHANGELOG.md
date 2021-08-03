@@ -8,6 +8,7 @@
   by spaces, so `div#main.left.top` is now correct.
 - The *if-else* operator returns "" (empty string) rather than None
   when the *else* branch is missing.
+- New built-in functions: `$crop()`, alias `$truncate()`.
 
 ## [1.1.4] - 2021-07-20
 

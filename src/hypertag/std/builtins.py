@@ -103,6 +103,36 @@ def changes(seq, first = True):
             yield value, (value != prev)
         prev = value
 
+@register.var
+def crop(s, length = 255, end = '...', killwords = False, maxdrop = 10, leeway = 0):
+    """
+    If `killwords` is false, the last word will be discarder, unless the resulting string
+    gets shorter than `maxdrop` characters only due to word preservation,
+    otherwise the word gets split (rather than discarded) anyway.
+    """
+
+    # the implementation below was inspired by Jinja's truncate(): https://github.com/pallets/jinja/blob/main/src/jinja2/filters.py
+    assert isinstance(s, str), f"expected a string, got {type(s)}"
+    assert length >= len(end), f"expected length >= {len(end)}, got {length}"
+    assert leeway >= 0, f"expected leeway >= 0, got {leeway}"
+
+    if len(s) <= length + leeway:
+        return s
+    
+    maxlen = length - len(end)          # maximum string length before appending the `end`
+    
+    if killwords:
+        return s[:maxlen] + end
+
+    result = s[:maxlen].rsplit(" ", 1)[0]
+    if len(result) < maxlen - maxdrop:
+        result = s[:maxlen]
+        
+    return result + end
+    
+truncate = crop
+register.var('truncate', truncate)          # truncate() is an alias for crop(), for similarity with Jinja/Django
+
 
 ########################################################################################################################################################
 

@@ -1970,8 +1970,11 @@ function (`$dedent`):
 - **unique**: removes duplicate lines, the order of remaining lines is preserved;
   if the attribute `strip=True` (default), the lines are stripped of leading & trailing whitespace 
   before comparison, and all empty lines are removed; 
-- **lower**: converts a given string or block of text to lower-case;
-- **upper**: converts a given string or block of text to upper-case;
+- **lower**: converts a string or block of text to lower-case;
+- **upper**: converts a string or block of text to upper-case;
+- **crop**: truncates a string at a given length and appends an ellipsis string
+  (`...` by default);
+- **truncate**: alias for `crop()`.
 
 In HyperHTML, all the above symbols are declared as built-ins and imported automatically: 
 

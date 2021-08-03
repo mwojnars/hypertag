@@ -1189,6 +1189,21 @@ def test_022_builtins():
         3, False
     """
     assert render(src).strip() == out.strip()
+    src = """
+        | {"ab cd ef gh" : truncate(7)}
+        | {"abcdefgh" : truncate(7)}
+        | {"a b cdefgh" : crop(9)}
+        | {"a b cdefgh" : crop(9, maxdrop=2)}
+        | {"abc def ghi jkl mno pqr" : truncate(9, maxdrop=2)}
+    """
+    out = """
+        ab...
+        abcd...
+        a b...
+        a b cd...
+        abc de...
+    """
+    assert render(src).strip() == out.strip()
 
 def test_023_html():
     src = """
