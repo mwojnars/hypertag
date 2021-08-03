@@ -212,7 +212,8 @@ if __name__ == '__main__':
         | $c
     """
     text = """
-    p#main.left.top
+        | abc{'...' if len('kot')>10}
+        | abc{'...' if len('kot')>0}
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

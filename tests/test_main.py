@@ -1590,6 +1590,17 @@ def test_032_qualifiers_embedding():
     assert render("a #{'a'}?").strip() == '<a id="a"></a>'
     assert render("$ x = {1}?").strip() == ''
     
+def test_033_ifelse_expr():
+    src = """
+        | abc{'...' if len('kot')>10}
+        | abc{'...' if len('kot')>0}
+    """
+    out = """
+        abc
+        abc...
+    """
+    assert render(src).strip() == out.strip()
+
 
 #####################################################################################################################################################
 

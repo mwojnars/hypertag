@@ -1665,7 +1665,7 @@ class NODES(object):
     class xifelse_test(expression):
         """
         ... if ... else ... Lazy evaluation of arguments: only the true branch of the condition undergoes evaluation.
-        "else" branch is optional, "else None" is assumed if "else" is missing.
+        "else" branch is optional, "else ''" is assumed if "else" is missing.
         """
         def evaluate(self, state):
             assert len(self.children) in (2, 3)             # the expression is compactified, that's why a single child is not possible here
@@ -1673,7 +1673,7 @@ class NODES(object):
                 return self.children[0].evaluate(state)
             if len(self.children) == 3:
                 return self.children[2].evaluate(state)
-            return None                                     # default None when "else..." branch is missing
+            return ''                                       # default empty string '' when "else..." branch is missing
     
     # class xempty_test(expression):
     #     """
