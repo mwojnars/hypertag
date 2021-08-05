@@ -2060,8 +2060,9 @@ output:
 </DIV>
 ```
 
-In addition to standard HTML tags, HyperHTML provides also the **comment** tag
-that inserts an HTML comment to the output. Typically, this tag is used 
+In addition to standard HTML tags, HyperHTML provides also the **doctype_html** tag
+that inserts `<!DOCTYPE html>` string; and the **comment** tag
+that outputs an HTML comment. The latter is typically used 
 with a _verbatim_ body (`!`):
 
     comment ! This is an HTML comment

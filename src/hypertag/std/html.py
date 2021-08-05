@@ -53,6 +53,10 @@ for tag in _HTML_TAGS_VOID:     _create(tag, True)
 #####
 
 @register.tag
+def doctype_html(text):
+    return "<!DOCTYPE html>"
+
+@register.tag
 class comment(Markup):
     
     name = "comment"

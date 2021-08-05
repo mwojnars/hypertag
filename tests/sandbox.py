@@ -212,11 +212,9 @@ if __name__ == '__main__':
         | $c
     """
     text = """
-        | {"ab cd ef gh" : truncate(7)}
-        | {"abcdefgh" : truncate(7)}
-        | {"a b cdefgh" : crop(9)}
-        | {"a b cdefgh" : crop(9, maxdrop=2)}
-        | {"abc def ghi jkl mno pqr" : truncate(9, maxdrop=2)}
+    doctype_html
+    html : body | text
+    comment | ala ma kota <i> psa
     """
     
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)
