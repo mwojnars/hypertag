@@ -212,11 +212,14 @@ if __name__ == '__main__':
         | $c
     """
     text = """
-    doctype_html
-    html : body | text
-    comment | ala ma kota <i> psa
+    %page @body
+        doctype_html
+        ...html
+            @body
+
+    < page | Ala ma kota
     """
-    
+
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)
     tree = HypertagAST(text, root, verbose = True)
     
@@ -246,6 +249,8 @@ if __name__ == '__main__':
     print(dom.render(), end = "=====\n")
     # print(tree.A())
     
+    
+    
     # import inspect, importlib
     # print(__file__)
     # module = importlib.import_module('.', 'hypertag.core')  #__package__)
@@ -263,6 +268,7 @@ if __name__ == '__main__':
     
     
 # TODO:
+# - disallow mixed inline+outline text blocks, they're confusing esp. when some lines are commented out
 # - czyszczenie slotów w `state` po wykonaniu bloku, przynajmniej dla xblock_def.expand() ??
 # - Markdown/Textile/Sass/Scss blocks
 # - Runtime & Loader: detection of circular imports

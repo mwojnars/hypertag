@@ -1,5 +1,6 @@
 import re, itertools
 from hypertag.nifty.util import unique as unique_list, merge_spaces
+from hypertag.core.dom import del_indent
 from hypertag.std.registry import Registry
 
 
@@ -17,11 +18,15 @@ _re_inline = re.compile(r'\s+')
 
 @register.tag
 @register.var
-def dedent(text):
-    """Remove all line indentation in `text`. The indentation may differ between lines and it still gets fully removed."""
-    return _re_dedent.sub('', text)
-    # if full: return _re_indent.sub('', text)
-    # return del_indent(text)
+def dedent(text, full = True):
+    """
+    Remove all line indentation in `text` (if full=True); or the longest common indentation shared by all
+    lines with at least one non-whitespace character.
+    The indentation may differ between lines and it still gets fully removed.
+    """
+    # return _re_dedent.sub('', text)
+    if full: return _re_dedent.sub('', text)
+    else:    return del_indent(text)
 
 @register.tag
 @register.var

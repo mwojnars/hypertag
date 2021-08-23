@@ -9,7 +9,8 @@
 - The *if-else* operator returns "" (empty string) rather than None
   when the *else* branch is missing.
 - New built-in functions: `$crop()`, alias `$truncate()`.
-- New built-in tag for HyperHTML runtime, `doctype_html`. 
+- New built-in tag for HyperHTML runtime, `doctype_html`.
+- Built-in tag/function `dedent` accepts an optional argument `full`.
 
 ## [1.1.4] - 2021-07-20
 
