@@ -211,13 +211,11 @@ if __name__ == '__main__':
         H
         | $c
     """
-    text = """
-    %page @body
-        doctype_html
-        ...html
-            @body
-
-    < page | Ala ma kota
+    text = r"""
+    p name="ala ma &amp; kota"
+    p name = 'ala ma &amp; kota'
+    p name=("ala " '"ma"' " 'kota' <&>")
+    p name=("ala " '"ma"' r" 'kota' <&> ${}")
     """
 
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

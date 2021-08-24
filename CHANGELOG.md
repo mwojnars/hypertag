@@ -10,7 +10,8 @@
   when the *else* branch is missing.
 - New built-in functions: `$crop()`, alias `$truncate()`.
 - New built-in tag for HyperHTML runtime, `doctype_html`.
-- Built-in tag/function `dedent` accepts an optional argument `full`.
+- Built-in tag/function `dedent` accepts now an optional argument `full`.
+- Fixed html-escaping of special symbols inside HTML attribute values.
 
 ## [1.1.4] - 2021-07-20
 

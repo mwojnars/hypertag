@@ -1462,6 +1462,21 @@ def test_026_attributes():
     """
     assert render(src).strip() == out.strip()
 
+    # HTML attributes
+    src = """
+        p name="ala ma &amp; kota"
+        p name = 'ala ma &amp; kota'
+        p name=("ala " '"ma"' " 'kota' <&>")
+        p name=("ala " '"ma"' r" 'kota' <&> ${}")
+    """
+    out = """
+        <p name="ala ma &amp;amp; kota"></p>
+        <p name="ala ma &amp;amp; kota"></p>
+        <p name="ala &quot;ma&quot; 'kota' &lt;&amp;&gt;"></p>
+        <p name="ala &quot;ma&quot; 'kota' &lt;&amp;&gt; ${}"></p>
+    """
+    assert render(src).strip() == out.strip()
+
 def test_027_pipelines():
     
     src = """

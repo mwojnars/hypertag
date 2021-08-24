@@ -124,13 +124,14 @@ class Markup(Tag):
         if value is False:              # name=False  -- removed from attr list
             return None
         
-        value = str(value)
-        if '"' not in value:
-            value = '"%s"' % value
-        elif "'" not in value:
-            value = "'%s'" % value
-        else:
-            value = quoteattr(value)    # escaping of <,>,&," chars is performed ONLY when the value contains a quote "
+        value = quoteattr(str(value))        # escaping of <,>,&," characters; string wrapped up in "..." or '...'
+        # value = str(value)
+        # if '"' not in value:
+        #     value = '"%s"' % value
+        # elif "'" not in value:
+        #     value = "'%s'" % value
+        # else:
+        #     value = quoteattr(value)    # escaping of <,>,&," chars is performed ONLY when the value contains a quote "
         
         return '%s=%s' % (name, value)
         
