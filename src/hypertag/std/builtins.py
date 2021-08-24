@@ -17,6 +17,10 @@ _re_inline = re.compile(r'\s+')
 
 
 @register.tag
+def custom(*attrs, **kwattrs):
+    pass
+
+@register.tag
 @register.var
 def dedent(text, full = True):
     """

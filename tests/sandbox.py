@@ -212,10 +212,7 @@ if __name__ == '__main__':
         | $c
     """
     text = r"""
-    p name="ala ma &amp; kota"
-    p name = 'ala ma &amp; kota'
-    p name=("ala " '"ma"' " 'kota' <&>")
-    p name=("ala " '"ma"' r" 'kota' <&> ${}")
+    custom "my-fancy-widget" id="widget" | ...
     """
 
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

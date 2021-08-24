@@ -4,12 +4,16 @@
 
 - Non-standard operator `<>` can be used as an alternative for `!=` 
   to avoid ambiguity with a verbatim block mark (`!`) inside `if` blocks.
-- Shortcut attribute values `.CLS` and `#ID` no longer need to be surrounded 
-  by spaces, so `div#main.left.top` is now correct.
+- Shortcut attributes `.CLS` and `#ID` no longer need spaces around, 
+  so `div#main.left.top` is now a correct tag occurrence.
 - The *if-else* operator returns "" (empty string) rather than None
   when the *else* branch is missing.
 - New built-in functions: `$crop()`, alias `$truncate()`.
-- New built-in tag for HyperHTML runtime, `doctype_html`.
+- New built-in tag, `doctype_html` in HyperHTML runtime, to produce 
+  a DOCTYPE declaration at the beginning of a page.
+- New built-in tag, `custom "NAME"` in HyperHTML runtime. It outputs 
+  non-standard HTML tag names, so that HTML Custom Elements (Web Components)
+  can be used inside target documents.
 - Built-in tag/function `dedent` accepts now an optional argument `full`.
 - Fixed html-escaping of special symbols inside HTML attribute values.
 

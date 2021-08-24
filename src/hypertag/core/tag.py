@@ -94,8 +94,9 @@ class Markup(Tag):
     def expand(self, body, attrs, kwattrs):
         
         if attrs: raise TypeErrorEx("markup tag '%s' does not accept positional attributes" % self.name)
+        return self._expand(self.name, body, kwattrs)
         
-        name = self.name
+    def _expand(self, name, body, kwattrs):
         
         # render attributes
         kwattrs = filter(None, map(self._render_attr, kwattrs.items()))

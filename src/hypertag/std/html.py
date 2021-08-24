@@ -45,7 +45,33 @@ def _create(name, void):
 
 for tag in _HTML_TAGS_NONVOID:  _create(tag, False)
 for tag in _HTML_TAGS_VOID:     _create(tag, True)
+
+
+class CustomTag(Markup):
+    """
+    The %custom "NAME" tag: outputs non-standard HTML tag names, so that HTML Custom Elements (Web Components)
+    can be used inside target documents. Example use:
     
+        custom "my-fancy-widget" id="widget" | ...
+        
+    which outputs:
+        
+        <my-fancy-widget id="widget">...</my-fancy-widget>
+       
+    Keyword attributes can be provided after NAME, as above.
+    """
+    name = "custom"
+
+    def expand(self, body, attrs, kwattrs):
+        if not attrs: raise TypeErrorEx("the %%custom tag requires a positional attribute with a desired output name of a tag")
+        if len(attrs) > 1: raise TypeErrorEx("the %%custom tag accepts exactly one positional attribute, not %s" % len(attrs))
+        
+        name = attrs[0]
+        return self._expand(name, body, kwattrs)
+
+        
+register.tag(CustomTag())
+
 
 ########################################################################################################################################################
 #####

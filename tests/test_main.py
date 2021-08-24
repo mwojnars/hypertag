@@ -1631,6 +1631,19 @@ def test_033_ifelse_expr():
     """
     assert render(src).strip() == out.strip()
 
+def test_034_the_custom_tag():
+    src = """
+        $name = 'aaa-123'
+        custom 'abc-xyz' class='title' .long
+            custom $name | body
+    """
+    out = """
+        <abc-xyz class="title long">
+            <aaa-123>body</aaa-123>
+        </abc-xyz>
+    """
+    assert render(src).strip() == out.strip()
+
 
 #####################################################################################################################################################
 

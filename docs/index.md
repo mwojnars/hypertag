@@ -159,9 +159,14 @@ and removes the need for explicit closing tags. Hypertag provides:
 - Integrated [Django filters](#django-filters).
 - [Django connector](#django-connector).
   
-If you are new to Hypertag, see the 
-[**Quick Start**](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
+See the 
+[Quick Start](https://github.com/mwojnars/hypertag#quick-start) for a brief introduction.
 The source code is available on [GitHub](https://github.com/mwojnars/hypertag) and [PyPI](https://pypi.org/project/hypertag-lang/).
+
+The documentation below describes the latest *development* version of Hypertag.
+Some details may differ between an official release,
+see the [change log](https://github.com/mwojnars/hypertag/blob/main/CHANGELOG.md)
+for differences.
 
 Authored by [Marcin Wojnarski](http://www.linkedin.com/in/marcinwojnarski)
 from [Paperity](https://paperity.org/).
@@ -2060,10 +2065,25 @@ output:
 </DIV>
 ```
 
-In addition to standard HTML tags, HyperHTML provides also the **doctype_html** tag
-that inserts `<!DOCTYPE html>` string; and the **comment** tag
-that outputs an HTML comment. The latter is typically used 
-with a _verbatim_ body (`!`):
+In addition to standard HTML tags, HyperHTML provides a number of utility tags,
+as described below.
+
+The **doctype_html** tag inserts the `<!DOCTYPE html>` string.
+
+The **custom "NAME"** tag outputs a non-standard HTML element of a given `NAME`,
+which allows the use of HTML Custom Elements (Web Components) inside 
+target documents. Example:
+    
+    custom "my-fancy-widget" id="widget" | ...
+    
+output:
+    
+    <my-fancy-widget id="widget">...</my-fancy-widget>
+       
+Keyword attributes for the output element can be provided after `NAME`, as above.
+
+The **comment** tag outputs an HTML comment. It is typically used 
+with _verbatim_ body (`!`) to avoid misinterpretation of any special symbols:
 
     comment ! This is an HTML comment
 
