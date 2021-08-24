@@ -2071,8 +2071,8 @@ as described below.
 The **doctype_html** tag inserts the `<!DOCTYPE html>` string.
 
 The **custom "NAME"** tag outputs a non-standard HTML element of a given `NAME`,
-which allows the use of HTML Custom Elements (Web Components) inside 
-target documents. Example:
+which allows the use of [HTML Custom Elements](https://en.wikipedia.org/wiki/Web_Components)
+(Web Components) inside target documents. Example:
     
     custom "my-fancy-widget" id="widget" | ...
     
