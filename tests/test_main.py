@@ -1103,12 +1103,25 @@ def test_022_builtins():
     """
     assert render(src).strip() == out.strip()
     src = r"""
-        inline
+        merge
            | text1
-           | {'text2 \n text3' : inline}
+           | {'text2 \n text3' : merge}
     """
     out = """
         text1 text2 text3
+    """
+    assert render(src).strip() == out.strip()
+    src = r"""
+    unique
+        merge |
+            Hypertag
+            rocks !!!
+        | { upper('  hyperTAGS   rock   ') : lower : merge }
+        | Hypertag rocks !!!
+    """
+    out = """
+    Hypertag rocks !!!
+    hypertags rock
     """
     assert render(src).strip() == out.strip()
     src = """
@@ -1202,6 +1215,16 @@ def test_022_builtins():
         a b...
         a b cd...
         abc de...
+    """
+    assert render(src).strip() == out.strip()
+    src = """
+    pre : inline
+        <| Ala ma
+            kota
+            i psa
+    """
+    out = """
+        <pre>&#10;Ala ma&#10; kota&#10; i psa</pre>
     """
     assert render(src).strip() == out.strip()
 

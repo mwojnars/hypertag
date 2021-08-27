@@ -1969,9 +1969,13 @@ that can be used with different runtimes and target languages.
 Each of the names below refer both to a tag (e.g., `%dedent`), and a same-named 
 function (`$dedent`):
 
+- **doctype** tag inserts `<!DOCTYPE html>` string;
+  an optional attribute can be used to replace "html" with a custom type name;
 - **dedent**: removes all line indentation in a given text or body;
-- **inline**: strips leading/trailing whitespace, replaces newlines and tabs with spaces, 
+- **merge**: strips leading/trailing whitespace, replaces newlines and tabs with spaces, 
   merges adjacent spaces; similar to normalize-space() in XPath;
+- **inline**: converts all newline characters to HTML entities `&#10;` 
+  for safe inclusion in indentation-sensitive blocks like `<pre>` or `<textarea>`;
 - **unique**: removes duplicate lines, the order of remaining lines is preserved;
   if the attribute `strip=True` (default), the lines are stripped of leading & trailing whitespace 
   before comparison, and all empty lines are removed; 
@@ -1984,10 +1988,10 @@ function (`$dedent`):
 In HyperHTML, all the above symbols are declared as built-ins and imported automatically: 
 
     unique
-        inline |
+        merge |
             Hypertag
             rocks !!!
-        | { upper('  hyperTAGS   rock   ') : lower : inline }
+        | { upper('  hyperTAGS   rock   ') : lower : merge }
         | Hypertag rocks !!!
 
 output:
@@ -2027,9 +2031,9 @@ The following symbols are only available as functions. They are declared as buil
 If needed, all the symbols listed above can be imported explictly from the 
 `hypertag.builtins` path:
 
-    from hypertag.builtins import %inline, $inline, $cycle
+    from hypertag.builtins import %unique, $unique, $cycle
 
-<!--Note that `%inline` (tag) and `$inline` (function) are two different objects.-->
+<!--Note that `%unique` (tag) and `$unique` (function) are two different objects.-->
 
 
 ### Foreign symbols
@@ -2067,8 +2071,6 @@ output:
 
 In addition to standard HTML tags, HyperHTML provides a number of utility tags,
 as described below.
-
-The **doctype_html** tag inserts the `<!DOCTYPE html>` string.
 
 The **custom "NAME"** tag outputs a non-standard HTML element of a given `NAME`,
 which allows the use of [HTML Custom Elements](https://en.wikipedia.org/wiki/Web_Components)

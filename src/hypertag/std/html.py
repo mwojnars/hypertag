@@ -79,10 +79,6 @@ register.tag(CustomTag())
 #####
 
 @register.tag
-def doctype_html(text):
-    return "<!DOCTYPE html>"
-
-@register.tag
 class comment(Markup):
     
     name = "comment"
@@ -97,5 +93,4 @@ class comment(Markup):
         nl = '\n' if body[:1] == '\n' else ''
         return "<!--" + body + nl + "-->"
     
-
     

@@ -212,7 +212,12 @@ if __name__ == '__main__':
         | $c
     """
     text = r"""
-    custom "my-fancy-widget" id="widget" | ...
+    pre : inline
+        <| Ala ma
+            kota
+            i psa
+    # import $os
+    # | $os
     """
 
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

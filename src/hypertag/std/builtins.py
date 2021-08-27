@@ -13,12 +13,13 @@ register = Registry()
 #####
 
 _re_dedent = re.compile(r'(?m)^\s+')
-_re_inline = re.compile(r'\s+')
+_re_merge  = re.compile(r'\s+')
 
 
 @register.tag
-def custom(*attrs, **kwattrs):
-    pass
+@register.var
+def doctype(text, value = 'html'):
+    return f"<!DOCTYPE {value}>"
 
 @register.tag
 @register.var
@@ -47,12 +48,22 @@ def unique(text, strip = True):
 
 @register.tag
 @register.var
-def inline(text):
+def merge(text):
     """
     Strip leading/trailing whitespace in `text`, replace newlines and tabs with spaces, merge multiple adjacent spaces.
     Similar to normalize-space() in XPath.
     """
-    return _re_inline.sub(' ', text).strip()
+    return _re_merge.sub(' ', text).strip()
+
+@register.tag
+@register.var
+def inline(text):
+    """
+    Convert all newline characters to HTML entities: &#10;
+    This can be used to prevent Hypertag from indenting lines of `text` when rendering parent nodes,
+    and to safely insert `text` inside <pre>, <textarea>, or similar elements.
+    """
+    return text.replace('\n', '&#10;')
 
 @register.tag
 @register.var

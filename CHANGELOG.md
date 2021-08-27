@@ -8,14 +8,17 @@
   so `div#main.left.top` is now a correct tag occurrence.
 - The *if-else* operator returns "" (empty string) rather than None
   when the *else* branch is missing.
+- Fixed html-escaping of special symbols inside HTML attribute values.
+- Built-in tag/function `dedent` accepts now an optional argument `full`.
+- Built-in tag/function `inline` renamed to `merge`.
+- New built-in tag and function, `inline`, converts all newline characters
+  to HTML entities `&#10;` for safe inclusion in indentation-sensitive blocks
+  like `<pre>` or `<textarea>`.
 - New built-in functions: `$crop()`, alias `$truncate()`.
-- New built-in tag, `doctype_html` in HyperHTML runtime, to produce 
-  a DOCTYPE declaration at the beginning of a page.
+- New built-in tag, `doctype`, to produce a DOCTYPE declaration at the beginning of a page.
 - New built-in tag, `custom "NAME"` in HyperHTML runtime. It outputs 
   non-standard HTML tag names, so that HTML Custom Elements (Web Components)
   can be used inside target documents.
-- Built-in tag/function `dedent` accepts now an optional argument `full`.
-- Fixed html-escaping of special symbols inside HTML attribute values.
 
 ## [1.1.4] - 2021-07-20
 
