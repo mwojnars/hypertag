@@ -212,12 +212,11 @@ if __name__ == '__main__':
         | $c
     """
     text = r"""
-    pre : inline
-        <| Ala ma
-            kota
-            i psa
     # import $os
     # | $os
+    $l = [1]
+    $l.append(2)
+    | $l
     """
 
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

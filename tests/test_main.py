@@ -1017,7 +1017,7 @@ def test_019_inplace_assign():
     assert render(src).strip() == out.strip()
 
     
-def test_020_expression_in_string():
+def test_020_expr_in_string():
     src = """
         $size = '10'
         p style={"font-size:" size}
@@ -1654,7 +1654,7 @@ def test_033_ifelse_expr():
     """
     assert render(src).strip() == out.strip()
 
-def test_034_the_custom_tag():
+def test_034_tag_custom():
     src = """
         $name = 'aaa-123'
         custom 'abc-xyz' class='title' .long
@@ -1666,6 +1666,15 @@ def test_034_the_custom_tag():
         </abc-xyz>
     """
     assert render(src).strip() == out.strip()
+
+def test_035_expr_block():
+    src = """
+        $l = [1]
+        $l.append(2)
+        | $l
+        $ len(l) * (3 + 2)
+    """
+    assert render(src).strip() == "[1, 2]"
 
 
 #####################################################################################################################################################

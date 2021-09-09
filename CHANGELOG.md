@@ -8,6 +8,8 @@
   so `div#main.left.top` is now a correct tag occurrence.
 - The *if-else* operator returns "" (empty string) rather than None
   when the *else* branch is missing.
+- Grammar extended to support *expression blocks* (`$ EXPR`) without an assignment. 
+  Can be used for method calls, like in `$myList.append(3)`.
 - Fixed html-escaping of special symbols inside HTML attribute values.
 - Built-in tag/function `dedent` accepts now an optional argument `full`.
 - Built-in tag/function `inline` renamed to `merge`.

@@ -970,6 +970,21 @@ class NODES(object):
             out.set_indent(state.indentation)
             return out
 
+    class xblock_expr(node):
+        """Block of the form:
+              $ <expr>
+           Executes the expression but does NOT emit any output. Can be used for side effects, like in:
+              $ l = []
+              $ l.append(3)
+        """
+        expr = None
+        def setup(self):
+            assert len(self.children) == 1
+            self.expr = self.children[0]
+        def translate(self, state):
+            self.expr.evaluate(state)
+            return None
+        
     class xblock_assign(node):
         targets = None
         inplace = None          # symbol of in-place arithmetic operator to apply (+-*/), optional
@@ -1907,7 +1922,7 @@ class HypertagAST(BaseTree):
                 "item_import rename try_long try_short special_tag head_verbat head_normal head_markup " \
                 "tail_for tail_if tail_verbat tail_normal tail_markup core_verbat core_normal core_markup " \
                 "attrs_def attrs_val attr_val value_of_attr args arg " \
-                "embedding embedding_braces embedding_eval target " \
+                "expr_assign embedding embedding_braces embedding_eval target " \
                 "expr_root subexpr slice subscript trailer trailer_filt atom literal dict_pair " \
                 "string string_quot1 string_quot2"
     

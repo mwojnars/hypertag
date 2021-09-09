@@ -26,13 +26,15 @@ append           =  '...'                       # marks the block is a continuat
 
 ###  CONTROL BLOCKS
 
-block_control    =  block_assign / block_if / block_try / block_for / block_while
+block_control    =  block_assign / block_expr / block_if / block_try / block_for / block_while
 
 block_try        =  try_long / try_short
 try_long         =  'try' generic_control? clause_else*
 try_short        =  '?' ws (block_struct / body_control)?       # short version of "try" block:  ?tag ... or ?|...
 
-block_assign     =  mark_eval ws targets ws op_inplace? '=' ws (embedding / expr_augment) inline_comment?
+block_expr       =  mark_eval expr_assign
+block_assign     =  mark_eval ws targets ws op_inplace? '=' expr_assign
+expr_assign      =  ws (embedding / expr_augment) inline_comment?
 op_inplace       =  ~"//|\%%|<<|>>|[-+*/&|^]"
 
 block_while      =  'while' clause_if clause_else?
@@ -139,6 +141,7 @@ embedding        =  embedding_braces / embedding_eval
 embedding_braces =  '{' ws expr_augment ws '}' qualifier?
 embedding_eval   =  mark_eval !mark_eval expr_var
 
+embedding_or_expr_augment = embedding / expr_augment
 #embedding_or_factor = embedding / expr_factor
 
 
