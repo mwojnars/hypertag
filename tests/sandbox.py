@@ -214,9 +214,9 @@ if __name__ == '__main__':
     text = r"""
     # import $os
     # | $os
-    $l = [1]
-    $l.append(2)
-    | $l
+    """
+    text = r"""
+    try: p | text
     """
 
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)

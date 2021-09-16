@@ -141,9 +141,6 @@ embedding        =  embedding_braces / embedding_eval
 embedding_braces =  '{' ws expr_augment ws '}' qualifier?
 embedding_eval   =  mark_eval !mark_eval expr_var
 
-embedding_or_expr_augment = embedding / expr_augment
-#embedding_or_factor = embedding / expr_factor
-
 
 ###  ATTRIBUTES of tags
 

@@ -2,6 +2,10 @@
 
 ## *upcoming*
 
+- ...
+
+## [1.2.0] - 2021-09-16
+
 - Non-standard operator `<>` can be used as an alternative for `!=` 
   to avoid ambiguity with a verbatim block mark (`!`) inside `if` blocks.
 - Shortcut attributes `.CLS` and `#ID` no longer need spaces around, 
