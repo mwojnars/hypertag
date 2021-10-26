@@ -34,7 +34,7 @@ try_short        =  '?' ws (block_struct / body_control)?       # short version 
 
 block_expr       =  mark_eval expr_assign
 block_assign     =  mark_eval ws targets ws op_inplace? '=' expr_assign
-expr_assign      =  ws (embedding / expr_augment) inline_comment?
+expr_assign      =  ws (expr_augment / embedding) inline_comment?
 op_inplace       =  ~"//|\%%|<<|>>|[-+*/&|^]"
 
 block_while      =  'while' clause_if clause_else?

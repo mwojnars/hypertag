@@ -2,6 +2,7 @@
 
 ## *upcoming*
 
+- Grammar fix: easier use of dictionaries in assignment blocks, no conflict with embedding syntax.
 - ...
 
 ## [1.2.0] - 2021-09-16

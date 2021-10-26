@@ -211,12 +211,17 @@ if __name__ == '__main__':
         H
         | $c
     """
+    
+    # TODO:
     text = r"""
-    # import $os
-    # | $os
+        import $os
+        | $os
     """
     text = r"""
-    try: p | text
+        try: p | text
+    """
+    text = """
+        from os import $x $y
     """
 
     root = RootModule(runtime = HyperHTML(), filename = __file__, package = __package__)
